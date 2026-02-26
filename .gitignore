@@ -1,0 +1,30 @@
+### Java & Compilers ###
+*.class
+*.log
+*.jar
+*.war
+*.ear
+
+### IntelliJ IDEA ###
+.idea/
+out/
+gen/
+
+### Eclipse ###
+.metadata/
+bin/
+tmp/
+.classpath
+.project
+.settings/
+
+### VS Code ###
+.vscode/
+
+### Build Tools ###
+target/
+build/
+
+### OS Specific ###
+.DS_Store
+Thumbs.db

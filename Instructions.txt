@@ -1,0 +1,43 @@
+============================================================
+LIBRARY NEXUS - MANAGEMENT SYSTEM V1.0
+Iteration 1: Authentication & Database Integration
+============================================================
+
+DEVELOPMENT ENVIRONMENT:
+- JDK: 21
+- Build Tool: Maven
+- Framework: JavaFX 21
+- Database: SQLite
+
+------------------------------------------------------------
+HOW TO RUN THE APPLICATION (IntelliJ IDEA)
+------------------------------------------------------------
+
+In lib folder, right click sqlite-jdbc-3.51.2.0.jar and select add as library
+Right click pom.xml, select add as maven
+
+OPTION 1: THE "GREEN ARROW" (Recommended)
+1. Open the project in IntelliJ.
+2. Navigate to 'src/Launcher.java'.
+3. Click the Green Play Arrow next to the main method.
+   (Note: Using Launcher.java bypasses JavaFX runtime issues).
+
+OPTION 2: MAVEN COMMANDS
+1. Open the 'Maven' tool window (far right edge).
+2. Expand 'LibraryManagementSystem' -> 'Plugins' -> 'javafx'.
+3. Double-click 'javafx:run'.
+
+------------------------------------------------------------
+DATABASE SETUP
+------------------------------------------------------------
+- The system automatically detects 'library.db' in the root.
+- If the file is missing, the application will initialize
+  a new database and create the 'Users' table automatically
+  on the first launch.
+
+
+
+============================================================
+SUBMISSION DATE: Feb 27, 2026
+LEAD DEVELOPER: Muhammad Aqib
+============================================================

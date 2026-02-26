@@ -1,7 +1,6 @@
 ### Java & Compilers ###
 *.class
 *.log
-*.jar
 *.war
 *.ear
 

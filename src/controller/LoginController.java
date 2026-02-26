@@ -1,6 +1,12 @@
 package controller;
 
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
+import model.User;
+import java.io.IOException;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
 import javafx.scene.control.PasswordField;
@@ -9,6 +15,9 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ToggleButton;
 import database.UserDAO;
 import database.SQLiteUserDAO;
+import javafx.collections.FXCollections;
+import javafx.fxml.FXML;
+import javafx.scene.control.ComboBox;
 
 public class LoginController {
 
@@ -22,6 +31,15 @@ public class LoginController {
 
     private UserDAO userDAO = new SQLiteUserDAO();
 
+
+    @FXML
+    public void initialize() {
+        roleComboBox.setItems(FXCollections.observableArrayList("Admin", "Member"));
+        roleComboBox.setPromptText("Select Role");
+
+        // Default to login view on startup
+        showLoginView();
+    }
     /**
      * Switches the UI to Login Mode
      */
@@ -79,11 +97,38 @@ public class LoginController {
         }
 
         if (userDAO.validateLogin(user, pass)) {
-            statusLabel.setTextFill(javafx.scene.paint.Color.GREEN);
-            statusLabel.setText("Successfully Logged In!");
+            model.User loggedInUser = userDAO.getUserByUsername(user);
+            if (loggedInUser == null) return;
+
+            if ("Member".equals(loggedInUser.getRole())) {
+                navigateToLenderDashboard(loggedInUser.getUsername());
+            } else {
+                // Admin — placeholder for now
+                statusLabel.setTextFill(javafx.scene.paint.Color.GREEN);
+                statusLabel.setText("Logged in as Admin.");
+            }
         } else {
             statusLabel.setTextFill(javafx.scene.paint.Color.RED);
             statusLabel.setText("Account not found or invalid password.");
+        }
+    }
+
+    private void navigateToLenderDashboard(String username) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/LenderDashboard.fxml"));
+            Parent root = loader.load();
+
+            LenderDashboardController controller = loader.getController();
+            controller.setUsername(username);
+
+            Stage stage = (Stage) submitButton.getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.setTitle("Lender Dashboard");
+            stage.show();
+        } catch (IOException e) {
+            statusLabel.setTextFill(javafx.scene.paint.Color.RED);
+            statusLabel.setText("Failed to load Lender Dashboard.");
+            e.printStackTrace();
         }
     }
 

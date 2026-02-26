@@ -4,39 +4,105 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.effect.DropShadow?>
 
-<StackPane prefHeight="500.0" prefWidth="900.0"
-           style="-fx-background-color: linear-gradient(to bottom right, #2c3e50, #000000);"
+<StackPane prefHeight="560.0" prefWidth="960.0"
+           style="-fx-background-color: linear-gradient(to bottom right, #0f0c29, #302b63, #24243e);"
            xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
            fx:controller="controller.LoginController">
 
-    <VBox alignment="CENTER" maxWidth="650.0" spacing="12.0"
-          style="-fx-background-color: rgba(240, 240, 240, 0.95); -fx-background-radius: 15;">
+    <!-- Decorative blurred circle top-left -->
+    <StackPane maxWidth="260" maxHeight="260"
+               style="-fx-background-color: rgba(52,152,219,0.18); -fx-background-radius: 130;"
+               StackPane.alignment="TOP_LEFT" translateX="-60" translateY="-60"/>
+
+    <!-- Decorative blurred circle bottom-right -->
+    <StackPane maxWidth="200" maxHeight="200"
+               style="-fx-background-color: rgba(155,89,182,0.18); -fx-background-radius: 100;"
+               StackPane.alignment="BOTTOM_RIGHT" translateX="60" translateY="60"/>
+
+    <!-- Card -->
+    <VBox alignment="CENTER" maxWidth="480.0" spacing="14.0"
+          style="-fx-background-color: rgba(255,255,255,0.18);
+                 -fx-background-radius: 20;
+                 -fx-border-color: rgba(255,255,255,0.30);
+                 -fx-border-radius: 20;
+                 -fx-border-width: 1;">
         <padding>
-            <Insets bottom="20.0" left="60.0" right="60.0" top="20.0"/>
+            <Insets top="40" bottom="40" left="55" right="55"/>
         </padding>
-        <effect><DropShadow color="#000000aa" radius="15" /></effect>
+        <effect><DropShadow color="#00000088" radius="40" spread="0.1"/></effect>
 
-        <Label text="LIBRARY NEXUS" style="-fx-font-size: 34px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" />
+        <!-- Logo / Title -->
+        <Label text="📚" style="-fx-font-size: 42px;"/>
+        <Label text="LIBRARY NEXUS"
+               style="-fx-font-size: 28px; -fx-font-weight: bold;
+                      -fx-text-fill: white; -fx-letter-spacing: 3;"/>
+        <Label text="Your gateway to knowledge"
+               style="-fx-font-size: 12px; -fx-text-fill: rgba(255,255,255,0.45);"/>
 
-        <HBox alignment="CENTER" spacing="0">
-            <ToggleButton fx:id="loginTab" selected="true" text="LOGIN" onAction="#showLoginView"
-                          style="-fx-background-radius: 25 0 0 25; -fx-padding: 8 60; -fx-cursor: hand; -fx-font-weight: bold;"/>
-            <ToggleButton fx:id="signupTab" text="SIGN UP" onAction="#showSignupView"
-                          style="-fx-background-radius: 0 25 25 0; -fx-padding: 8 60; -fx-cursor: hand; -fx-font-weight: bold;"/>
+        <!-- Tab switcher -->
+        <HBox alignment="CENTER" spacing="0" style="-fx-padding: 10 0 4 0;">
+            <ToggleButton fx:id="loginTab" selected="true" text="LOGIN"
+                          onAction="#showLoginView"
+                          style="-fx-background-radius: 25 0 0 25;
+                                 -fx-padding: 9 40;
+                                 -fx-cursor: hand;
+                                 -fx-font-weight: bold;
+                                 -fx-font-size: 12px;
+                                 -fx-background-color: #3498db;
+                                 -fx-text-fill: white;"/>
+            <ToggleButton fx:id="signupTab" text="SIGN UP"
+                          onAction="#showSignupView"
+                          style="-fx-background-radius: 0 25 25 0;
+                                 -fx-padding: 9 40;
+                                 -fx-cursor: hand;
+                                 -fx-font-weight: bold;
+                                 -fx-font-size: 12px;
+                                 -fx-background-color: rgba(255,255,255,0.1);
+                                 -fx-text-fill: rgba(255,255,255,0.7);"/>
         </HBox>
 
-        <TextField fx:id="usernameField" promptText="Username"
-                   style="-fx-background-radius: 25; -fx-padding: 12;" maxWidth="500.0"/>
+        <!-- Fields -->
+        <TextField fx:id="usernameField" promptText="👤  Username"
+                   maxWidth="370.0"
+                   style="-fx-background-radius: 10;
+                          -fx-background-color: rgba(255,255,255,0.1);
+                          -fx-text-fill: white;
+                          -fx-prompt-text-fill: rgba(255,255,255,0.4);
+                          -fx-padding: 13 16;
+                          -fx-border-color: rgba(255,255,255,0.15);
+                          -fx-border-radius: 10;
+                          -fx-font-size: 13px;"/>
 
-        <PasswordField fx:id="passwordField" promptText="Password"
-                       style="-fx-background-radius: 25; -fx-padding: 12;" maxWidth="500.0"/>
+        <PasswordField fx:id="passwordField" promptText="🔒  Password"
+                       maxWidth="370.0"
+                       style="-fx-background-radius: 10;
+                              -fx-background-color: rgba(255,255,255,0.1);
+                              -fx-text-fill: white;
+                              -fx-prompt-text-fill: rgba(255,255,255,0.4);
+                              -fx-padding: 13 16;
+                              -fx-border-color: rgba(255,255,255,0.15);
+                              -fx-border-radius: 10;
+                              -fx-font-size: 13px;"/>
 
-        <ComboBox fx:id="roleComboBox" visible="false" managed="false" prefWidth="500.0" promptText="Select Role"
-                  style="-fx-background-radius: 25;"/>
+        <ComboBox fx:id="roleComboBox" visible="false" managed="false"
+                  prefWidth="370.0" promptText="Select Role"
+                  style="-fx-background-radius: 10;
+                         -fx-prompt-text-fill: rgba(255,255,255,0.4);
+                         -fx-background-color: rgba(255,255,255,0.1);
+                         -fx-font-size: 13px;"/>
 
+        <!-- Submit -->
         <Button fx:id="submitButton" text="SIGN IN" onAction="#handleSubmit"
-                style="-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 25; -fx-padding: 10 100; -fx-cursor: hand;" />
+                maxWidth="370.0"
+                style="-fx-background-color: linear-gradient(to right, #3498db, #8e44ad);
+                       -fx-text-fill: white;
+                       -fx-font-weight: bold;
+                       -fx-font-size: 14px;
+                       -fx-background-radius: 10;
+                       -fx-padding: 13 0;
+                       -fx-cursor: hand;"/>
 
-        <Label fx:id="statusLabel" textFill="#e74c3c" style="-fx-font-weight: bold;" />
+        <Label fx:id="statusLabel"
+               style="-fx-font-size: 12px; -fx-font-weight: bold;"/>
     </VBox>
 </StackPane>

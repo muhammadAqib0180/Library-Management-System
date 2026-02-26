@@ -8,33 +8,21 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
-import java.io.IOException;
 import model.Book;
 
-public class LenderDashboardController {
+public class LenderDashboardController extends BaseDashboardController {
 
-    // Add Book panel fields
     @FXML private TextField isbnField;
     @FXML private TextField titleField;
     @FXML private TextField authorField;
     @FXML private Label statusLabel;
 
-    // Top bar
-    @FXML private Label welcomeLabel;
-
-    // Sidebar buttons
     @FXML private Button btnAddBook;
     @FXML private Button btnInventory;
 
-    // Panels
     @FXML private VBox addBookPanel;
     @FXML private VBox inventoryPanel;
 
-    // Table
     @FXML private TableView<Book> bookTable;
     @FXML private TableColumn<Book, String> isbnColumn;
     @FXML private TableColumn<Book, String> titleColumn;
@@ -43,11 +31,9 @@ public class LenderDashboardController {
 
     private final BookDAO bookDAO = new SQLiteBookDAO();
     private final ObservableList<Book> bookList = FXCollections.observableArrayList();
-    private String currentUsername;
 
     @FXML
     public void initialize() {
-        // Bind table columns to Book properties
         isbnColumn.setCellValueFactory(data ->
                 new javafx.beans.property.SimpleStringProperty(data.getValue().getIsbn()));
         titleColumn.setCellValueFactory(data ->
@@ -59,21 +45,17 @@ public class LenderDashboardController {
 
         bookTable.setItems(bookList);
         loadBooks();
-
-        // Start on the Add Book panel
         showAddBookPanel();
     }
 
-    /** Called from outside to pass the logged-in username */
-    public void setUsername(String username) {
-        this.currentUsername = username;
-        welcomeLabel.setText("Welcome, " + username);
-    }
+    // ── Member-only: switch to Borrower Dashboard ──
 
     @FXML
     private void switchToBorrower() {
         // Borrower dashboard coming soon — no action for now
     }
+
+    // ── Sidebar panel switching ──
 
     @FXML
     public void showAddBookPanel() {
@@ -96,6 +78,8 @@ public class LenderDashboardController {
         loadBooks();
     }
 
+    // ── Book actions ──
+
     @FXML
     private void handleAddBook() {
         String isbn   = isbnField.getText().trim();
@@ -110,8 +94,8 @@ public class LenderDashboardController {
 
         Book book = new Book(isbn, title, author);
         bookDAO.insert(book);
-
         bookList.add(book);
+
         isbnField.clear();
         titleField.clear();
         authorField.clear();
@@ -125,15 +109,19 @@ public class LenderDashboardController {
         bookList.addAll(bookDAO.getAll());
     }
 
+    // ── Sidebar button styles ──
+
     private void setActiveButton(Button btn) {
-        btn.setStyle("-fx-background-color: #2ecc71; -fx-text-fill: white; " +
-                "-fx-font-weight: bold; -fx-font-size: 13; " +
-                "-fx-padding: 12 20; -fx-cursor: hand; -fx-background-radius: 0;");
+        btn.setStyle("-fx-background-color: linear-gradient(to right, #0f3460, #1a1a2e); " +
+                "-fx-text-fill: #4fc3f7; -fx-font-weight: bold; -fx-font-size: 13px; " +
+                "-fx-padding: 14 20; -fx-cursor: hand; -fx-background-radius: 0; " +
+                "-fx-border-color: transparent transparent transparent #4fc3f7; " +
+                "-fx-border-width: 0 0 0 3; -fx-alignment: CENTER_LEFT;");
     }
 
     private void setInactiveButton(Button btn) {
-        btn.setStyle("-fx-background-color: transparent; -fx-text-fill: #ecf0f1; " +
-                "-fx-font-size: 13; -fx-padding: 12 20; -fx-cursor: hand; " +
+        btn.setStyle("-fx-background-color: transparent; -fx-text-fill: rgba(255,255,255,0.6); " +
+                "-fx-font-size: 13px; -fx-padding: 14 20; -fx-cursor: hand; " +
                 "-fx-background-radius: 0; -fx-alignment: CENTER_LEFT;");
     }
 }

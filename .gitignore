@@ -27,3 +27,9 @@ build/
 ### OS Specific ###
 .DS_Store
 Thumbs.db
+
+### SQLite / Local Database ###
+*.db
+*.db-journal
+*.db-shm
+*.db-wal

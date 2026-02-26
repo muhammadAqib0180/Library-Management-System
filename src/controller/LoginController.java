@@ -31,49 +31,59 @@ public class LoginController {
 
     private UserDAO userDAO = new SQLiteUserDAO();
 
+    private static final String ACTIVE_STYLE =
+            "-fx-background-color: #3498db; -fx-text-fill: white; " +
+            "-fx-font-weight: bold; -fx-font-size: 12px; -fx-cursor: hand;";
+
+    private static final String INACTIVE_STYLE =
+            "-fx-background-color: rgba(255,255,255,0.1); -fx-text-fill: rgba(255,255,255,0.7); " +
+            "-fx-font-weight: bold; -fx-font-size: 12px; -fx-cursor: hand;";
 
     @FXML
     public void initialize() {
         roleComboBox.setItems(FXCollections.observableArrayList("Admin", "Member"));
         roleComboBox.setPromptText("Select Role");
 
-        // Default to login view on startup
+        // Press Enter from either field to submit
+        usernameField.setOnAction(e -> handleSubmit());
+        passwordField.setOnAction(e -> handleSubmit());
+
         showLoginView();
     }
-    /**
-     * Switches the UI to Login Mode
-     */
-    @FXML
     public void showLoginView() {
         signupTab.setSelected(false);
         loginTab.setSelected(true);
 
-        // Hide the role selection for login
+        loginTab.setStyle(ACTIVE_STYLE   + " -fx-background-radius: 25 0 0 25; -fx-padding: 9 40;");
+        signupTab.setStyle(INACTIVE_STYLE + " -fx-background-radius: 0 25 25 0; -fx-padding: 9 40;");
+
         roleComboBox.setVisible(false);
         roleComboBox.setManaged(false);
 
         submitButton.setText("SIGN IN");
-        submitButton.setStyle("-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-background-radius: 25; -fx-font-weight: bold; -fx-padding: 12 60;");
+        submitButton.setStyle("-fx-background-color: linear-gradient(to right, #3498db, #8e44ad); " +
+                "-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px; " +
+                "-fx-background-radius: 10; -fx-padding: 13 0; -fx-cursor: hand;");
         statusLabel.setText("");
     }
 
-    /**
-     * Switches the UI to Sign Up Mode
-     */
     @FXML
     public void showSignupView() {
         loginTab.setSelected(false);
         signupTab.setSelected(true);
 
-        // Show the role selection for registration
+        signupTab.setStyle(ACTIVE_STYLE   + " -fx-background-radius: 0 25 25 0; -fx-padding: 9 40;");
+        loginTab.setStyle(INACTIVE_STYLE  + " -fx-background-radius: 25 0 0 25; -fx-padding: 9 40;");
+
         roleComboBox.setVisible(true);
         roleComboBox.setManaged(true);
 
         submitButton.setText("CREATE ACCOUNT");
-        submitButton.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-background-radius: 25; -fx-font-weight: bold; -fx-padding: 12 60;");
+        submitButton.setStyle("-fx-background-color: linear-gradient(to right, #3498db, #8e44ad); " +
+                "-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px; " +
+                "-fx-background-radius: 10; -fx-padding: 13 0; -fx-cursor: hand;");
         statusLabel.setText("");
     }
-
     /**
      * Determines which action to take based on the selected tab
      */
@@ -101,11 +111,11 @@ public class LoginController {
             if (loggedInUser == null) return;
 
             if ("Member".equals(loggedInUser.getRole())) {
-                navigateToLenderDashboard(loggedInUser.getUsername());
-            } else {
-                // Admin — placeholder for now
-                statusLabel.setTextFill(javafx.scene.paint.Color.GREEN);
-                statusLabel.setText("Logged in as Admin.");
+                navigateTo("/view/LenderDashboard.fxml", "Lender Dashboard",
+                        ctrl -> ((LenderDashboardController) ctrl).setUsername(loggedInUser.getUsername()));
+            } else if ("Admin".equals(loggedInUser.getRole())) {
+                navigateTo("/view/AdminDashboard.fxml", "Admin Dashboard",
+                        ctrl -> ((AdminDashboardController) ctrl).setUsername(loggedInUser.getUsername()));
             }
         } else {
             statusLabel.setTextFill(javafx.scene.paint.Color.RED);
@@ -113,25 +123,22 @@ public class LoginController {
         }
     }
 
-    private void navigateToLenderDashboard(String username) {
+    private void navigateTo(String fxmlPath, String title, BaseDashboardController.ControllerCallback callback) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/LenderDashboard.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent root = loader.load();
-
-            LenderDashboardController controller = loader.getController();
-            controller.setUsername(username);
+            callback.accept(loader.getController());
 
             Stage stage = (Stage) submitButton.getScene().getWindow();
             stage.setScene(new Scene(root));
-            stage.setTitle("Lender Dashboard");
+            stage.setTitle(title);
             stage.show();
         } catch (IOException e) {
             statusLabel.setTextFill(javafx.scene.paint.Color.RED);
-            statusLabel.setText("Failed to load Lender Dashboard.");
+            statusLabel.setText("Failed to load dashboard.");
             e.printStackTrace();
         }
     }
-
     private void handleSignUp() {
         String user = usernameField.getText();
         String pass = passwordField.getText();

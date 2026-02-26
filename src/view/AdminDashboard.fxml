@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="controller.AdminDashboardController"
+            prefWidth="980" prefHeight="640"
+            style="-fx-background-color: #f0f2f8;">
+
+    <!-- TOP BAR -->
+    <top>
+        <HBox alignment="CENTER_LEFT" spacing="14"
+              style="-fx-background-color: linear-gradient(to right, #1a1a2e, #16213e);
+                     -fx-padding: 14 24;
+                     -fx-effect: dropshadow(gaussian, #00000055, 8, 0, 0, 3);">
+            <Label text="⚙️" style="-fx-font-size: 22px;"/>
+            <VBox spacing="0">
+                <Label text="Library Nexus"
+                       style="-fx-text-fill: white; -fx-font-size: 17px; -fx-font-weight: bold;"/>
+                <Label text="Admin Panel"
+                       style="-fx-text-fill: rgba(255,255,255,0.4); -fx-font-size: 10px;"/>
+            </VBox>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label fx:id="welcomeLabel"
+                   style="-fx-text-fill: rgba(255,255,255,0.65); -fx-font-size: 12px;"/>
+        </HBox>
+    </top>
+
+    <!-- SIDEBAR -->
+    <left>
+        <VBox prefWidth="200"
+              style="-fx-background-color: #16213e; -fx-padding: 20 0;">
+
+            <Label text="NAVIGATION"
+                   style="-fx-text-fill: rgba(255,255,255,0.3);
+                          -fx-font-size: 10px;
+                          -fx-font-weight: bold;
+                          -fx-padding: 0 20 12 20;
+                          -fx-letter-spacing: 1.5;"/>
+
+            <Region VBox.vgrow="ALWAYS"/>
+
+            <Button text="🚪  Logout"
+                    onAction="#handleLogout"
+                    maxWidth="Infinity"
+                    style="-fx-background-color: rgba(231,76,60,0.15);
+                           -fx-text-fill: #e74c3c;
+                           -fx-font-size: 13px;
+                           -fx-font-weight: bold;
+                           -fx-padding: 12 20;
+                           -fx-cursor: hand;
+                           -fx-background-radius: 0;
+                           -fx-alignment: CENTER_LEFT;"/>
+        </VBox>
+    </left>
+
+    <!-- MAIN CONTENT -->
+    <center>
+        <StackPane>
+            <Label text="Admin dashboard — coming soon."
+                   style="-fx-font-size: 16px; -fx-text-fill: #aab4c8;"/>
+        </StackPane>
+    </center>
+
+</BorderPane>

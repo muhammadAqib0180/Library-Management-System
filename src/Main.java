@@ -24,7 +24,7 @@ public class Main extends Application {
 
         // 3. Set the Window Title and Size
         primaryStage.setTitle("Library Management System - Login");
-        primaryStage.setScene(new Scene(root, 400, 350));
+        primaryStage.setScene(new Scene(root));
         primaryStage.show();
     }
 

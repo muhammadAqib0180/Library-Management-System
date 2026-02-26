@@ -5,108 +5,215 @@
 
 <BorderPane xmlns:fx="http://javafx.com/fxml"
             fx:controller="controller.LenderDashboardController"
-            prefWidth="900" prefHeight="600"
-            style="-fx-background-color: #f4f6f9;">
+            prefWidth="980" prefHeight="640"
+            style="-fx-background-color: #f0f2f8;">
 
-    <!-- TOP BAR -->
+    <!-- ── TOP BAR ── -->
     <top>
-        <HBox alignment="CENTER_LEFT" spacing="10"
-              style="-fx-background-color: #2c3e50; -fx-padding: 15 20;">
-            <Label text="📚 Lender Dashboard"
-                   style="-fx-text-fill: white; -fx-font-size: 20; -fx-font-weight: bold;"/>
+        <HBox alignment="CENTER_LEFT" spacing="14"
+              style="-fx-background-color: linear-gradient(to right, #1a1a2e, #16213e);
+                     -fx-padding: 14 24;
+                     -fx-effect: dropshadow(gaussian, #00000055, 8, 0, 0, 3);">
+
+            <Label text="📚"  style="-fx-font-size: 22px;"/>
+            <VBox spacing="0">
+                <Label text="Library Nexus"
+                       style="-fx-text-fill: white; -fx-font-size: 17px; -fx-font-weight: bold;"/>
+                <Label text="Lender Workspace"
+                       style="-fx-text-fill: rgba(255,255,255,0.4); -fx-font-size: 10px;"/>
+            </VBox>
+
             <Region HBox.hgrow="ALWAYS"/>
+
             <Label fx:id="welcomeLabel"
-                   style="-fx-text-fill: #bdc3c7; -fx-font-size: 13;"/>
-            <Button text="Switch to Borrower ▶"
+                   style="-fx-text-fill: rgba(255,255,255,0.65); -fx-font-size: 12px;"/>
+
+            <Button text="Switch to Borrower  ▶"
                     onAction="#switchToBorrower"
-                    style="-fx-background-color: #3498db; -fx-text-fill: white;
-                           -fx-font-weight: bold; -fx-background-radius: 20;
-                           -fx-padding: 7 18; -fx-cursor: hand;"/>
+                    style="-fx-background-color: linear-gradient(to right, #3498db, #2980b9);
+                           -fx-text-fill: white;
+                           -fx-font-weight: bold;
+                           -fx-font-size: 12px;
+                           -fx-background-radius: 20;
+                           -fx-padding: 8 20;
+                           -fx-cursor: hand;
+                           -fx-effect: dropshadow(gaussian, #3498db88, 8, 0, 0, 2);"/>
         </HBox>
     </top>
 
-    <!-- SIDEBAR -->
+    <!-- ── SIDEBAR ── -->
     <left>
-        <VBox spacing="5"
-              style="-fx-background-color: #34495e; -fx-padding: 15 0;">
+        <VBox prefWidth="200"
+              style="-fx-background-color: #16213e; -fx-padding: 20 0;">
 
-            <Label text="MENU"
-                   style="-fx-text-fill: #7f8c8d; -fx-font-size: 11; -fx-font-weight: bold; -fx-padding: 0 20 8 20;"/>
+            <Label text="NAVIGATION"
+                   style="-fx-text-fill: rgba(255,255,255,0.3);
+                          -fx-font-size: 10px;
+                          -fx-font-weight: bold;
+                          -fx-padding: 0 20 12 20;
+                          -fx-letter-spacing: 1.5;"/>
 
-            <Button fx:id="btnAddBook" text="＋  Add New Book"
+            <Button fx:id="btnAddBook" text="  ＋   Add New Book"
                     onAction="#showAddBookPanel"
                     maxWidth="Infinity"
-                    style="-fx-background-color: #2ecc71; -fx-text-fill: white;
-                           -fx-font-weight: bold; -fx-font-size: 13;
-                           -fx-padding: 12 20; -fx-cursor: hand;
-                           -fx-background-radius: 0;"/>
+                    style="-fx-background-color: linear-gradient(to right, #0f3460, #1a1a2e);
+                           -fx-text-fill: #4fc3f7;
+                           -fx-font-weight: bold;
+                           -fx-font-size: 13px;
+                           -fx-padding: 14 20;
+                           -fx-cursor: hand;
+                           -fx-background-radius: 0;
+                           -fx-border-color: transparent transparent transparent #4fc3f7;
+                           -fx-border-width: 0 0 0 3;
+                           -fx-alignment: CENTER_LEFT;"/>
 
-            <Button fx:id="btnInventory" text="📋  My Inventory"
+            <Button fx:id="btnInventory" text="  📋   My Inventory"
                     onAction="#showInventoryPanel"
                     maxWidth="Infinity"
-                    style="-fx-background-color: transparent; -fx-text-fill: #ecf0f1;
-                           -fx-font-size: 13; -fx-padding: 12 20; -fx-cursor: hand;
-                           -fx-background-radius: 0; -fx-alignment: CENTER_LEFT;"/>
+                    style="-fx-background-color: transparent;
+                           -fx-text-fill: rgba(255,255,255,0.6);
+                           -fx-font-size: 13px;
+                           -fx-padding: 14 20;
+                           -fx-cursor: hand;
+                           -fx-background-radius: 0;
+                           -fx-alignment: CENTER_LEFT;"/>
+
+            <Region VBox.vgrow="ALWAYS"/>
+
+            <Button text="🚪  Logout"
+                    onAction="#handleLogout"
+                    maxWidth="Infinity"
+                    style="-fx-background-color: rgba(231,76,60,0.15);
+                           -fx-text-fill: #e74c3c;
+                           -fx-font-size: 13px;
+                           -fx-font-weight: bold;
+                           -fx-padding: 12 20;
+                           -fx-cursor: hand;
+                           -fx-background-radius: 0;
+                           -fx-alignment: CENTER_LEFT;"/>
+
+            <!-- Bottom accent -->
+            <VBox style="-fx-padding: 15 20;
+                         -fx-background-color: rgba(255,255,255,0.04);
+                         -fx-background-radius: 10;
+                         -fx-margin: 0 12;">
+                <Label text="💡 Tip"
+                       style="-fx-text-fill: rgba(255,255,255,0.4); -fx-font-size: 10px; -fx-font-weight: bold;"/>
+                <Label text="Add books to share with the community."
+                       wrapText="true"
+                       style="-fx-text-fill: rgba(255,255,255,0.25); -fx-font-size: 10px;"/>
+            </VBox>
+
         </VBox>
     </left>
 
-    <!-- MAIN CONTENT (swappable panels) -->
+    <!-- ── MAIN CONTENT ── -->
     <center>
-        <StackPane fx:id="contentArea" style="-fx-padding: 25;">
+        <StackPane fx:id="contentArea" style="-fx-padding: 28;">
 
             <!-- ADD BOOK PANEL -->
-            <VBox fx:id="addBookPanel" spacing="15"
-                  style="-fx-background-color: white; -fx-padding: 25;
-                         -fx-background-radius: 8;
-                         -fx-effect: dropshadow(gaussian, #cccccc, 6, 0, 0, 2);"
-                  maxHeight="220" maxWidth="620"
-                  StackPane.alignment="TOP_LEFT">
+            <VBox fx:id="addBookPanel" spacing="20"
+                  maxWidth="660" maxHeight="260"
+                  StackPane.alignment="TOP_LEFT"
+                  style="-fx-background-color: white;
+                         -fx-background-radius: 14;
+                         -fx-padding: 28;
+                         -fx-effect: dropshadow(gaussian, #c0c8d8, 12, 0, 0, 4);">
 
-                <Label text="Add a New Book"
-                       style="-fx-font-size: 16; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
-
-                <HBox spacing="10" alignment="CENTER_LEFT">
-                    <TextField fx:id="isbnField" promptText="ISBN" prefWidth="140"
-                               style="-fx-background-radius: 5; -fx-border-color: #ddd;
-                                      -fx-border-radius: 5; -fx-padding: 8;"/>
-                    <TextField fx:id="titleField" promptText="Title" prefWidth="200"
-                               style="-fx-background-radius: 5; -fx-border-color: #ddd;
-                                      -fx-border-radius: 5; -fx-padding: 8;"/>
-                    <TextField fx:id="authorField" promptText="Author" prefWidth="160"
-                               style="-fx-background-radius: 5; -fx-border-color: #ddd;
-                                      -fx-border-radius: 5; -fx-padding: 8;"/>
+                <!-- Panel header -->
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Label text="＋"
+                           style="-fx-background-color: #e8f4fd;
+                                  -fx-text-fill: #3498db;
+                                  -fx-font-size: 16px;
+                                  -fx-font-weight: bold;
+                                  -fx-padding: 6 12;
+                                  -fx-background-radius: 8;"/>
+                    <VBox spacing="1">
+                        <Label text="Add a New Book"
+                               style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1a1a2e;"/>
+                        <Label text="Fill in the details below and hit Add Book"
+                               style="-fx-font-size: 11px; -fx-text-fill: #aab4c8;"/>
+                    </VBox>
                 </HBox>
 
-                <HBox spacing="10" alignment="CENTER_LEFT">
-                    <Button text="+ Add Book" onAction="#handleAddBook"
-                            style="-fx-background-color: #3498db; -fx-text-fill: white;
-                                   -fx-background-radius: 5; -fx-font-weight: bold;
-                                   -fx-padding: 9 20; -fx-cursor: hand;"/>
-                    <Label fx:id="statusLabel" style="-fx-font-size: 12;"/>
+                <!-- Input row -->
+                <HBox spacing="12" alignment="CENTER_LEFT">
+                    <TextField fx:id="isbnField" promptText="ISBN" prefWidth="148"
+                               style="-fx-background-radius: 8;
+                                      -fx-border-color: #e0e6f0;
+                                      -fx-border-radius: 8;
+                                      -fx-padding: 10 12;
+                                      -fx-font-size: 13px;
+                                      -fx-background-color: #f8faff;"/>
+                    <TextField fx:id="titleField" promptText="Title" prefWidth="210"
+                               style="-fx-background-radius: 8;
+                                      -fx-border-color: #e0e6f0;
+                                      -fx-border-radius: 8;
+                                      -fx-padding: 10 12;
+                                      -fx-font-size: 13px;
+                                      -fx-background-color: #f8faff;"/>
+                    <TextField fx:id="authorField" promptText="Author" prefWidth="168"
+                               style="-fx-background-radius: 8;
+                                      -fx-border-color: #e0e6f0;
+                                      -fx-border-radius: 8;
+                                      -fx-padding: 10 12;
+                                      -fx-font-size: 13px;
+                                      -fx-background-color: #f8faff;"/>
+                </HBox>
+
+                <HBox spacing="14" alignment="CENTER_LEFT">
+                    <Button text="＋  Add Book" onAction="#handleAddBook"
+                            style="-fx-background-color: linear-gradient(to right, #3498db, #2980b9);
+                                   -fx-text-fill: white;
+                                   -fx-background-radius: 8;
+                                   -fx-font-weight: bold;
+                                   -fx-font-size: 13px;
+                                   -fx-padding: 10 24;
+                                   -fx-cursor: hand;
+                                   -fx-effect: dropshadow(gaussian, #3498db66, 8, 0, 0, 3);"/>
+                    <Label fx:id="statusLabel" style="-fx-font-size: 12px; -fx-font-weight: bold;"/>
                 </HBox>
             </VBox>
 
             <!-- INVENTORY PANEL -->
-            <VBox fx:id="inventoryPanel" spacing="10"
-                  style="-fx-background-color: white; -fx-padding: 25;
-                         -fx-background-radius: 8;
-                         -fx-effect: dropshadow(gaussian, #cccccc, 6, 0, 0, 2);"
+            <VBox fx:id="inventoryPanel" spacing="14"
                   StackPane.alignment="TOP_LEFT"
-                  visible="false" managed="false">
+                  visible="false" managed="false"
+                  style="-fx-background-color: white;
+                         -fx-background-radius: 14;
+                         -fx-padding: 28;
+                         -fx-effect: dropshadow(gaussian, #c0c8d8, 12, 0, 0, 4);">
 
-                <Label text="My Inventory"
-                       style="-fx-font-size: 16; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                <!-- Panel header -->
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Label text="📋"
+                           style="-fx-background-color: #eafaf1;
+                                  -fx-font-size: 16px;
+                                  -fx-padding: 6 10;
+                                  -fx-background-radius: 8;"/>
+                    <VBox spacing="1">
+                        <Label text="My Inventory"
+                               style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1a1a2e;"/>
+                        <Label text="All books you have listed"
+                               style="-fx-font-size: 11px; -fx-text-fill: #aab4c8;"/>
+                    </VBox>
+                </HBox>
 
-                <TableView fx:id="bookTable" prefHeight="400" VBox.vgrow="ALWAYS"
-                           style="-fx-background-radius: 5;">
+                <TableView fx:id="bookTable" prefHeight="420" VBox.vgrow="ALWAYS"
+                           style="-fx-background-radius: 10;
+                                  -fx-border-color: #e8edf5;
+                                  -fx-border-radius: 10;
+                                  -fx-font-size: 13px;">
                     <columns>
                         <TableColumn fx:id="isbnColumn"   text="ISBN"   prefWidth="150"/>
-                        <TableColumn fx:id="titleColumn"  text="Title"  prefWidth="230"/>
+                        <TableColumn fx:id="titleColumn"  text="Title"  prefWidth="240"/>
                         <TableColumn fx:id="authorColumn" text="Author" prefWidth="180"/>
-                        <TableColumn fx:id="statusColumn" text="Status" prefWidth="100"/>
+                        <TableColumn fx:id="statusColumn" text="Status" prefWidth="110"/>
                     </columns>
                     <placeholder>
-                        <Label text="No books in your inventory yet." style="-fx-text-fill: #aaa;"/>
+                        <Label text="No books in your inventory yet."
+                               style="-fx-text-fill: #c0c8d8; -fx-font-size: 13px;"/>
                     </placeholder>
                 </TableView>
             </VBox>

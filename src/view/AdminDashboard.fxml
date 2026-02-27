@@ -57,10 +57,20 @@
 
     <!-- MAIN CONTENT -->
     <center>
-        <StackPane>
-            <Label text="Admin dashboard — coming soon."
-                   style="-fx-font-size: 16px; -fx-text-fill: #aab4c8;"/>
-        </StackPane>
+        <VBox alignment="TOP_CENTER" spacing="16">
+            <TableView fx:id="userTableView" prefWidth="700" prefHeight="500">
+                <columns>
+                    <TableColumn fx:id="idColumn" text="ID" prefWidth="60" />
+                    <TableColumn fx:id="usernameColumn" text="Username" prefWidth="200" />
+                    <TableColumn fx:id="roleColumn" text="Role" prefWidth="120" />
+                    <TableColumn fx:id="statusColumn" text="Status" prefWidth="120" />
+                </columns>
+            </TableView>
+            <HBox alignment="CENTER" spacing="12">
+                <Button fx:id="banUserButton" text="Ban User" disable="true" style="-fx-background-color: #f39c12; -fx-text-fill: white; -fx-font-weight: bold;" />
+                <Button fx:id="deleteUserButton" text="Delete User" disable="true" style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold;" />
+            </HBox>
+        </VBox>
     </center>
 
 </BorderPane>

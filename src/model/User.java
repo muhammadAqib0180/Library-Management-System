@@ -1,19 +1,32 @@
 package model;
 
-public class User {
-    private int id;
-    private String username;
-    private String password;
-    private String role; // "Librarian" or "Member"
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleStringProperty;
 
-    public User(String username, String password, String role) {
-        this.username = username;
-        this.password = password;
-        this.role = role;
+public class User {
+    private final SimpleIntegerProperty id;
+    private final SimpleStringProperty username;
+    private final SimpleStringProperty password;
+    private final SimpleStringProperty role;
+
+    public User(int id, String username, String password, String role) {
+        this.id = new SimpleIntegerProperty(id);
+        this.username = new SimpleStringProperty(username);
+        this.password = new SimpleStringProperty(password);
+        this.role = new SimpleStringProperty(role);
     }
 
-    // Getters
-    public String getUsername() { return username; }
-    public String getPassword() { return password; }
-    public String getRole() { return role; }
+    public User(String username, String password, String role) {
+        this(-1, username, password, role);
+    }
+
+    // Getters for JavaFX TableView
+    public int getId() { return id.get(); }
+    public SimpleIntegerProperty idProperty() { return id; }
+    public String getUsername() { return username.get(); }
+    public SimpleStringProperty usernameProperty() { return username; }
+    public String getPassword() { return password.get(); }
+    public SimpleStringProperty passwordProperty() { return password; }
+    public String getRole() { return role.get(); }
+    public SimpleStringProperty roleProperty() { return role; }
 }

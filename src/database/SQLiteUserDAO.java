@@ -1,8 +1,9 @@
 package database;
 
 import model.User;
-
 import java.sql.*;
+import java.util.List;
+import java.util.ArrayList;
 
 public class SQLiteUserDAO implements UserDAO {
     private String url = "jdbc:sqlite:library.db";
@@ -35,7 +36,7 @@ public class SQLiteUserDAO implements UserDAO {
             pstmt.setString(1, username);
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
-                return new User(rs.getString("username"), rs.getString("password"), rs.getString("role"));
+                return new User(rs.getInt("id"), rs.getString("username"), rs.getString("password"), rs.getString("role"));
             }
         } catch (SQLException e) { System.out.println(e.getMessage()); }
         return null;
@@ -45,5 +46,30 @@ public class SQLiteUserDAO implements UserDAO {
     public boolean validateLogin(String username, String password) {
         User user = getUserByUsername(username);
         return user != null && user.getPassword().equals(password);
+    }
+
+    @Override
+    public List<User> getAllUsers() {
+        List<User> users = new ArrayList<>();
+        String sql = "SELECT * FROM Users";
+        System.out.println("[SQLiteUserDAO] Fetching all users from DB...");
+        try (Connection conn = DriverManager.getConnection(url);
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                User user = new User(
+                    rs.getInt("id"),
+                    rs.getString("username"),
+                    rs.getString("password"),
+                    rs.getString("role")
+                );
+                System.out.println("[SQLiteUserDAO] Found user: id=" + user.getId() + ", username=" + user.getUsername() + ", role=" + user.getRole());
+                users.add(user);
+            }
+        } catch (SQLException e) {
+            System.out.println("[SQLiteUserDAO] Error fetching users: " + e.getMessage());
+        }
+        System.out.println("[SQLiteUserDAO] Returning " + users.size() + " users.");
+        return users;
     }
 }

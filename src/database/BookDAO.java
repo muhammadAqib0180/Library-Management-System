@@ -7,4 +7,7 @@ public interface BookDAO {
     void insert(Book book);
     List<Book> getAll();
     Book findByIsbn(String isbn);
+    boolean updateBook(Book book);
+    boolean deleteBook(String isbn);
+    List<Book> getByOwnerId(int ownerId);
 }

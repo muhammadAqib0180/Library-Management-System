@@ -1,41 +1,121 @@
 package controller;
 
-import javafx.fxml.FXML;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.cell.PropertyValueFactory;
+import database.SQLiteUserDAO;
+import database.UserDAO;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.fxml.FXML;
+import javafx.scene.control.*;
+import javafx.scene.layout.VBox;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import model.User;
-import database.UserDAO;
-import database.SQLiteUserDAO;
 
 public class AdminDashboardController extends BaseDashboardController {
-    @FXML private TableView<User> userTableView;
-    @FXML private TableColumn<User, Integer> idColumn;
-    @FXML private TableColumn<User, String> usernameColumn;
-    @FXML private TableColumn<User, String> roleColumn;
-    @FXML private TableColumn<User, String> statusColumn;
 
-    private UserDAO userDAO = new SQLiteUserDAO();
+    @FXML
+    private Button btnManageUsers;
+
+    @FXML
+    private VBox welcomePanel;
+    @FXML
+    private VBox manageUsersPanel;
+
+    @FXML
+    private TableView<User> userTableView;
+    @FXML
+    private TableColumn<User, Integer> idColumn;
+    @FXML
+    private TableColumn<User, String> usernameColumn;
+    @FXML
+    private TableColumn<User, String> roleColumn;
+    @FXML
+    private TableColumn<User, String> statusColumn;
+    @FXML
+    private Button deactivateUserBtn;
+    @FXML
+    private Label adminStatusLabel;
+
+    private final UserDAO userDAO = new SQLiteUserDAO();
+    private final ObservableList<User> userList = FXCollections.observableArrayList();
 
     @FXML
     public void initialize() {
-        System.out.println("[AdminDashboardController] Initializing TableView...");
-        userTableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-        idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
-        usernameColumn.setCellValueFactory(new PropertyValueFactory<>("username"));
-        roleColumn.setCellValueFactory(new PropertyValueFactory<>("role"));
-        // For now, status is a placeholder (could be extended later)
-        statusColumn.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty("Active"));
+        idColumn.setCellValueFactory(data ->
+                new SimpleIntegerProperty(data.getValue().getId()).asObject());
+        usernameColumn.setCellValueFactory(data ->
+                new SimpleStringProperty(data.getValue().getUsername()));
+        roleColumn.setCellValueFactory(data ->
+                new SimpleStringProperty(data.getValue().getRole()));
+        statusColumn.setCellValueFactory(data ->
+                new SimpleStringProperty(data.getValue().isActive() ? "Active" : "Inactive"));
 
-        java.util.List<User> userList = userDAO.getAllUsers();
-        System.out.println("[AdminDashboardController] Users loaded from DB: " + userList.size());
-        for (User u : userList) {
-            System.out.println("[AdminDashboardController] User: id=" + u.getId() + ", username=" + u.getUsername() + ", role=" + u.getRole());
+        // Setup button action
+        deactivateUserBtn.setOnAction(e -> {
+            User selected = userTableView.getSelectionModel().getSelectedItem();
+            if (selected != null) handleToggleUserStatus(selected);
+        });
+
+        // Enable/disable button based on table selection and update text
+        userTableView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+            boolean hasSelection = newVal != null;
+            deactivateUserBtn.setDisable(!hasSelection);
+
+            // Update button text and styling based on user status
+            if (hasSelection) {
+                if (newVal.isActive()) {
+                    deactivateUserBtn.setText("🚫 Deactivate User");
+                    deactivateUserBtn.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold; " +
+                            "-fx-padding: 10 20; -fx-background-radius: 8; -fx-font-size: 12px; -fx-cursor: hand;");
+                } else {
+                    deactivateUserBtn.setText("✓ Activate User");
+                    deactivateUserBtn.setStyle("-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; " +
+                            "-fx-padding: 10 20; -fx-background-radius: 8; -fx-font-size: 12px; -fx-cursor: hand;");
+                }
+            }
+        });
+
+        userTableView.setItems(userList);
+    }
+
+    @FXML
+    public void showManageUsers() {
+        manageUsersPanel.setVisible(true);
+        manageUsersPanel.setManaged(true);
+        welcomePanel.setVisible(false);
+        welcomePanel.setManaged(false);
+
+        btnManageUsers.setStyle(
+                "-fx-background-color: rgba(0,0,0,0.2); -fx-text-fill: white; " +
+                        "-fx-font-weight: bold; -fx-font-size: 13px; -fx-padding: 14 20; " +
+                        "-fx-cursor: hand; -fx-background-radius: 0; " +
+                        "-fx-border-color: transparent transparent transparent #bdc3c7; " +
+                        "-fx-border-width: 0 0 0 3; -fx-alignment: CENTER_LEFT;");
+
+        userList.clear();
+        userList.addAll(userDAO.getAllUsers());
+    }
+
+    private void handleToggleUserStatus(User user) {
+        boolean newStatus = !user.isActive();
+        String action = newStatus ? "reactivate" : "deactivate";
+
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Confirm Action");
+        alert.setHeaderText("Are you sure?");
+        alert.setContentText("Do you want to " + action + " user: " + user.getUsername() + "?");
+
+        if (alert.showAndWait().isPresent() && alert.getResult() == ButtonType.OK) {
+            if (userDAO.updateUserStatus(user.getId(), newStatus)) {
+                adminStatusLabel.setTextFill(javafx.scene.paint.Color.GREEN);
+                adminStatusLabel.setText("User " + user.getUsername() + " is now " + (newStatus ? "Active" : "Inactive"));
+                userList.clear();
+                userList.addAll(userDAO.getAllUsers());
+                userTableView.refresh();
+            } else {
+                adminStatusLabel.setTextFill(javafx.scene.paint.Color.RED);
+                adminStatusLabel.setText("Failed to update user status.");
+            }
         }
-        ObservableList<User> users = FXCollections.observableArrayList(userList);
-        userTableView.setItems(users);
-        userTableView.refresh();
     }
 }

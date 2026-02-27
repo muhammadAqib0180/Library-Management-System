@@ -4,149 +4,116 @@ import database.BookDAO;
 import database.SQLiteBookDAO;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 import model.Book;
-import model.BorrowedBook;
 
-import java.util.List;
+import java.io.IOException;
 
 public class BorrowerDashboardController extends BaseDashboardController {
 
-    @FXML private TextField searchBar;
-
-    // ✅ FIX 1: These now match the fx:id values added to the FXML
+    // Sidebar buttons
     @FXML private Button btnMyBooks;
     @FXML private Button btnBrowse;
 
-    // Table View
-    @FXML private TableView<BorrowedBook> borrowedTableView;
-    @FXML private TableColumn<BorrowedBook, String> titleColumn;
-    @FXML private TableColumn<BorrowedBook, String> authorColumn;
-    @FXML private TableColumn<BorrowedBook, String> borrowDateColumn;
-    @FXML private TableColumn<BorrowedBook, String> dueDateColumn;
-    @FXML private TableColumn<BorrowedBook, String> statusColumn;
+    // Panels
+    @FXML private VBox myBooksPanel;
+    @FXML private VBox browseCatalogPanel;
 
-    // ✅ FIX 2: Kept fx:id but also declared here so renew/return can reference selected row
+    // My Borrowed table
+    @FXML private TableView<Book> borrowedTableView;
+    @FXML private TableColumn<Book, String> titleColumn;
+    @FXML private TableColumn<Book, String> authorColumn;
+    @FXML private TableColumn<Book, String> borrowDateColumn;
+    @FXML private TableColumn<Book, String> dueDateColumn;
+    @FXML private TableColumn<Book, String> statusColumn;
     @FXML private Button renewButton;
     @FXML private Button returnButton;
 
+    // Browse catalog table
+    @FXML private TableView<Book> catalogTableView;
+    @FXML private TableColumn<Book, String> catIsbnColumn;
+    @FXML private TableColumn<Book, String> catTitleColumn;
+    @FXML private TableColumn<Book, String> catAuthorColumn;
+    @FXML private TableColumn<Book, String> catStatusColumn;
+
     private final BookDAO bookDAO = new SQLiteBookDAO();
-    private final ObservableList<BorrowedBook> masterData = FXCollections.observableArrayList();
+    private final ObservableList<Book> catalogList = FXCollections.observableArrayList();
 
     @FXML
     public void initialize() {
-        // 1. Setup Columns
-        titleColumn.setCellValueFactory(data -> data.getValue().titleProperty());
-        authorColumn.setCellValueFactory(data -> data.getValue().authorProperty());
-        borrowDateColumn.setCellValueFactory(data -> data.getValue().borrowDateProperty());
-        dueDateColumn.setCellValueFactory(data -> data.getValue().dueDateProperty());
-        statusColumn.setCellValueFactory(data -> data.getValue().statusProperty());
+        // Browse catalog columns
+        catIsbnColumn.setCellValueFactory(data ->
+                new javafx.beans.property.SimpleStringProperty(data.getValue().getIsbn()));
+        catTitleColumn.setCellValueFactory(data ->
+                new javafx.beans.property.SimpleStringProperty(data.getValue().getTitle()));
+        catAuthorColumn.setCellValueFactory(data ->
+                new javafx.beans.property.SimpleStringProperty(data.getValue().getAuthor()));
+        catStatusColumn.setCellValueFactory(data ->
+                new javafx.beans.property.SimpleStringProperty("Available"));
 
-        // 2. Initial Data Load
-        loadBooks();
+        catalogTableView.setItems(catalogList);
 
-        // 3. Search Bar filtering
-        FilteredList<BorrowedBook> filteredData = new FilteredList<>(masterData, p -> true);
-        searchBar.textProperty().addListener((observable, oldValue, newValue) -> {
-            filteredData.setPredicate(book -> {
-                if (newValue == null || newValue.isEmpty()) return true;
-                String lowerCaseFilter = newValue.toLowerCase();
-                return book.titleProperty().get().toLowerCase().contains(lowerCaseFilter)
-                        || book.authorProperty().get().toLowerCase().contains(lowerCaseFilter);
-            });
-        });
-
-        borrowedTableView.setItems(filteredData);
-
-        // ✅ FIX 3: btnMyBooks and btnBrowse are now injected from FXML — no more NullPointerException
-        setActiveButton(btnMyBooks);
-        setInactiveButton(btnBrowse);
+        // Start on My Borrowed panel
+        showMyBooks();
     }
-
-    /**
-     * Loads borrowed book data into the master list.
-     * Uses a placeholder loan date until a LoanDAO is implemented.
-     */
-    private void loadBooks() {
-        masterData.clear();
-        List<Book> books = bookDAO.getAll();
-        for (Book b : books) {
-            masterData.add(new BorrowedBook(
-                    b.getIsbn(),
-                    b.getTitle(),
-                    b.getAuthor(),
-                    "2026-02-27",   // Placeholder — replace with LoanDAO value
-                    "2026-03-27",
-                    "Active"
-            ));
-        }
-    }
-
-    // ── Sidebar switching ──
 
     @FXML
     public void showMyBooks() {
+        myBooksPanel.setVisible(true);
+        myBooksPanel.setManaged(true);
+        browseCatalogPanel.setVisible(false);
+        browseCatalogPanel.setManaged(false);
         setActiveButton(btnMyBooks);
         setInactiveButton(btnBrowse);
     }
 
     @FXML
     public void showBrowseCatalog() {
+        browseCatalogPanel.setVisible(true);
+        browseCatalogPanel.setManaged(true);
+        myBooksPanel.setVisible(false);
+        myBooksPanel.setManaged(false);
         setActiveButton(btnBrowse);
         setInactiveButton(btnMyBooks);
+
+        // Load all books from the DB (added by lenders)
+        catalogList.clear();
+        catalogList.addAll(bookDAO.getAll());
     }
 
-    // ── Table action handlers ──
+    @FXML
+    private void switchToLender() {
+        navigateTo("/view/LenderDashboard.fxml", "Lender Dashboard",
+                ctrl -> ((LenderDashboardController) ctrl).setUsername(currentUsername));
+    }
 
-    // ✅ FIX 4: Stub handlers so FXML onAction references don't throw on click
     @FXML
     private void handleRenew() {
-        BorrowedBook selected = borrowedTableView.getSelectionModel().getSelectedItem();
-        if (selected == null) {
-            showAlert("No Selection", "Please select a book to renew.");
-            return;
-        }
-        // TODO: call LoanDAO.renewLoan(selected.getIsbn(), currentUsername)
-        showAlert("Renewed", "\"" + selected.titleProperty().get() + "\" has been renewed.");
+        // Coming soon
     }
 
     @FXML
     private void handleReturn() {
-        BorrowedBook selected = borrowedTableView.getSelectionModel().getSelectedItem();
-        if (selected == null) {
-            showAlert("No Selection", "Please select a book to return.");
-            return;
-        }
-        // TODO: call LoanDAO.returnLoan(selected.getIsbn(), currentUsername)
-        masterData.remove(selected);
-        showAlert("Returned", "\"" + selected.titleProperty().get() + "\" has been returned.");
+        // Coming soon
     }
-
-    private void showAlert(String title, String message) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
-    }
-
-    // ── Sidebar button styles ──
 
     private void setActiveButton(Button btn) {
-        btn.setStyle(
-                "-fx-background-color: linear-gradient(to right, #0f3460, #1a1a2e); " +
-                        "-fx-text-fill: #4fc3f7; -fx-font-weight: bold; -fx-font-size: 13px; " +
-                        "-fx-padding: 14 20; -fx-cursor: hand; -fx-background-radius: 0; " +
-                        "-fx-border-color: transparent transparent transparent #4fc3f7; " +
-                        "-fx-border-width: 0 0 0 3; -fx-alignment: CENTER_LEFT;");
+        btn.setStyle("-fx-background-color: rgba(0,0,0,0.2); " +
+                "-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 13px; " +
+                "-fx-padding: 14 20; -fx-cursor: hand; -fx-background-radius: 0; " +
+                "-fx-border-color: transparent transparent transparent white; " +
+                "-fx-border-width: 0 0 0 3; -fx-alignment: CENTER_LEFT;");
     }
 
     private void setInactiveButton(Button btn) {
-        btn.setStyle(
-                "-fx-background-color: transparent; -fx-text-fill: rgba(255,255,255,0.6); " +
-                        "-fx-font-size: 13px; -fx-padding: 14 20; -fx-cursor: hand; " +
-                        "-fx-background-radius: 0; -fx-alignment: CENTER_LEFT;");
+        btn.setStyle("-fx-background-color: transparent; -fx-text-fill: rgba(255,255,255,0.7); " +
+                "-fx-font-size: 13px; -fx-padding: 14 20; -fx-cursor: hand; " +
+                "-fx-background-radius: 0; -fx-alignment: CENTER_LEFT;");
     }
 }

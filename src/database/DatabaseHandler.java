@@ -1,38 +1,56 @@
 package database;
+
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 
 public class DatabaseHandler {
-    // The name of the file that will be created in your project folder
-    private static final String URL = "jdbc:sqlite:library.db";
 
-    public static void initializeDatabase() {
-        // SQL to create the business logic tables 
-        String createBooksTable = "CREATE TABLE IF NOT EXISTS Books (" +
-                "isbn TEXT PRIMARY KEY, " +
-                "title TEXT NOT NULL, " +
-                "author TEXT NOT NULL, " +
-                "status TEXT DEFAULT 'Available');";
+    public static Connection getConnection() throws SQLException {
+        return DatabaseConnection.getConnection();
+    }
 
-        String createUsersTable = "CREATE TABLE IF NOT EXISTS Users (" +
-                "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                "username TEXT UNIQUE NOT NULL, " +
-                "password TEXT NOT NULL, " +
-                "role TEXT NOT NULL);";
-
-        try (Connection conn = DriverManager.getConnection(URL);
-             Statement stmt = conn.createStatement()) {
-
-            // Execute the creation of tables
-            stmt.execute(createBooksTable);
-            stmt.execute(createUsersTable);
-
-            System.out.println("Success: library.db created and tables initialized.");
-
+    public static void initialize() {
+        try (Connection conn = getConnection(); Statement stmt = conn.createStatement()) {
+            stmt.execute("""
+                CREATE TABLE IF NOT EXISTS users (
+                    id       SERIAL PRIMARY KEY,
+                    username VARCHAR(255) UNIQUE NOT NULL,
+                    password VARCHAR(255) NOT NULL,
+                    role     VARCHAR(50)  NOT NULL,
+                    active   BOOLEAN DEFAULT TRUE
+                )
+            """);
+            
+            // Add active column if it doesn't exist (for existing tables)
+            try {
+                stmt.execute("""
+                    ALTER TABLE users
+                    ADD COLUMN active BOOLEAN DEFAULT TRUE
+                """);
+                System.out.println("Added 'active' column to users table.");
+            } catch (SQLException e) {
+                if (e.getMessage().contains("already exists")) {
+                    System.out.println("Column 'active' already exists in users table.");
+                } else {
+                    System.err.println("Error adding 'active' column: " + e.getMessage());
+                }
+            }
+            
+            stmt.execute("""
+                CREATE TABLE IF NOT EXISTS books (
+                    isbn            VARCHAR(255) PRIMARY KEY UNIQUE NOT NULL,
+                    title           VARCHAR(255) NOT NULL,
+                    author          VARCHAR(255),
+                    genre           VARCHAR(100),
+                    owner_id        INTEGER REFERENCES users(id),
+                    available       BOOLEAN DEFAULT TRUE,
+                    borrowed_by     VARCHAR(255)
+                )
+            """);
+            System.out.println("Database initialized successfully.");
         } catch (SQLException e) {
-            System.out.println("Database Error: " + e.getMessage());
+            System.err.println("Failed to initialize database: " + e.getMessage());
         }
     }
 }

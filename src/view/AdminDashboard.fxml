@@ -2,16 +2,18 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
 
 <BorderPane xmlns:fx="http://javafx.com/fxml"
             fx:controller="controller.AdminDashboardController"
             prefWidth="980" prefHeight="640"
-            style="-fx-background-color: #f0f2f8;">
+            style="-fx-background-color: #eaecef;">
 
     <!-- TOP BAR -->
     <top>
         <HBox alignment="CENTER_LEFT" spacing="14"
-              style="-fx-background-color: linear-gradient(to right, #1a1a2e, #16213e);
+              style="-fx-background-color: linear-gradient(to right, #1a252f, #2c3e50);
                      -fx-padding: 14 24;
                      -fx-effect: dropshadow(gaussian, #00000055, 8, 0, 0, 3);">
             <Label text="⚙️" style="-fx-font-size: 22px;"/>
@@ -19,58 +21,103 @@
                 <Label text="Library Nexus"
                        style="-fx-text-fill: white; -fx-font-size: 17px; -fx-font-weight: bold;"/>
                 <Label text="Admin Panel"
-                       style="-fx-text-fill: rgba(255,255,255,0.4); -fx-font-size: 10px;"/>
+                       style="-fx-text-fill: rgba(255,255,255,0.5); -fx-font-size: 10px;"/>
             </VBox>
             <Region HBox.hgrow="ALWAYS"/>
             <Label fx:id="welcomeLabel"
-                   style="-fx-text-fill: rgba(255,255,255,0.65); -fx-font-size: 12px;"/>
+                   style="-fx-text-fill: #bdc3c7; -fx-font-size: 12px;"/>
         </HBox>
     </top>
 
     <!-- SIDEBAR -->
     <left>
-        <VBox prefWidth="200"
-              style="-fx-background-color: #16213e; -fx-padding: 20 0;">
+        <VBox prefWidth="210"
+              style="-fx-background-color: #2c3e50; -fx-padding: 20 0;">
 
             <Label text="NAVIGATION"
-                   style="-fx-text-fill: rgba(255,255,255,0.3);
-                          -fx-font-size: 10px;
-                          -fx-font-weight: bold;
-                          -fx-padding: 0 20 12 20;
-                          -fx-letter-spacing: 1.5;"/>
+                   style="-fx-text-fill: rgba(189,195,199,0.5); -fx-font-size: 10px;
+                          -fx-font-weight: bold; -fx-padding: 0 20 12 20; -fx-letter-spacing: 1.5;"/>
+
+            <Button fx:id="btnManageUsers" text="  👥  Manage Users"
+                    onAction="#showManageUsers"
+                    maxWidth="Infinity"
+                    style="-fx-background-color: transparent;
+                           -fx-text-fill: #bdc3c7; -fx-font-size: 13px;
+                           -fx-padding: 14 20; -fx-cursor: hand;
+                           -fx-background-radius: 0; -fx-alignment: CENTER_LEFT;"/>
 
             <Region VBox.vgrow="ALWAYS"/>
 
             <Button text="🚪  Logout"
                     onAction="#handleLogout"
                     maxWidth="Infinity"
-                    style="-fx-background-color: rgba(231,76,60,0.15);
-                           -fx-text-fill: #e74c3c;
-                           -fx-font-size: 13px;
-                           -fx-font-weight: bold;
-                           -fx-padding: 12 20;
-                           -fx-cursor: hand;
-                           -fx-background-radius: 0;
-                           -fx-alignment: CENTER_LEFT;"/>
+                    style="-fx-background-color: rgba(231,76,60,0.15); -fx-text-fill: #e74c3c;
+                           -fx-font-size: 13px; -fx-font-weight: bold; -fx-padding: 12 20;
+                           -fx-cursor: hand; -fx-background-radius: 0; -fx-alignment: CENTER_LEFT;"/>
         </VBox>
     </left>
 
     <!-- MAIN CONTENT -->
     <center>
-        <VBox alignment="TOP_CENTER" spacing="16">
-            <TableView fx:id="userTableView" prefWidth="700" prefHeight="500">
-                <columns>
-                    <TableColumn fx:id="idColumn" text="ID" prefWidth="60" />
-                    <TableColumn fx:id="usernameColumn" text="Username" prefWidth="200" />
-                    <TableColumn fx:id="roleColumn" text="Role" prefWidth="120" />
-                    <TableColumn fx:id="statusColumn" text="Status" prefWidth="120" />
-                </columns>
-            </TableView>
-            <HBox alignment="CENTER" spacing="12">
-                <Button fx:id="banUserButton" text="Ban User" disable="true" style="-fx-background-color: #f39c12; -fx-text-fill: white; -fx-font-weight: bold;" />
-                <Button fx:id="deleteUserButton" text="Delete User" disable="true" style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold;" />
-            </HBox>
-        </VBox>
+        <StackPane style="-fx-padding: 28;">
+
+            <!-- WELCOME PANEL -->
+            <VBox fx:id="welcomePanel" alignment="CENTER" spacing="12"
+                  StackPane.alignment="CENTER">
+                <Label text="⚙️" style="-fx-font-size: 52px;"/>
+                <Label text="Welcome to the Admin Panel"
+                       style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                <Label text="Select an option from the sidebar to get started."
+                       style="-fx-font-size: 13px; -fx-text-fill: #95a5a6;"/>
+            </VBox>
+
+            <!-- MANAGE USERS PANEL -->
+            <VBox fx:id="manageUsersPanel" spacing="14"
+                  StackPane.alignment="TOP_LEFT"
+                  visible="false" managed="false"
+                  style="-fx-background-color: white; -fx-background-radius: 14;
+                         -fx-padding: 28; -fx-effect: dropshadow(gaussian, #bdc3c7, 12, 0, 0, 4);">
+
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Label text="👥"
+                           style="-fx-background-color: #eaecef; -fx-font-size: 16px;
+                                  -fx-padding: 6 10; -fx-background-radius: 8;"/>
+                    <VBox spacing="1">
+                        <Label text="Manage Users"
+                               style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                        <Label text="View and manage all registered users."
+                               style="-fx-font-size: 11px; -fx-text-fill: #95a5a6;"/>
+                    </VBox>
+                </HBox>
+
+                <TableView fx:id="userTableView" VBox.vgrow="ALWAYS" prefHeight="380"
+                           style="-fx-background-radius: 10; -fx-border-color: #bdc3c7;
+                                  -fx-border-radius: 10; -fx-font-size: 13px;">
+                    <columns>
+                        <TableColumn fx:id="idColumn"       text="ID"       prefWidth="60"/>
+                        <TableColumn fx:id="usernameColumn" text="Username" prefWidth="200"/>
+                        <TableColumn fx:id="roleColumn"     text="Role"     prefWidth="120"/>
+                        <TableColumn fx:id="statusColumn"   text="Status"   prefWidth="120"/>
+                    </columns>
+                    <placeholder>
+                        <Label text="No users found."
+                               style="-fx-text-fill: #bdc3c7; -fx-font-size: 13px;"/>
+                    </placeholder>
+                </TableView>
+
+                <HBox spacing="12" alignment="CENTER_LEFT">
+                    <VBox.margin>
+                        <Insets top="14"/>
+                    </VBox.margin>
+                    <Button fx:id="deactivateUserBtn" text="🚫 Deactivate User" disable="true"
+                            style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold;
+                                   -fx-padding: 10 20; -fx-background-radius: 8; -fx-font-size: 12px; -fx-cursor: hand;"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Label fx:id="adminStatusLabel" style="-fx-font-size: 12px; -fx-font-weight: bold;"/>
+                </HBox>
+            </VBox>
+
+        </StackPane>
     </center>
 
 </BorderPane>

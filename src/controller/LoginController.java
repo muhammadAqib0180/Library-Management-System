@@ -16,8 +16,8 @@ import javafx.scene.control.ToggleButton;
 import database.UserDAO;
 import database.SQLiteUserDAO;
 import javafx.collections.FXCollections;
-import javafx.fxml.FXML;
-import javafx.scene.control.ComboBox;
+import javafx.application.Platform;
+import javafx.concurrent.Task;
 
 public class LoginController {
 
@@ -49,6 +49,12 @@ public class LoginController {
         passwordField.setOnAction(e -> handleSubmit());
 
         showLoginView();
+
+        // Pre-warm DB connection in background so first login isn't slow
+        new Thread(() -> {
+            try { database.DatabaseConnection.getConnection(); }
+            catch (Exception ignored) {}
+        }, "db-warmup").start();
     }
     public void showLoginView() {
         signupTab.setSelected(false);
@@ -106,23 +112,47 @@ public class LoginController {
             return;
         }
 
-        if (userDAO.validateLogin(user, pass)) {
-            model.User loggedInUser = userDAO.getUserByUsername(user);
-            if (loggedInUser == null) return;
+        submitButton.setDisable(true);
+        statusLabel.setTextFill(javafx.scene.paint.Color.WHITE);
+        statusLabel.setText("Signing in...");
 
+        Task<model.User> loginTask = new Task<>() {
+            @Override
+            protected model.User call() {
+                // Single DB call — gets user and validates password AND active status
+                model.User found = userDAO.getUserByUsername(user);
+                if (found != null && found.getPassword().equals(pass) && found.isActive()) {
+                    return found;
+                }
+                return null;
+            }
+        };
+
+        loginTask.setOnSucceeded(e -> {
+            model.User loggedInUser = loginTask.getValue();
+            submitButton.setDisable(false);
+            if (loggedInUser == null) {
+                statusLabel.setTextFill(javafx.scene.paint.Color.RED);
+                statusLabel.setText("Account not found or invalid password.");
+                return;
+            }
             if ("Member".equals(loggedInUser.getRole())) {
                 navigateTo("/view/LenderDashboard.fxml", "Lender Dashboard",
-                        ctrl -> ((LenderDashboardController) ctrl).setUsername(loggedInUser.getUsername()));
+                        ctrl -> ((LenderDashboardController) ctrl).setUsername(loggedInUser.getUsername(), loggedInUser.getId()));
             } else if ("Admin".equals(loggedInUser.getRole())) {
                 navigateTo("/view/AdminDashboard.fxml", "Admin Dashboard",
-                        ctrl -> ((AdminDashboardController) ctrl).setUsername(loggedInUser.getUsername()));
+                        ctrl -> ((AdminDashboardController) ctrl).setUsername(loggedInUser.getUsername(), loggedInUser.getId()));
             }
-        } else {
-            statusLabel.setTextFill(javafx.scene.paint.Color.RED);
-            statusLabel.setText("Account not found or invalid password.");
-        }
-    }
+        });
 
+        loginTask.setOnFailed(e -> {
+            submitButton.setDisable(false);
+            statusLabel.setTextFill(javafx.scene.paint.Color.RED);
+            statusLabel.setText("Connection error. Try again.");
+        });
+
+        new Thread(loginTask).start();
+    }
     private void navigateTo(String fxmlPath, String title, BaseDashboardController.ControllerCallback callback) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));

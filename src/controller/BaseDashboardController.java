@@ -14,13 +14,32 @@ public abstract class BaseDashboardController {
     @FXML protected Label welcomeLabel;
 
     protected String currentUsername;
+    protected int currentUserId;
 
     /**
-     * Called after login to pass the logged-in username.
-     * Subclasses can override but should call super.setUsername(username).
+     * Called after login to pass the logged-in username and user ID.
+     * Subclasses can override but should call super.setUsername(username, userId).
+     */
+    public void setUsername(String username, int userId) {
+        this.currentUsername = username;
+        this.currentUserId = userId;
+        if (welcomeLabel != null) {
+            welcomeLabel.setText("Welcome, " + username);
+        }
+    }
+
+    /**
+     * Backward compatibility method - fetch user ID from database
      */
     public void setUsername(String username) {
         this.currentUsername = username;
+        try {
+            database.SQLiteUserDAO userDAO = new database.SQLiteUserDAO();
+            model.User user = userDAO.getUserByUsername(username);
+            if (user != null) {
+                this.currentUserId = user.getId();
+            }
+        } catch (Exception ignored) {}
         if (welcomeLabel != null) {
             welcomeLabel.setText("Welcome, " + username);
         }

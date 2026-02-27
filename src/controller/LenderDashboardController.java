@@ -50,9 +50,16 @@ public class LenderDashboardController extends BaseDashboardController {
 
     // ── Member-only: switch to Borrower Dashboard ──
 
+    // ── Member-only: switch to Borrower Dashboard ──
+
     @FXML
     private void switchToBorrower() {
-        // Borrower dashboard coming soon — no action for now
+        // Uses the shared navigateTo method from BaseDashboardController
+        System.out.println("Button Clicked!");
+        navigateTo("/view/BorrowerDashboard.fxml", "Library Nexus - Member Portal", (Object controller) -> {
+            // Passes the current username to the new dashboard
+            ((BaseDashboardController) controller).setUsername(currentUsername);
+        });
     }
 
     // ── Sidebar panel switching ──

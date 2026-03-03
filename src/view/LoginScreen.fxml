@@ -3,6 +3,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.shape.Circle?>
 
 <StackPane prefHeight="560.0" prefWidth="960.0"
            style="-fx-background-color: linear-gradient(to bottom right, #0f0c29, #302b63, #24243e);"
@@ -47,18 +48,14 @@
                                  -fx-padding: 9 40;
                                  -fx-cursor: hand;
                                  -fx-font-weight: bold;
-                                 -fx-font-size: 12px;
-                                 -fx-background-color: #3498db;
-                                 -fx-text-fill: white;"/>
+                                 -fx-font-size: 12px;"/>
             <ToggleButton fx:id="signupTab" text="SIGN UP"
                           onAction="#showSignupView"
                           style="-fx-background-radius: 0 25 25 0;
                                  -fx-padding: 9 40;
                                  -fx-cursor: hand;
                                  -fx-font-weight: bold;
-                                 -fx-font-size: 12px;
-                                 -fx-background-color: rgba(255,255,255,0.1);
-                                 -fx-text-fill: rgba(255,255,255,0.7);"/>
+                                 -fx-font-size: 12px;"/>
         </HBox>
 
         <!-- Fields -->
@@ -73,16 +70,31 @@
                           -fx-border-radius: 10;
                           -fx-font-size: 13px;"/>
 
-        <PasswordField fx:id="passwordField" promptText="🔒  Password"
-                       maxWidth="370.0"
+        <StackPane maxWidth="370.0" alignment="CENTER_RIGHT">
+            <TextField fx:id="passwordVisibleField" promptText="🔒  Password"
+                       visible="false" managed="false"
                        style="-fx-background-radius: 10;
                               -fx-background-color: rgba(255,255,255,0.1);
                               -fx-text-fill: white;
                               -fx-prompt-text-fill: rgba(255,255,255,0.4);
-                              -fx-padding: 13 16;
+                              -fx-padding: 13 40 13 16;
                               -fx-border-color: rgba(255,255,255,0.15);
                               -fx-border-radius: 10;
                               -fx-font-size: 13px;"/>
+            <PasswordField fx:id="passwordField" promptText="🔒  Password"
+                           style="-fx-background-radius: 10;
+                                  -fx-background-color: rgba(255,255,255,0.1);
+                                  -fx-text-fill: white;
+                                  -fx-prompt-text-fill: rgba(255,255,255,0.4);
+                                  -fx-padding: 13 40 13 16;
+                                  -fx-border-color: rgba(255,255,255,0.15);
+                                  -fx-border-radius: 10;
+                                  -fx-font-size: 13px;"/>
+            <ToggleButton fx:id="togglePasswordBtn" text="👁" onAction="#togglePasswordVisibility"
+                          style="-fx-background-color: transparent; -fx-text-fill: rgba(255,255,255,0.6);
+                                 -fx-cursor: hand; -fx-padding: 0 12 0 0;"
+                          StackPane.alignment="CENTER_RIGHT"/>
+        </StackPane>
 
         <ComboBox fx:id="roleComboBox" visible="false" managed="false"
                   prefWidth="370.0" promptText="Select Role"
@@ -103,6 +115,16 @@
                        -fx-cursor: hand;"/>
 
         <Label fx:id="statusLabel"
+               minHeight="20"
                style="-fx-font-size: 12px; -fx-font-weight: bold;"/>
     </VBox>
+
+    <!-- System Status Indicator -->
+    <HBox alignment="CENTER_LEFT" spacing="8"
+          StackPane.alignment="BOTTOM_LEFT" maxWidth="150" maxHeight="30"
+          translateX="20" translateY="-20">
+        <Circle fx:id="systemStatusCircle" radius="6" fill="GRAY"/>
+        <Label text="System Status"
+               style="-fx-text-fill: rgba(255,255,255,0.7); -fx-font-size: 11px; -fx-font-weight: bold;"/>
+    </HBox>
 </StackPane>

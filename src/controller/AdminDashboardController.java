@@ -1,6 +1,6 @@
 package controller;
 
-import database.SQLiteUserDAO;
+import database.SupaUserDAO;
 import database.UserDAO;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -10,17 +10,16 @@ import javafx.scene.layout.VBox;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import model.User;
+import util.AlertHelper;
 
 public class AdminDashboardController extends BaseDashboardController {
 
     @FXML
     private Button btnManageUsers;
-
     @FXML
     private VBox welcomePanel;
     @FXML
     private VBox manageUsersPanel;
-
     @FXML
     private TableView<User> userTableView;
     @FXML
@@ -32,50 +31,51 @@ public class AdminDashboardController extends BaseDashboardController {
     @FXML
     private TableColumn<User, String> statusColumn;
     @FXML
+    private TableColumn<User, String> lastLoginColumn;
+    @FXML
     private Button deactivateUserBtn;
     @FXML
     private Label adminStatusLabel;
 
-    private final UserDAO userDAO = new SQLiteUserDAO();
+    private final UserDAO userDAO = new SupaUserDAO();
     private final ObservableList<User> userList = FXCollections.observableArrayList();
 
     @FXML
     public void initialize() {
-        idColumn.setCellValueFactory(data ->
-                new SimpleIntegerProperty(data.getValue().getId()).asObject());
-        usernameColumn.setCellValueFactory(data ->
-                new SimpleStringProperty(data.getValue().getUsername()));
-        roleColumn.setCellValueFactory(data ->
-                new SimpleStringProperty(data.getValue().getRole()));
-        statusColumn.setCellValueFactory(data ->
-                new SimpleStringProperty(data.getValue().isActive() ? "Active" : "Inactive"));
+        idColumn.setCellValueFactory(data -> new SimpleIntegerProperty(data.getValue().getId()).asObject());
+        usernameColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getUsername()));
+        roleColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getRole()));
+        statusColumn.setCellValueFactory(
+                data -> new SimpleStringProperty(data.getValue().isActive() ? "Active" : "Inactive"));
+        lastLoginColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getLastLogin()));
 
-        // Setup button action
         deactivateUserBtn.setOnAction(e -> {
             User selected = userTableView.getSelectionModel().getSelectedItem();
-            if (selected != null) handleToggleUserStatus(selected);
+            if (selected != null)
+                handleToggleUserStatus(selected);
         });
 
-        // Enable/disable button based on table selection and update text
         userTableView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
             boolean hasSelection = newVal != null;
             deactivateUserBtn.setDisable(!hasSelection);
 
-            // Update button text and styling based on user status
             if (hasSelection) {
                 if (newVal.isActive()) {
-                    deactivateUserBtn.setText("🚫 Deactivate User");
-                    deactivateUserBtn.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold; " +
-                            "-fx-padding: 10 20; -fx-background-radius: 8; -fx-font-size: 12px; -fx-cursor: hand;");
+                    deactivateUserBtn.setText("\uD83D\uDEAB Deactivate User");
+                    deactivateUserBtn
+                            .setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold; " +
+                                    "-fx-padding: 10 20; -fx-background-radius: 8; -fx-font-size: 12px; -fx-cursor: hand;");
                 } else {
-                    deactivateUserBtn.setText("✓ Activate User");
-                    deactivateUserBtn.setStyle("-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; " +
-                            "-fx-padding: 10 20; -fx-background-radius: 8; -fx-font-size: 12px; -fx-cursor: hand;");
+                    deactivateUserBtn.setText("\u2713 Activate User");
+                    deactivateUserBtn
+                            .setStyle("-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; " +
+                                    "-fx-padding: 10 20; -fx-background-radius: 8; -fx-font-size: 12px; -fx-cursor: hand;");
                 }
             }
         });
 
         userTableView.setItems(userList);
+        startStatusCheck();
     }
 
     @FXML
@@ -98,17 +98,21 @@ public class AdminDashboardController extends BaseDashboardController {
 
     private void handleToggleUserStatus(User user) {
         boolean newStatus = !user.isActive();
-        String action = newStatus ? "reactivate" : "deactivate";
 
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Confirm Action");
-        alert.setHeaderText("Are you sure?");
-        alert.setContentText("Do you want to " + action + " user: " + user.getUsername() + "?");
+        // Red button for deactivate, blue/purple for reactivate
+        boolean ok = newStatus
+                ? AlertHelper.confirm(userTableView.getScene().getWindow(),
+                        "Activate User", "Activate this user?",
+                        "Do you want to reactivate: " + user.getUsername() + "?", "Activate")
+                : AlertHelper.danger(userTableView.getScene().getWindow(),
+                        "Deactivate User", "Deactivate this user?",
+                        "Do you want to deactivate: " + user.getUsername() + "?", "Deactivate");
 
-        if (alert.showAndWait().isPresent() && alert.getResult() == ButtonType.OK) {
+        if (ok) {
             if (userDAO.updateUserStatus(user.getId(), newStatus)) {
                 adminStatusLabel.setTextFill(javafx.scene.paint.Color.GREEN);
-                adminStatusLabel.setText("User " + user.getUsername() + " is now " + (newStatus ? "Active" : "Inactive"));
+                adminStatusLabel
+                        .setText("User " + user.getUsername() + " is now " + (newStatus ? "Active" : "Inactive"));
                 userList.clear();
                 userList.addAll(userDAO.getAllUsers());
                 userTableView.refresh();

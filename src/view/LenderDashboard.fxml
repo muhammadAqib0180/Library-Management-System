@@ -24,7 +24,7 @@
             </VBox>
             <Region HBox.hgrow="ALWAYS"/>
             <Label fx:id="welcomeLabel"
-                   style="-fx-text-fill: rgba(255,255,255,0.75); -fx-font-size: 12px;"/>
+                   style="-fx-text-fill: rgba(255,255,255,0.92); -fx-font-size: 12px;"/>
             <Button text="Become a Borrower"
                     onAction="#switchToBorrower"
                     style="-fx-background-color: rgba(255,255,255,0.15);
@@ -149,7 +149,7 @@
                     <VBox spacing="1">
                         <Label text="My Inventory"
                                style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1a1a2e;"/>
-                        <Label text="All books you have listed"
+                        <Label fx:id="inventorySubtitleLabel" text="All books you have listed"
                                style="-fx-font-size: 11px; -fx-text-fill: #aab4c8;"/>
                     </VBox>
                 </HBox>
@@ -158,11 +158,11 @@
                            style="-fx-background-radius: 10; -fx-border-color: #d5f5e3;
                                   -fx-border-radius: 10; -fx-font-size: 13px;">
                     <columns>
-                        <TableColumn fx:id="isbnColumn"   text="ISBN"   prefWidth="120"/>
-                        <TableColumn fx:id="titleColumn"  text="Title"  prefWidth="160"/>
-                        <TableColumn fx:id="authorColumn" text="Author" prefWidth="130"/>
-                        <TableColumn fx:id="genreColumn"  text="Genre"  prefWidth="120"/>
-                        <TableColumn fx:id="statusColumn" text="Status" prefWidth="110"/>
+                        <TableColumn fx:id="isbnColumn"   text="ISBN"   minWidth="100" prefWidth="120"/>
+                        <TableColumn fx:id="titleColumn"  text="Title"  minWidth="140" prefWidth="180"/>
+                        <TableColumn fx:id="authorColumn" text="Author" minWidth="110" prefWidth="140"/>
+                        <TableColumn fx:id="genreColumn"  text="Genre"  minWidth="100" prefWidth="120"/>
+                        <TableColumn fx:id="statusColumn" text="Status" minWidth="90"  prefWidth="110"/>
                     </columns>
                     <placeholder>
                         <Label text="No books in your inventory yet."
@@ -190,5 +190,16 @@
 
         </StackPane>
     </center>
+
+    <!-- BOTTOM BAR - SYSTEM STATUS -->
+    <bottom>
+        <HBox alignment="CENTER_LEFT" spacing="8"
+              style="-fx-padding: 10 24; -fx-background-color: transparent;">
+            <?import javafx.scene.shape.Circle?>
+            <Circle fx:id="systemStatusCircle" radius="5" fill="GRAY"/>
+            <Label text="System Status"
+                   style="-fx-text-fill: #7f8c8d; -fx-font-size: 11px; -fx-font-weight: bold;"/>
+        </HBox>
+    </bottom>
 
 </BorderPane>

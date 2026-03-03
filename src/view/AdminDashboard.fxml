@@ -25,7 +25,7 @@
             </VBox>
             <Region HBox.hgrow="ALWAYS"/>
             <Label fx:id="welcomeLabel"
-                   style="-fx-text-fill: #bdc3c7; -fx-font-size: 12px;"/>
+                   style="-fx-text-fill: rgba(255,255,255,0.92); -fx-font-size: 12px;"/>
         </HBox>
     </top>
 
@@ -96,8 +96,9 @@
                     <columns>
                         <TableColumn fx:id="idColumn"       text="ID"       prefWidth="60"/>
                         <TableColumn fx:id="usernameColumn" text="Username" prefWidth="200"/>
-                        <TableColumn fx:id="roleColumn"     text="Role"     prefWidth="120"/>
-                        <TableColumn fx:id="statusColumn"   text="Status"   prefWidth="120"/>
+                        <TableColumn fx:id="roleColumn"     text="Role"     prefWidth="100"/>
+                        <TableColumn fx:id="statusColumn"   text="Status"   prefWidth="90"/>
+                        <TableColumn fx:id="lastLoginColumn" text="Last Login" prefWidth="130"/>
                     </columns>
                     <placeholder>
                         <Label text="No users found."
@@ -119,5 +120,16 @@
 
         </StackPane>
     </center>
+
+    <!-- BOTTOM BAR - SYSTEM STATUS -->
+    <bottom>
+        <HBox alignment="CENTER_LEFT" spacing="8"
+              style="-fx-padding: 10 24; -fx-background-color: transparent;">
+            <?import javafx.scene.shape.Circle?>
+            <Circle fx:id="systemStatusCircle" radius="5" fill="GRAY"/>
+            <Label text="System Status"
+                   style="-fx-text-fill: #7f8c8d; -fx-font-size: 11px; -fx-font-weight: bold;"/>
+        </HBox>
+    </bottom>
 
 </BorderPane>

@@ -1,66 +1,78 @@
 package controller;
 
 import database.BookDAO;
-import database.SQLiteBookDAO;
+import database.SupaBookDAO;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
 import model.Book;
-
-import java.io.IOException;
 
 public class BorrowerDashboardController extends BaseDashboardController {
 
     // Sidebar buttons
-    @FXML private Button btnMyBooks;
-    @FXML private Button btnBrowse;
+    @FXML
+    private Button btnMyBooks;
+    @FXML
+    private Button btnBrowse;
 
     // Panels
-    @FXML private VBox myBooksPanel;
-    @FXML private VBox browseCatalogPanel;
+    @FXML
+    private VBox myBooksPanel;
+    @FXML
+    private VBox browseCatalogPanel;
 
     // My Borrowed table
-    @FXML private TableView<Book> borrowedTableView;
-    @FXML private TableColumn<Book, String> titleColumn;
-    @FXML private TableColumn<Book, String> authorColumn;
-    @FXML private TableColumn<Book, String> borrowDateColumn;
-    @FXML private TableColumn<Book, String> dueDateColumn;
-    @FXML private TableColumn<Book, String> statusColumn;
-    @FXML private Button renewButton;
-    @FXML private Button returnButton;
+    @FXML
+    private TableView<Book> borrowedTableView;
+    @FXML
+    private TableColumn<Book, String> titleColumn;
+    @FXML
+    private TableColumn<Book, String> authorColumn;
+    @FXML
+    private TableColumn<Book, String> borrowDateColumn;
+    @FXML
+    private TableColumn<Book, String> dueDateColumn;
+    @FXML
+    private TableColumn<Book, String> statusColumn;
+    @FXML
+    private Button renewButton;
+    @FXML
+    private Button returnButton;
 
     // Browse catalog table
-    @FXML private TableView<Book> catalogTableView;
-    @FXML private TableColumn<Book, String> catIsbnColumn;
-    @FXML private TableColumn<Book, String> catTitleColumn;
-    @FXML private TableColumn<Book, String> catAuthorColumn;
-    @FXML private TableColumn<Book, String> catStatusColumn;
+    @FXML
+    private TableView<Book> catalogTableView;
+    @FXML
+    private TableColumn<Book, String> catIsbnColumn;
+    @FXML
+    private TableColumn<Book, String> catTitleColumn;
+    @FXML
+    private TableColumn<Book, String> catAuthorColumn;
+    @FXML
+    private TableColumn<Book, String> catStatusColumn;
 
-    private final BookDAO bookDAO = new SQLiteBookDAO();
+    private final BookDAO bookDAO = new SupaBookDAO();
     private final ObservableList<Book> catalogList = FXCollections.observableArrayList();
 
     @FXML
     public void initialize() {
         // Browse catalog columns
-        catIsbnColumn.setCellValueFactory(data ->
-                new javafx.beans.property.SimpleStringProperty(data.getValue().getIsbn()));
-        catTitleColumn.setCellValueFactory(data ->
-                new javafx.beans.property.SimpleStringProperty(data.getValue().getTitle()));
-        catAuthorColumn.setCellValueFactory(data ->
-                new javafx.beans.property.SimpleStringProperty(data.getValue().getAuthor()));
-        catStatusColumn.setCellValueFactory(data ->
-                new javafx.beans.property.SimpleStringProperty("Available"));
+        catIsbnColumn
+                .setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().getIsbn()));
+        catTitleColumn.setCellValueFactory(
+                data -> new javafx.beans.property.SimpleStringProperty(data.getValue().getTitle()));
+        catAuthorColumn.setCellValueFactory(
+                data -> new javafx.beans.property.SimpleStringProperty(data.getValue().getAuthor()));
+        catStatusColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(
+                data.getValue().isAvailable() ? "Available" : "Borrowed"));
 
         catalogTableView.setItems(catalogList);
 
         // Start on My Borrowed panel
         showMyBooks();
+        startStatusCheck();
     }
 
     @FXML
@@ -82,9 +94,12 @@ public class BorrowerDashboardController extends BaseDashboardController {
         setActiveButton(btnBrowse);
         setInactiveButton(btnMyBooks);
 
-        // Load all books from the DB (added by lenders)
+        // Load only AVAILABLE books from the DB
         catalogList.clear();
-        catalogList.addAll(bookDAO.getAll());
+        catalogList.addAll(
+                bookDAO.getAll().stream()
+                        .filter(model.Book::isAvailable)
+                        .collect(java.util.stream.Collectors.toList()));
     }
 
     @FXML

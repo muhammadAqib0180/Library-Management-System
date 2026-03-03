@@ -1,13 +1,13 @@
 package database;
 import model.Book;
-import database.BookDAO;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SQLiteBookDAO implements BookDAO {
+public class SupaBookDAO implements BookDAO {
     // Now connects to Supabase PostgreSQL via DatabaseHandler
-    private UserDAO userDAO = new SQLiteUserDAO();
+    private UserDAO userDAO = new SupaUserDAO();
     private String url = "jdbc:sqlite:library.db";
 
     @Override

@@ -1,0 +1,63 @@
+/* ============================================================
+   Library Nexus — Styled Dialog / Alert Stylesheet
+   Applied to all Alert and Dialog popups via AlertHelper.java
+   ============================================================ */
+
+/* --- Root dialog pane --- */
+.dialog-pane {
+    -fx-background-color: white;
+    -fx-padding: 0;
+    -fx-border-radius: 14;
+    -fx-background-radius: 14;
+    -fx-min-width: 380;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.30), 24, 0.08, 0, 6);
+}
+
+/* --- Header panel (shown when setHeaderText is used) --- */
+.dialog-pane:header .header-panel {
+    -fx-background-color: linear-gradient(to right, #302b63, #24243e);
+    -fx-padding: 20 24;
+    -fx-background-radius: 14 14 0 0;
+}
+
+.dialog-pane:header .header-panel .label {
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-wrap-text: true;
+}
+
+/* Hide the default graphic/icon in the header to keep it clean */
+.dialog-pane:header .graphic-container {
+    -fx-padding: 0;
+    -fx-max-width: 0;
+    -fx-max-height: 0;
+}
+
+/* --- Content area --- */
+.dialog-pane > .content {
+    -fx-padding: 20 26 10 26;
+}
+
+.dialog-pane > .content > .label {
+    -fx-font-size: 13px;
+    -fx-text-fill: #4a4a6a;
+    -fx-wrap-text: true;
+    -fx-line-spacing: 2;
+}
+
+/* --- Button bar area at the bottom --- */
+.dialog-pane > .button-bar {
+    -fx-padding: 8 20 18 20;
+    -fx-background-color: transparent;
+}
+
+/* --- Base style for all dialog buttons --- */
+.dialog-pane > .button-bar > .container > .button {
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-padding: 9 24;
+    -fx-cursor: hand;
+}

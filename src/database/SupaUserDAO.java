@@ -5,13 +5,13 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SQLiteUserDAO implements UserDAO {
+public class SupaUserDAO implements UserDAO {
 
     @Override
     public boolean addUser(User user) {
         String sql = "INSERT INTO users(username, password, role, active) VALUES(?,?,?,?)";
         try (Connection conn = DatabaseHandler.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, user.getUsername());
             pstmt.setString(2, user.getPassword());
             pstmt.setString(3, user.getRole());
@@ -23,7 +23,7 @@ public class SQLiteUserDAO implements UserDAO {
             if (e.getMessage().contains("active")) {
                 String sqlFallback = "INSERT INTO users(username, password, role) VALUES(?,?,?)";
                 try (Connection conn = DatabaseHandler.getConnection();
-                     PreparedStatement pstmt = conn.prepareStatement(sqlFallback)) {
+                        PreparedStatement pstmt = conn.prepareStatement(sqlFallback)) {
                     pstmt.setString(1, user.getUsername());
                     pstmt.setString(2, user.getPassword());
                     pstmt.setString(3, user.getRole());
@@ -44,19 +44,23 @@ public class SQLiteUserDAO implements UserDAO {
     public User getUserByUsername(String username) {
         String sql = "SELECT * FROM Users WHERE username = ?";
         try (Connection conn = DatabaseHandler.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, username);
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
                 boolean active = true;
+                String lastLogin = "Never";
                 try {
                     active = rs.getBoolean("active");
+                    lastLogin = rs.getString("last_login");
+                    if (lastLogin == null)
+                        lastLogin = "Never";
                 } catch (SQLException e) {
-                    // Column doesn't exist yet, default to active
-                    System.out.println("Warning: 'active' column not found, defaulting to true.");
+                    // Column doesn't exist yet, default to active and Never
+                    System.out.println("Warning: 'active' or 'last_login' column not found, defaulting.");
                 }
                 return new User(rs.getInt("id"), rs.getString("username"),
-                        rs.getString("password"), rs.getString("role"), active);
+                        rs.getString("password"), rs.getString("role"), active, lastLogin);
             }
         } catch (SQLException e) {
             System.out.println("Error fetching user: " + e.getMessage());
@@ -76,23 +80,27 @@ public class SQLiteUserDAO implements UserDAO {
         String sql = "SELECT * FROM users";
         System.out.println("[SQLiteUserDAO] Fetching all users from DB...");
         try (Connection conn = DatabaseHandler.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
                 boolean active = true;
+                String lastLogin = "Never";
                 try {
                     active = rs.getBoolean("active");
+                    lastLogin = rs.getString("last_login");
+                    if (lastLogin == null)
+                        lastLogin = "Never";
                 } catch (SQLException e) {
                     // Column doesn't exist yet, default to active
-                    System.out.println("Warning: 'active' column not found, defaulting to true.");
+                    System.out.println("Warning: 'active' or 'last_login' column not found, defaulting.");
                 }
                 User user = new User(
                         rs.getInt("id"),
                         rs.getString("username"),
                         rs.getString("password"),
                         rs.getString("role"),
-                        active
-                );
+                        active,
+                        lastLogin);
                 System.out.println("[SQLiteUserDAO] Found user: id=" + user.getId()
                         + ", username=" + user.getUsername() + ", role=" + user.getRole()
                         + ", active=" + user.isActive());
@@ -109,7 +117,7 @@ public class SQLiteUserDAO implements UserDAO {
     public boolean updateUserStatus(int userId, boolean active) {
         String sql = "UPDATE users SET active = ? WHERE id = ?";
         try (Connection conn = DatabaseHandler.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setBoolean(1, active);
             pstmt.setInt(2, userId);
             pstmt.executeUpdate();
@@ -127,5 +135,17 @@ public class SQLiteUserDAO implements UserDAO {
     public int findUserIdByUsername(String username) {
         User user = getUserByUsername(username);
         return user != null ? user.getId() : -1;
+    }
+
+    @Override
+    public void updateLastLogin(int userId) {
+        String sql = "UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = ?";
+        try (Connection conn = DatabaseHandler.getConnection();
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, userId);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println("Error updating last login (might need migration): " + e.getMessage());
+        }
     }
 }

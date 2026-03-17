@@ -56,6 +56,8 @@ public class LenderDashboardController extends BaseDashboardController {
     @FXML private Button delistBookBtn;
     @FXML private Label inventoryStatusLabel;
 
+    @FXML private TextField inventorySearchField;
+
     // Pending Requests
     @FXML private TableView<BorrowRequest> pendingRequestsTable;
     @FXML private TableColumn<BorrowRequest, String> reqBorrowerColumn;
@@ -131,6 +133,13 @@ public class LenderDashboardController extends BaseDashboardController {
 
         bookTable.setItems(bookList);
         loadBooks();
+
+            // Inventory search bar logic
+            if (inventorySearchField != null) {
+                inventorySearchField.textProperty().addListener((obs, oldVal, newVal) -> {
+                    filterInventoryBooks(newVal);
+                });
+            }
         
         // Setup Pending Requests table columns
         reqBorrowerColumn.setCellValueFactory(data -> {
@@ -462,8 +471,27 @@ public class LenderDashboardController extends BaseDashboardController {
     }
 
     private void loadBooks() {
-        bookList.clear();
-        bookList.addAll(bookDAO.getByOwnerId(currentUserId));
+            bookList.clear();
+            bookList.addAll(bookDAO.getByOwnerId(currentUserId));
+            // Re-apply filter if search bar is not empty
+            if (inventorySearchField != null && !inventorySearchField.getText().isEmpty()) {
+                filterInventoryBooks(inventorySearchField.getText());
+            }
+        }
+
+        private void filterInventoryBooks(String filter) {
+            if (filter == null || filter.isEmpty()) {
+                bookTable.setItems(bookList);
+                return;
+            }
+            String lower = filter.toLowerCase();
+            ObservableList<Book> filtered = bookList.filtered(book ->
+                (book.getTitle() != null && book.getTitle().toLowerCase().contains(lower)) ||
+                (book.getAuthor() != null && book.getAuthor().toLowerCase().contains(lower)) ||
+                (book.getIsbn() != null && book.getIsbn().toLowerCase().contains(lower)) ||
+                (book.getGenre() != null && book.getGenre().toLowerCase().contains(lower))
+            );
+            bookTable.setItems(filtered);
     }
 
     private void loadPendingRequests() {

@@ -77,6 +77,9 @@ public class BorrowerDashboardController extends BaseDashboardController {
     @FXML
     private Button borrowButton;
 
+    @FXML
+    private TextField catalogSearchField;
+
     // My Requests table
     @FXML
     private TableView<BorrowRequest> requestsTableView;
@@ -195,6 +198,13 @@ public class BorrowerDashboardController extends BaseDashboardController {
                 data.getValue().isAvailable() ? "Available" : "Borrowed"));
 
         catalogTableView.setItems(catalogList);
+
+            // Catalog search bar logic
+            if (catalogSearchField != null) {
+                catalogSearchField.textProperty().addListener((obs, oldVal, newVal) -> {
+                    filterCatalogBooks(newVal);
+                });
+            }
 
         // Update notification badge
         updateNotificationBadge();
@@ -410,11 +420,30 @@ public class BorrowerDashboardController extends BaseDashboardController {
     private java.util.Map<String, Book> cachedBooks = new java.util.HashMap<>();
 
     private void loadCatalog() {
-        catalogList.clear();
-        catalogList.addAll(
-            bookDAO.getAll().stream()
-                .filter(book -> book.isAvailable() && book.isListed() && book.getOwnerId() != currentUserId)
-                .collect(java.util.stream.Collectors.toList()));
+            catalogList.clear();
+            catalogList.addAll(
+                bookDAO.getAll().stream()
+                    .filter(book -> book.isAvailable() && book.isListed() && book.getOwnerId() != currentUserId)
+                    .collect(java.util.stream.Collectors.toList()));
+            // Re-apply filter if search bar is not empty
+            if (catalogSearchField != null && !catalogSearchField.getText().isEmpty()) {
+                filterCatalogBooks(catalogSearchField.getText());
+            }
+        }
+
+        private void filterCatalogBooks(String filter) {
+            if (filter == null || filter.isEmpty()) {
+                catalogTableView.setItems(catalogList);
+                return;
+            }
+            String lower = filter.toLowerCase();
+            ObservableList<Book> filtered = catalogList.filtered(book ->
+                (book.getTitle() != null && book.getTitle().toLowerCase().contains(lower)) ||
+                (book.getAuthor() != null && book.getAuthor().toLowerCase().contains(lower)) ||
+                (book.getIsbn() != null && book.getIsbn().toLowerCase().contains(lower)) ||
+                (book.getGenre() != null && book.getGenre().toLowerCase().contains(lower))
+            );
+            catalogTableView.setItems(filtered);
     }
 
     @FXML

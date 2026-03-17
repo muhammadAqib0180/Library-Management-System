@@ -6,6 +6,7 @@ import database.NotificationDAO;
 import database.SupaBookDAO;
 import database.SupaBorrowRequestDAO;
 import database.SupaNotificationDAO;
+import database.SupaUserDAO;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -15,6 +16,7 @@ import javafx.scene.paint.Color;
 import model.Book;
 import model.BorrowRequest;
 import model.Notification;
+import model.User;
 
 public class LenderDashboardController extends BaseDashboardController {
 
@@ -28,6 +30,8 @@ public class LenderDashboardController extends BaseDashboardController {
     @FXML private Button btnInventory;
     @FXML private Button btnPendingRequests;
 
+    @FXML private Button btnLentBooks;
+
     // Notification badge
     @FXML private Label notificationBell;
     @FXML private Label notificationBadge;
@@ -37,6 +41,8 @@ public class LenderDashboardController extends BaseDashboardController {
     @FXML private VBox addBookPanel;
     @FXML private VBox inventoryPanel;
     @FXML private VBox pendingRequestsPanel;
+
+    @FXML private VBox lentBooksPanel;
 
     @FXML private TableView<Book> bookTable;
     @FXML private TableColumn<Book, String> isbnColumn;
@@ -58,6 +64,15 @@ public class LenderDashboardController extends BaseDashboardController {
     @FXML private TableColumn<BorrowRequest, String> reqDateColumn;
     @FXML private Button acceptRequestBtn;
     @FXML private Button rejectRequestBtn;
+
+    // Lent Books Table
+    @FXML private TableView<Book> lentBooksTable;
+    @FXML private TableColumn<Book, String> lentIsbnColumn;
+    @FXML private TableColumn<Book, String> lentTitleColumn;
+    @FXML private TableColumn<Book, String> lentBorrowerColumn;
+    @FXML private TableColumn<Book, String> lentBorrowDateColumn;
+    @FXML private TableColumn<Book, String> lentDueDateColumn;
+    @FXML private Label lentBooksStatusLabel;
     @FXML private Label pendingRequestsStatusLabel;
 
     private final BookDAO bookDAO = new SupaBookDAO();
@@ -65,6 +80,8 @@ public class LenderDashboardController extends BaseDashboardController {
     private final NotificationDAO notificationDAO = new SupaNotificationDAO();
     private final ObservableList<Book> bookList = FXCollections.observableArrayList();
     private final ObservableList<BorrowRequest> pendingRequestsList = FXCollections.observableArrayList();
+
+    private final ObservableList<Book> lentBooksList = FXCollections.observableArrayList();
 
     @FXML
     public void initialize() {
@@ -158,6 +175,25 @@ public class LenderDashboardController extends BaseDashboardController {
         updateNotificationBadge();
         
         showAddBookPanel();
+
+        // Lent Books Table setup
+        if (lentIsbnColumn != null) {
+            lentIsbnColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().getIsbn()));
+            lentTitleColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().getTitle()));
+            lentBorrowerColumn.setCellValueFactory(data -> {
+                Integer borrowerId = data.getValue().getBorrowedById();
+                if (borrowerId == null) return new javafx.beans.property.SimpleStringProperty("");
+                User borrower = new SupaUserDAO().getAllUsers().stream().filter(u -> u.getId() == borrowerId).findFirst().orElse(null);
+                return new javafx.beans.property.SimpleStringProperty(borrower != null ? borrower.getUsername() : "User #" + borrowerId);
+            });
+            lentBorrowDateColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(
+                data.getValue().getBorrowDate() != null ? data.getValue().getBorrowDate().toString() : ""
+            ));
+            lentDueDateColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(
+                data.getValue().getDueDate() != null ? data.getValue().getDueDate().toString() : ""
+            ));
+            lentBooksTable.setItems(lentBooksList);
+        }
     }
 
     private void updateNotificationBadge() {
@@ -311,9 +347,14 @@ public class LenderDashboardController extends BaseDashboardController {
         inventoryPanel.setManaged(false);
         pendingRequestsPanel.setVisible(false);
         pendingRequestsPanel.setManaged(false);
+        if (lentBooksPanel != null) {
+            lentBooksPanel.setVisible(false);
+            lentBooksPanel.setManaged(false);
+        }
         setActiveButton(btnAddBook);
         setInactiveButton(btnInventory);
         setInactiveButton(btnPendingRequests);
+        setInactiveButton(btnLentBooks);
     }
 
     @FXML
@@ -324,9 +365,14 @@ public class LenderDashboardController extends BaseDashboardController {
         addBookPanel.setManaged(false);
         pendingRequestsPanel.setVisible(false);
         pendingRequestsPanel.setManaged(false);
+        if (lentBooksPanel != null) {
+            lentBooksPanel.setVisible(false);
+            lentBooksPanel.setManaged(false);
+        }
         setActiveButton(btnInventory);
         setInactiveButton(btnAddBook);
         setInactiveButton(btnPendingRequests);
+        setInactiveButton(btnLentBooks);
         loadBooks();
     }
 
@@ -338,10 +384,53 @@ public class LenderDashboardController extends BaseDashboardController {
         addBookPanel.setManaged(false);
         inventoryPanel.setVisible(false);
         inventoryPanel.setManaged(false);
+        if (lentBooksPanel != null) {
+            lentBooksPanel.setVisible(false);
+            lentBooksPanel.setManaged(false);
+        }
         setActiveButton(btnPendingRequests);
         setInactiveButton(btnAddBook);
         setInactiveButton(btnInventory);
+        setInactiveButton(btnLentBooks);
         loadPendingRequests();
+    }
+
+    @FXML
+    public void showLentBooksPanel() {
+        if (lentBooksPanel == null) return;
+        lentBooksPanel.setVisible(true);
+        lentBooksPanel.setManaged(true);
+        addBookPanel.setVisible(false);
+        addBookPanel.setManaged(false);
+        inventoryPanel.setVisible(false);
+        inventoryPanel.setManaged(false);
+        pendingRequestsPanel.setVisible(false);
+        pendingRequestsPanel.setManaged(false);
+        setActiveButton(btnLentBooks);
+        setInactiveButton(btnAddBook);
+        setInactiveButton(btnInventory);
+        setInactiveButton(btnPendingRequests);
+        loadLentBooks();
+    }
+
+    private void loadLentBooks() {
+        lentBooksList.clear();
+        // Only show books owned by this lender, currently lent out (borrowed_by not null)
+        for (Book book : bookDAO.getByOwnerId(currentUserId)) {
+            if (book.getBorrowedById() != null) {
+                lentBooksList.add(book);
+            }
+        }
+        if (lentBooksList.isEmpty()) {
+            if (lentBooksStatusLabel != null) {
+                lentBooksStatusLabel.setText("No books are currently lent out.");
+                lentBooksStatusLabel.setTextFill(Color.GRAY);
+            }
+        } else {
+            if (lentBooksStatusLabel != null) {
+                lentBooksStatusLabel.setText("");
+            }
+        }
     }
 
     // ── Book actions ──

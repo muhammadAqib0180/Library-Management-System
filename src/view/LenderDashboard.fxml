@@ -112,6 +112,14 @@
                            -fx-padding: 14 20; -fx-cursor: hand; -fx-background-radius: 0;
                            -fx-alignment: CENTER_LEFT;"/>
 
+           <Button fx:id="btnLentBooks" text="  📖   Lent Books"
+                  onAction="#showLentBooksPanel"
+                  maxWidth="Infinity"
+                  style="-fx-background-color: transparent;
+                        -fx-text-fill: rgba(255,255,255,0.7); -fx-font-size: 13px;
+                        -fx-padding: 14 20; -fx-cursor: hand; -fx-background-radius: 0;
+                        -fx-alignment: CENTER_LEFT;"/>
+
             <Region VBox.vgrow="ALWAYS"/>
 
             <Button text="🚪  Logout"
@@ -185,6 +193,44 @@
                     <Label fx:id="statusLabel" style="-fx-font-size: 12px; -fx-font-weight: bold;"/>
                 </HBox>
             </VBox>
+
+                     <!-- LENT BOOKS PANEL -->
+                     <VBox fx:id="lentBooksPanel" spacing="14"
+                              StackPane.alignment="TOP_LEFT"
+                              visible="false" managed="false"
+                              style="-fx-background-color: white; -fx-background-radius: 14;
+                                           -fx-padding: 28; -fx-effect: dropshadow(gaussian, #b2dfcc, 12, 0, 0, 4);">
+
+                            <HBox alignment="CENTER_LEFT" spacing="10">
+                                   <Label text="📖"
+                                             style="-fx-background-color: #d5f5e3; -fx-font-size: 16px;
+                                                          -fx-padding: 6 10; -fx-background-radius: 8;"/>
+                                   <VBox spacing="1">
+                                          <Label text="Lent Books"
+                                                    style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1a1a2e;"/>
+                                          <Label text="Books currently lent to users"
+                                                    style="-fx-font-size: 11px; -fx-text-fill: #aab4c8;"/>
+                                   </VBox>
+                            </HBox>
+
+                            <TableView fx:id="lentBooksTable" prefHeight="380" VBox.vgrow="ALWAYS"
+                                             style="-fx-background-radius: 10; -fx-border-color: #d5f5e3;
+                                                          -fx-border-radius: 10; -fx-font-size: 13px;">
+                                   <columns>
+                                          <TableColumn fx:id="lentIsbnColumn"   text="ISBN"   prefWidth="120"/>
+                                          <TableColumn fx:id="lentTitleColumn"  text="Title"  prefWidth="160"/>
+                                          <TableColumn fx:id="lentBorrowerColumn" text="Borrower" prefWidth="130"/>
+                                          <TableColumn fx:id="lentBorrowDateColumn" text="Borrow Date" prefWidth="120"/>
+                                          <TableColumn fx:id="lentDueDateColumn"  text="Due Date"  prefWidth="120"/>
+                                   </columns>
+                                   <placeholder>
+                                          <Label text="No books are currently lent out."
+                                                    style="-fx-text-fill: #c0c8d8; -fx-font-size: 13px;"/>
+                                   </placeholder>
+                            </TableView>
+
+                            <Label fx:id="lentBooksStatusLabel" style="-fx-font-size: 12px; -fx-font-weight: bold;"/>
+                     </VBox>
 
             <!-- INVENTORY PANEL -->
             <VBox fx:id="inventoryPanel" spacing="14"

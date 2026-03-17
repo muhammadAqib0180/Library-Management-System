@@ -3,11 +3,11 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
-
+<?import javafx.scene.shape.Circle?>
 
 <BorderPane xmlns:fx="http://javafx.com/fxml"
             fx:controller="controller.AdminDashboardController"
-            prefWidth="980" prefHeight="640"
+            prefWidth="1050" prefHeight="680"
             style="-fx-background-color: #eaecef;">
 
     <!-- TOP BAR -->
@@ -31,15 +31,43 @@
 
     <!-- SIDEBAR -->
     <left>
-        <VBox prefWidth="210"
+        <VBox prefWidth="220"
               style="-fx-background-color: #2c3e50; -fx-padding: 20 0;">
 
             <Label text="NAVIGATION"
                    style="-fx-text-fill: rgba(189,195,199,0.5); -fx-font-size: 10px;
                           -fx-font-weight: bold; -fx-padding: 0 20 12 20; -fx-letter-spacing: 1.5;"/>
 
+            <!-- EXISTING: Manage Users -->
             <Button fx:id="btnManageUsers" text="  👥  Manage Users"
                     onAction="#showManageUsers"
+                    maxWidth="Infinity"
+                    style="-fx-background-color: transparent;
+                           -fx-text-fill: #bdc3c7; -fx-font-size: 13px;
+                           -fx-padding: 14 20; -fx-cursor: hand;
+                           -fx-background-radius: 0; -fx-alignment: CENTER_LEFT;"/>
+
+            <!-- NEW: All Books with Borrower Info -->
+            <Button fx:id="btnAllBooks" text="  📖  Books &amp; Borrowers"
+                    onAction="#showAllBooks"
+                    maxWidth="Infinity"
+                    style="-fx-background-color: transparent;
+                           -fx-text-fill: #bdc3c7; -fx-font-size: 13px;
+                           -fx-padding: 14 20; -fx-cursor: hand;
+                           -fx-background-radius: 0; -fx-alignment: CENTER_LEFT;"/>
+
+            <!-- NEW: Per-user borrow activity -->
+            <Button fx:id="btnUserActivity" text="  📊  User Activity"
+                    onAction="#showUserActivity"
+                    maxWidth="Infinity"
+                    style="-fx-background-color: transparent;
+                           -fx-text-fill: #bdc3c7; -fx-font-size: 13px;
+                           -fx-padding: 14 20; -fx-cursor: hand;
+                           -fx-background-radius: 0; -fx-alignment: CENTER_LEFT;"/>
+
+            <!-- NEW: Overdue Books -->
+            <Button fx:id="btnOverdue" text="  ⚠️  Overdue Books"
+                    onAction="#showOverdue"
                     maxWidth="Infinity"
                     style="-fx-background-color: transparent;
                            -fx-text-fill: #bdc3c7; -fx-font-size: 13px;
@@ -61,7 +89,7 @@
     <center>
         <StackPane style="-fx-padding: 28;">
 
-            <!-- WELCOME PANEL -->
+            <!-- WELCOME PANEL (existing) -->
             <VBox fx:id="welcomePanel" alignment="CENTER" spacing="12"
                   StackPane.alignment="CENTER">
                 <Label text="⚙️" style="-fx-font-size: 52px;"/>
@@ -71,7 +99,7 @@
                        style="-fx-font-size: 13px; -fx-text-fill: #95a5a6;"/>
             </VBox>
 
-            <!-- MANAGE USERS PANEL -->
+            <!-- MANAGE USERS PANEL (existing, unchanged) -->
             <VBox fx:id="manageUsersPanel" spacing="14"
                   StackPane.alignment="TOP_LEFT"
                   visible="false" managed="false"
@@ -94,10 +122,10 @@
                            style="-fx-background-radius: 10; -fx-border-color: #bdc3c7;
                                   -fx-border-radius: 10; -fx-font-size: 13px;">
                     <columns>
-                        <TableColumn fx:id="idColumn"       text="ID"       prefWidth="60"/>
-                        <TableColumn fx:id="usernameColumn" text="Username" prefWidth="200"/>
-                        <TableColumn fx:id="roleColumn"     text="Role"     prefWidth="100"/>
-                        <TableColumn fx:id="statusColumn"   text="Status"   prefWidth="90"/>
+                        <TableColumn fx:id="idColumn"        text="ID"         prefWidth="60"/>
+                        <TableColumn fx:id="usernameColumn"  text="Username"   prefWidth="200"/>
+                        <TableColumn fx:id="roleColumn"      text="Role"       prefWidth="100"/>
+                        <TableColumn fx:id="statusColumn"    text="Status"     prefWidth="90"/>
                         <TableColumn fx:id="lastLoginColumn" text="Last Login" prefWidth="130"/>
                     </columns>
                     <placeholder>
@@ -107,9 +135,7 @@
                 </TableView>
 
                 <HBox spacing="12" alignment="CENTER_LEFT">
-                    <VBox.margin>
-                        <Insets top="14"/>
-                    </VBox.margin>
+                    <VBox.margin><Insets top="14"/></VBox.margin>
                     <Button fx:id="deactivateUserBtn" text="🚫 Deactivate User" disable="true"
                             style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold;
                                    -fx-padding: 10 20; -fx-background-radius: 8; -fx-font-size: 12px; -fx-cursor: hand;"/>
@@ -118,14 +144,227 @@
                 </HBox>
             </VBox>
 
+            <!-- ══════════════════════════════════════════════ -->
+            <!-- NEW PANEL 1: ALL BOOKS WITH BORROWER INFO     -->
+            <!-- ══════════════════════════════════════════════ -->
+            <VBox fx:id="allBooksPanel" spacing="14"
+                  StackPane.alignment="TOP_LEFT"
+                  visible="false" managed="false"
+                  style="-fx-background-color: white; -fx-background-radius: 14;
+                         -fx-padding: 28; -fx-effect: dropshadow(gaussian, #bdc3c7, 12, 0, 0, 4);">
+
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Label text="📖"
+                           style="-fx-background-color: #eaf4fb; -fx-font-size: 16px;
+                                  -fx-padding: 6 10; -fx-background-radius: 8;"/>
+                    <VBox spacing="1">
+                        <Label text="Books &amp; Borrower Info"
+                               style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                        <Label text="All books in the system with current borrower details."
+                               style="-fx-font-size: 11px; -fx-text-fill: #95a5a6;"/>
+                    </VBox>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <!-- Search bar -->
+                    <HBox spacing="6" alignment="CENTER"
+                          style="-fx-background-color: #f4f6f8; -fx-background-radius: 8;
+                                 -fx-border-color: #d5d8dc; -fx-border-radius: 8; -fx-padding: 4 10;">
+                        <Label text="🔍" style="-fx-text-fill: #95a5a6;"/>
+                        <TextField fx:id="bookSearchField" promptText="Search title / author / ISBN..."
+                                   prefWidth="240"
+                                   style="-fx-background-color: transparent; -fx-border-color: transparent;
+                                          -fx-font-size: 12px;"/>
+                    </HBox>
+                    <Button fx:id="btnRefreshBooks" text="↻  Refresh"
+                            onAction="#refreshAllBooks"
+                            style="-fx-background-color: #2c3e50; -fx-text-fill: white;
+                                   -fx-font-size: 12px; -fx-font-weight: bold;
+                                   -fx-padding: 7 16; -fx-background-radius: 7; -fx-cursor: hand;"/>
+                </HBox>
+
+                <!-- Summary chips -->
+                <HBox spacing="10">
+                    <Label fx:id="totalBooksLabel"
+                           style="-fx-background-color: #eaf4fb; -fx-text-fill: #2980b9;
+                                  -fx-font-weight: bold; -fx-font-size: 11px;
+                                  -fx-padding: 4 12; -fx-background-radius: 20;"/>
+                    <Label fx:id="borrowedCountLabel"
+                           style="-fx-background-color: #fef9e7; -fx-text-fill: #d68910;
+                                  -fx-font-weight: bold; -fx-font-size: 11px;
+                                  -fx-padding: 4 12; -fx-background-radius: 20;"/>
+                    <Label fx:id="availableCountLabel"
+                           style="-fx-background-color: #eafaf1; -fx-text-fill: #1e8449;
+                                  -fx-font-weight: bold; -fx-font-size: 11px;
+                                  -fx-padding: 4 12; -fx-background-radius: 20;"/>
+                </HBox>
+
+                <TableView fx:id="allBooksTable" VBox.vgrow="ALWAYS" prefHeight="360"
+                           style="-fx-background-radius: 10; -fx-border-color: #d5d8dc;
+                                  -fx-border-radius: 10; -fx-font-size: 12px;">
+                    <columns>
+                        <TableColumn fx:id="abIsbnCol"       text="ISBN"          prefWidth="130"/>
+                        <TableColumn fx:id="abTitleCol"      text="Title"         prefWidth="200"/>
+                        <TableColumn fx:id="abAuthorCol"     text="Author"        prefWidth="140"/>
+                        <TableColumn fx:id="abGenreCol"      text="Genre"         prefWidth="100"/>
+                        <TableColumn fx:id="abOwnerCol"      text="Owner"         prefWidth="110"/>
+                        <TableColumn fx:id="abBorrowerCol"   text="Borrowed By"   prefWidth="110"/>
+                        <TableColumn fx:id="abBorrowDateCol" text="Borrow Date"   prefWidth="100"/>
+                        <TableColumn fx:id="abDueDateCol"    text="Due Date"      prefWidth="100"/>
+                        <TableColumn fx:id="abStatusCol"     text="Status"        prefWidth="90"/>
+                    </columns>
+                    <placeholder>
+                        <Label text="No books found."
+                               style="-fx-text-fill: #bdc3c7; -fx-font-size: 13px;"/>
+                    </placeholder>
+                </TableView>
+            </VBox>
+
+            <!-- ══════════════════════════════════════════════ -->
+            <!-- NEW PANEL 2: PER-USER BORROW ACTIVITY         -->
+            <!-- ══════════════════════════════════════════════ -->
+            <VBox fx:id="userActivityPanel" spacing="14"
+                  StackPane.alignment="TOP_LEFT"
+                  visible="false" managed="false"
+                  style="-fx-background-color: white; -fx-background-radius: 14;
+                         -fx-padding: 28; -fx-effect: dropshadow(gaussian, #bdc3c7, 12, 0, 0, 4);">
+
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Label text="📊"
+                           style="-fx-background-color: #f4ecf7; -fx-font-size: 16px;
+                                  -fx-padding: 6 10; -fx-background-radius: 8;"/>
+                    <VBox spacing="1">
+                        <Label text="User Borrow Activity"
+                               style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                        <Label text="Select a user to see their full borrowing history."
+                               style="-fx-font-size: 11px; -fx-text-fill: #95a5a6;"/>
+                    </VBox>
+                </HBox>
+
+                <!-- User search row -->
+                <HBox spacing="12" alignment="CENTER_LEFT"
+                      style="-fx-background-color: #f8f9fa; -fx-padding: 12 16;
+                             -fx-background-radius: 10; -fx-border-color: #d5d8dc;
+                             -fx-border-radius: 10;">
+                    <Label text="Search User:" style="-fx-font-weight: bold; -fx-font-size: 13px; -fx-text-fill: #2c3e50;"/>
+                    <HBox spacing="6" alignment="CENTER"
+                          style="-fx-background-color: white; -fx-background-radius: 8;
+                                 -fx-border-color: #d5d8dc; -fx-border-radius: 8; -fx-padding: 4 10;">
+                        <Label text="🔍" style="-fx-text-fill: #95a5a6;"/>
+                        <TextField fx:id="userSearchField" promptText="Type a username..."
+                                   prefWidth="220"
+                                   style="-fx-background-color: transparent; -fx-border-color: transparent;
+                                          -fx-font-size: 13px;"/>
+                    </HBox>
+                    <Button text="View Activity"
+                            onAction="#loadUserActivity"
+                            style="-fx-background-color: #8e44ad; -fx-text-fill: white;
+                                   -fx-font-weight: bold; -fx-font-size: 12px;
+                                   -fx-padding: 8 18; -fx-background-radius: 7; -fx-cursor: hand;"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Label fx:id="activityUserLabel"
+                           style="-fx-font-size: 12px; -fx-text-fill: #7f8c8d; -fx-font-style: italic;"/>
+                </HBox>
+
+                <!-- Stats chips shown after user is selected -->
+                <HBox fx:id="activityStatsBox" spacing="10" visible="false" managed="false">
+                    <Label fx:id="actTotalLabel"
+                           style="-fx-background-color: #eaf4fb; -fx-text-fill: #2980b9;
+                                  -fx-font-weight: bold; -fx-font-size: 11px;
+                                  -fx-padding: 4 12; -fx-background-radius: 20;"/>
+                    <Label fx:id="actActiveLabel"
+                           style="-fx-background-color: #eafaf1; -fx-text-fill: #1e8449;
+                                  -fx-font-weight: bold; -fx-font-size: 11px;
+                                  -fx-padding: 4 12; -fx-background-radius: 20;"/>
+                    <Label fx:id="actOverdueLabel"
+                           style="-fx-background-color: #fdedec; -fx-text-fill: #c0392b;
+                                  -fx-font-weight: bold; -fx-font-size: 11px;
+                                  -fx-padding: 4 12; -fx-background-radius: 20;"/>
+                </HBox>
+
+                <TableView fx:id="userActivityTable" VBox.vgrow="ALWAYS" prefHeight="340"
+                           style="-fx-background-radius: 10; -fx-border-color: #d5d8dc;
+                                  -fx-border-radius: 10; -fx-font-size: 12px;">
+                    <columns>
+                        <TableColumn fx:id="uaIsbnCol"       text="ISBN"        prefWidth="130"/>
+                        <TableColumn fx:id="uaTitleCol"      text="Title"       prefWidth="220"/>
+                        <TableColumn fx:id="uaAuthorCol"     text="Author"      prefWidth="150"/>
+                        <TableColumn fx:id="uaBorrowDateCol" text="Borrow Date" prefWidth="110"/>
+                        <TableColumn fx:id="uaDueDateCol"    text="Due Date"    prefWidth="110"/>
+                        <TableColumn fx:id="uaStatusCol"     text="Status"      prefWidth="100"/>
+                    </columns>
+                    <placeholder>
+                        <Label text="Select a user above to view their activity."
+                               style="-fx-text-fill: #bdc3c7; -fx-font-size: 13px;"/>
+                    </placeholder>
+                </TableView>
+            </VBox>
+
+            <!-- ══════════════════════════════════════════════ -->
+            <!-- NEW PANEL 3: OVERDUE BOOKS                    -->
+            <!-- ══════════════════════════════════════════════ -->
+            <VBox fx:id="overduePanel" spacing="14"
+                  StackPane.alignment="TOP_LEFT"
+                  visible="false" managed="false"
+                  style="-fx-background-color: white; -fx-background-radius: 14;
+                         -fx-padding: 28; -fx-effect: dropshadow(gaussian, #bdc3c7, 12, 0, 0, 4);">
+
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Label text="⚠️"
+                           style="-fx-background-color: #fdedec; -fx-font-size: 16px;
+                                  -fx-padding: 6 10; -fx-background-radius: 8;"/>
+                    <VBox spacing="1">
+                        <Label text="Overdue Books"
+                               style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                        <Label text="Books whose due date has passed and have not been returned."
+                               style="-fx-font-size: 11px; -fx-text-fill: #95a5a6;"/>
+                    </VBox>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button text="↻  Refresh"
+                            onAction="#refreshOverdue"
+                            style="-fx-background-color: #c0392b; -fx-text-fill: white;
+                                   -fx-font-size: 12px; -fx-font-weight: bold;
+                                   -fx-padding: 7 16; -fx-background-radius: 7; -fx-cursor: hand;"/>
+                </HBox>
+
+                <!-- Overdue summary banner -->
+                <HBox fx:id="overdueBanner" spacing="10" alignment="CENTER_LEFT"
+                      style="-fx-background-color: #fdedec; -fx-padding: 10 16;
+                             -fx-background-radius: 10; -fx-border-color: #f1948a;
+                             -fx-border-radius: 10;">
+                    <Label text="🚨" style="-fx-font-size: 16px;"/>
+                    <Label fx:id="overdueCountLabel"
+                           style="-fx-font-weight: bold; -fx-font-size: 13px; -fx-text-fill: #c0392b;"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Label fx:id="overdueTodayLabel"
+                           style="-fx-font-size: 11px; -fx-text-fill: #7f8c8d;"/>
+                </HBox>
+
+                <TableView fx:id="overdueTable" VBox.vgrow="ALWAYS" prefHeight="360"
+                           style="-fx-background-radius: 10; -fx-border-color: #f1948a;
+                                  -fx-border-radius: 10; -fx-font-size: 12px;">
+                    <columns>
+                        <TableColumn fx:id="odIsbnCol"       text="ISBN"          prefWidth="130"/>
+                        <TableColumn fx:id="odTitleCol"      text="Title"         prefWidth="200"/>
+                        <TableColumn fx:id="odAuthorCol"     text="Author"        prefWidth="140"/>
+                        <TableColumn fx:id="odBorrowerCol"   text="Borrower"      prefWidth="120"/>
+                        <TableColumn fx:id="odOwnerCol"      text="Owner/Lender"  prefWidth="120"/>
+                        <TableColumn fx:id="odBorrowDateCol" text="Borrow Date"   prefWidth="100"/>
+                        <TableColumn fx:id="odDueDateCol"    text="Due Date"      prefWidth="100"/>
+                        <TableColumn fx:id="odDaysOverdueCol" text="Days Overdue" prefWidth="100"/>
+                    </columns>
+                    <placeholder>
+                        <Label text="No overdue books — all clear! ✅"
+                               style="-fx-text-fill: #27ae60; -fx-font-size: 13px; -fx-font-weight: bold;"/>
+                    </placeholder>
+                </TableView>
+            </VBox>
+
         </StackPane>
     </center>
 
-    <!-- BOTTOM BAR - SYSTEM STATUS -->
+    <!-- BOTTOM BAR - SYSTEM STATUS (existing, unchanged) -->
     <bottom>
         <HBox alignment="CENTER_LEFT" spacing="8"
               style="-fx-padding: 10 24; -fx-background-color: transparent;">
-            <?import javafx.scene.shape.Circle?>
             <Circle fx:id="systemStatusCircle" radius="5" fill="GRAY"/>
             <Label text="System Status"
                    style="-fx-text-fill: #7f8c8d; -fx-font-size: 11px; -fx-font-weight: bold;"/>

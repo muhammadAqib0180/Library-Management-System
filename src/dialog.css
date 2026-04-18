@@ -61,3 +61,20 @@
     -fx-padding: 9 24;
     -fx-cursor: hand;
 }
+
+/* ============================================================
+   OVERDUE WARNING ANIMATIONS - "Bleeding" Effect like PUBG
+   ============================================================ */
+
+/* Pulsing glow effect for overdue warning banner */
+@keyframes pulse-glow {
+    0% {
+        -fx-effect: dropshadow(gaussian, #e74c3c80, 8, 0.5, 0, 2);
+    }
+    50% {
+        -fx-effect: dropshadow(gaussian, #e74c3c, 12, 0.8, 0, 4);
+    }
+    100% {
+        -fx-effect: dropshadow(gaussian, #e74c3c80, 8, 0.5, 0, 2);
+    }
+}

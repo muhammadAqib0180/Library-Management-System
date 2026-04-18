@@ -11,6 +11,9 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.input.KeyCode;
 import model.Book;
 import model.BorrowRequest;
 import model.Notification;
@@ -36,6 +39,22 @@ public class BorrowerDashboardController extends BaseDashboardController {
     private VBox notificationPanel;
     @FXML
     private VBox notificationListContainer;
+
+    // Overdue Warning Banner
+    @FXML
+    private HBox overdueWarningBanner;
+    @FXML
+    private Label overdueWarningTitle;
+    @FXML
+    private Label overdueWarningMessage;
+
+    // Root Dashboard
+    @FXML
+    private BorderPane dashboardRoot;
+
+    // Red vignette overlay (defined in FXML)
+    @FXML
+    private javafx.scene.layout.StackPane vignetteOverlay;
 
     // Panels
     @FXML
@@ -120,6 +139,22 @@ public class BorrowerDashboardController extends BaseDashboardController {
             new javafx.beans.property.SimpleStringProperty(getDueStatus(data.getValue().getDueDate())));
 
         borrowedTableView.setItems(borrowedList);
+        
+        // Add keyboard shortcut for testing overdue warning: Ctrl+Shift+O
+        borrowedTableView.setOnKeyPressed(event -> {
+            if (event.isControlDown() && event.isShiftDown()) {
+                if (event.getCode() == javafx.scene.input.KeyCode.O) {
+                    testOverdueWarning();
+                    event.consume();
+                } else if (event.getCode() == javafx.scene.input.KeyCode.R) {
+                    removeTestOverdueBooks();
+                    event.consume();
+                }
+            }
+        });
+        
+        // Setup the vignette overlay with the red gradient
+        setupVignetteOverlay();
         
         // Setup button handlers
         renewButton.setOnAction(e -> {
@@ -368,6 +403,8 @@ public class BorrowerDashboardController extends BaseDashboardController {
         setInactiveButton(btnMyBooks);
         setInactiveButton(btnBrowse);
         loadMyRequests();
+        // Still check for overdue books to keep warning visible
+        checkForOverdueBooks();
     }
 
     @FXML
@@ -382,11 +419,14 @@ public class BorrowerDashboardController extends BaseDashboardController {
         setInactiveButton(btnMyBooks);
         setInactiveButton(btnMyRequests);
         loadCatalog();
+        // Still check for overdue books to keep warning visible
+        checkForOverdueBooks();
     }
 
     private void loadMyBorrowedBooks() {
         borrowedList.clear();
         borrowedList.addAll(bookDAO.findBorrowedByUser(currentUserId));
+        checkForOverdueBooks();
     }
 
     private void loadMyRequests() {
@@ -638,5 +678,310 @@ public class BorrowerDashboardController extends BaseDashboardController {
         btn.setStyle("-fx-background-color: transparent; -fx-text-fill: rgba(255,255,255,0.7); " +
                 "-fx-font-size: 13px; -fx-padding: 14 20; -fx-cursor: hand; " +
                 "-fx-background-radius: 0; -fx-alignment: CENTER_LEFT;");
+    }
+
+    /**
+     * Checks for overdue books in the borrowed list and displays the warning banner if any are found.
+     * If called from another panel, also loads borrowed books from database.
+     */
+    private void checkForOverdueBooks() {
+        // Load borrowed books to check for overdue
+        java.util.List<Book> booksToCheck = borrowedList;
+        
+        // If borrowedList is empty and we're not on the My Borrowed tab, load from DB
+        if (booksToCheck.isEmpty() && !myBooksPanel.isVisible()) {
+            booksToCheck = bookDAO.findBorrowedByUser(currentUserId);
+        }
+        
+        java.util.List<Book> overdueBooks = new java.util.ArrayList<>();
+        LocalDate today = LocalDate.now();
+        
+        for (Book book : booksToCheck) {
+            if (book.getDueDate() != null && book.getDueDate().isBefore(today)) {
+                overdueBooks.add(book);
+            }
+        }
+        
+        if (!overdueBooks.isEmpty()) {
+            displayOverdueWarning(overdueBooks);
+        } else {
+            hideOverdueWarning();
+        }
+    }
+
+    /**
+     * Displays the overdue warning banner with information about overdue books.
+     * Applies pulsing animation for visual "bleeding" effect on both banner and entire dashboard.
+     */
+    private void displayOverdueWarning(java.util.List<Book> overdueBooks) {
+        overdueWarningBanner.setVisible(true);
+        overdueWarningBanner.setManaged(true);
+        
+        // Update message with number of overdue books
+        int count = overdueBooks.size();
+        String title = count == 1 ? "1 Overdue Book" : count + " Overdue Books";
+        String message = "⏰ Due " + (count == 1 ? "date" : "dates") + " passed. " + 
+                        "Return " + (count == 1 ? "it" : "them") + " as soon as possible.";
+        
+        overdueWarningTitle.setText(title);
+        overdueWarningMessage.setText(message);
+        
+        // Apply pulsing animation to both banner and dashboard
+        applyOverdueAnimation();
+        applyDashboardBleedingEffect();
+    }
+
+    /**
+     * Hides the overdue warning banner and stops all animations.
+     */
+    private void hideOverdueWarning() {
+        overdueWarningBanner.setVisible(false);
+        overdueWarningBanner.setManaged(false);
+        
+        if (vignetteOverlay != null) {
+            // Fade vignette back to baseline opacity instead of hiding completely
+            javafx.animation.Timeline fadeOut = new javafx.animation.Timeline(
+                new javafx.animation.KeyFrame(javafx.util.Duration.millis(300),
+                    new javafx.animation.KeyValue(vignetteOverlay.opacityProperty(), 0.25))
+            );
+            fadeOut.play();
+        }
+        
+        // Stop banner animation
+        if (overdueWarningBanner.getUserData() instanceof javafx.animation.Timeline) {
+            ((javafx.animation.Timeline) overdueWarningBanner.getUserData()).stop();
+        }
+        
+        // Stop all dashboard animations
+        Object userData = dashboardRoot.getUserData();
+        if (userData instanceof Object[]) {
+            Object[] timelines = (Object[]) userData;
+            for (Object timeline : timelines) {
+                if (timeline instanceof javafx.animation.Timeline) {
+                    ((javafx.animation.Timeline) timeline).stop();
+                }
+            }
+        }
+        
+        // Reset style
+        dashboardRoot.setStyle("-fx-background-color: #f5f0fa;");
+        dashboardRoot.setTranslateX(0);
+        dashboardRoot.setTranslateY(0);
+    }
+
+    /**
+     * Applies a pulsing animation to the warning banner to create a "bleeding" visual effect.
+     * The animation continuously pulses with increased glow, scaling, and color changes.
+     * Similar to the "HP low" warning effect in PUBG.
+     */
+    private void applyOverdueAnimation() {
+        javafx.animation.Timeline timeline = new javafx.animation.Timeline(
+            // Start: Normal state
+            new javafx.animation.KeyFrame(
+                javafx.util.Duration.millis(0),
+                new javafx.animation.KeyValue(overdueWarningBanner.scaleXProperty(), 1.0),
+                new javafx.animation.KeyValue(overdueWarningBanner.scaleYProperty(), 1.0),
+                new javafx.animation.KeyValue(overdueWarningBanner.opacityProperty(), 1.0),
+                new javafx.animation.KeyValue(overdueWarningBanner.translateXProperty(), 0)
+            ),
+            // 25%: Pulse - Scale up slightly with slight vibration
+            new javafx.animation.KeyFrame(
+                javafx.util.Duration.millis(600),
+                new javafx.animation.KeyValue(overdueWarningBanner.scaleXProperty(), 1.02),
+                new javafx.animation.KeyValue(overdueWarningBanner.scaleYProperty(), 1.05),
+                new javafx.animation.KeyValue(overdueWarningBanner.opacityProperty(), 0.93),
+                new javafx.animation.KeyValue(overdueWarningBanner.translateXProperty(), 3)
+            ),
+            // 50%: Peak glow - Maximum intensity
+            new javafx.animation.KeyFrame(
+                javafx.util.Duration.millis(1200),
+                new javafx.animation.KeyValue(overdueWarningBanner.scaleXProperty(), 1.0),
+                new javafx.animation.KeyValue(overdueWarningBanner.scaleYProperty(), 1.0),
+                new javafx.animation.KeyValue(overdueWarningBanner.opacityProperty(), 1.0),
+                new javafx.animation.KeyValue(overdueWarningBanner.translateXProperty(), -3)
+            ),
+            // 75%: Dim - Fade out slightly (like "pain" effect)
+            new javafx.animation.KeyFrame(
+                javafx.util.Duration.millis(1800),
+                new javafx.animation.KeyValue(overdueWarningBanner.scaleXProperty(), 0.98),
+                new javafx.animation.KeyValue(overdueWarningBanner.scaleYProperty(), 0.98),
+                new javafx.animation.KeyValue(overdueWarningBanner.opacityProperty(), 0.86),
+                new javafx.animation.KeyValue(overdueWarningBanner.translateXProperty(), 2)
+            ),
+            // Back to start for loop
+            new javafx.animation.KeyFrame(
+                javafx.util.Duration.millis(2400),
+                new javafx.animation.KeyValue(overdueWarningBanner.scaleXProperty(), 1.0),
+                new javafx.animation.KeyValue(overdueWarningBanner.scaleYProperty(), 1.0),
+                new javafx.animation.KeyValue(overdueWarningBanner.opacityProperty(), 1.0),
+                new javafx.animation.KeyValue(overdueWarningBanner.translateXProperty(), 0)
+            )
+        );
+        timeline.setCycleCount(javafx.animation.Animation.INDEFINITE);
+        timeline.play();
+        
+        // Store timeline for cleanup if needed
+        overdueWarningBanner.setUserData(timeline);
+    }
+
+    /**
+     * Sets up the vignette overlay with the red gradient effect.
+     */
+    private void setupVignetteOverlay() {
+        if (vignetteOverlay == null) return;
+        
+        vignetteOverlay.getChildren().clear();
+        vignetteOverlay.setMouseTransparent(true);
+        vignetteOverlay.setPickOnBounds(false);
+        
+        // Create radial gradient for vignette effect (dark red on edges, transparent in center)
+        javafx.scene.paint.RadialGradient gradient = new javafx.scene.paint.RadialGradient(
+            0.5, 0.5,  // centerX, centerY
+            0.5, 0.5,  // focusX, focusY
+            0.8,       // radius
+            false,     // proportional
+            javafx.scene.paint.CycleMethod.NO_CYCLE,
+            new javafx.scene.paint.Stop(0, javafx.scene.paint.Color.web("#00000000")),  // Transparent center
+            new javafx.scene.paint.Stop(0.6, javafx.scene.paint.Color.web("#c0392bff")), // Red edges
+            new javafx.scene.paint.Stop(1.0, javafx.scene.paint.Color.web("#990000ff"))  // Dark red corners
+        );
+        
+        javafx.scene.shape.Rectangle vignetteRect = new javafx.scene.shape.Rectangle();
+        vignetteRect.widthProperty().bind(vignetteOverlay.widthProperty());
+        vignetteRect.heightProperty().bind(vignetteOverlay.heightProperty());
+        vignetteRect.setFill(gradient);
+        vignetteRect.setMouseTransparent(true);
+        
+        vignetteOverlay.getChildren().add(vignetteRect);
+        vignetteOverlay.setOpacity(0.25);  // Subtle but visible red vignette
+        vignetteOverlay.setVisible(true);  // Always visible on dashboard
+    }
+    
+    /**
+     * Creates the vignette overlay that will appear on top of content without blocking it.
+     */
+    private void createVignetteOverlay() {
+        // This is now handled by FXML and setupVignetteOverlay()
+    }
+
+    /**
+     * Applies an innovative "bleeding" effect to the entire dashboard.
+     * Creates a red vignette overlay that pulsates with corner glow effects.
+     * Multiple layers of animation create a sophisticated PUBG-like warning effect.
+     */
+    private void applyDashboardBleedingEffect() {
+        // Show the vignette overlay if it exists
+        if (vignetteOverlay != null) {
+            vignetteOverlay.toFront();
+            
+            // === ANIMATION 1: Vignette Opacity Pulsing ===
+            javafx.animation.Timeline vignetteTimeline = new javafx.animation.Timeline(
+                new javafx.animation.KeyFrame(javafx.util.Duration.millis(0),
+                    new javafx.animation.KeyValue(vignetteOverlay.opacityProperty(), 0.25)),
+                new javafx.animation.KeyFrame(javafx.util.Duration.millis(500),
+                    new javafx.animation.KeyValue(vignetteOverlay.opacityProperty(), 0.35)),
+                new javafx.animation.KeyFrame(javafx.util.Duration.millis(1000),
+                    new javafx.animation.KeyValue(vignetteOverlay.opacityProperty(), 0.55)),
+                new javafx.animation.KeyFrame(javafx.util.Duration.millis(1500),
+                    new javafx.animation.KeyValue(vignetteOverlay.opacityProperty(), 0.35)),
+                new javafx.animation.KeyFrame(javafx.util.Duration.millis(2000),
+                    new javafx.animation.KeyValue(vignetteOverlay.opacityProperty(), 0.25))
+            );
+            vignetteTimeline.setCycleCount(javafx.animation.Animation.INDEFINITE);
+            vignetteTimeline.play();
+            
+            // Store for later cleanup
+            if (dashboardRoot.getUserData() == null) {
+                dashboardRoot.setUserData(new Object[]{vignetteTimeline, null});
+            }
+        }
+        
+        // === ANIMATION 2: Background color subtle shift ===
+        javafx.animation.Timeline colorTimeline = new javafx.animation.Timeline(
+            new javafx.animation.KeyFrame(javafx.util.Duration.millis(0),
+                new javafx.animation.KeyValue(dashboardRoot.styleProperty(),
+                    "-fx-background-color: #f5f0fa;")),
+            new javafx.animation.KeyFrame(javafx.util.Duration.millis(600),
+                new javafx.animation.KeyValue(dashboardRoot.styleProperty(),
+                    "-fx-background-color: #f5eded;")),
+            new javafx.animation.KeyFrame(javafx.util.Duration.millis(1200),
+                new javafx.animation.KeyValue(dashboardRoot.styleProperty(),
+                    "-fx-background-color: #fae6e0;")),
+            new javafx.animation.KeyFrame(javafx.util.Duration.millis(1800),
+                new javafx.animation.KeyValue(dashboardRoot.styleProperty(),
+                    "-fx-background-color: #f5eded;")),
+            new javafx.animation.KeyFrame(javafx.util.Duration.millis(2400),
+                new javafx.animation.KeyValue(dashboardRoot.styleProperty(),
+                    "-fx-background-color: #f5f0fa;"))
+        );
+        colorTimeline.setCycleCount(javafx.animation.Animation.INDEFINITE);
+        colorTimeline.play();
+        
+        // Store timelines for cleanup
+        Object[] timelines = (dashboardRoot.getUserData() instanceof Object[]) ? 
+            (Object[]) dashboardRoot.getUserData() : new Object[2];
+        timelines[0] = (timelines[0] == null) ? null : timelines[0];  // vignette timeline
+        timelines[1] = colorTimeline;
+        dashboardRoot.setUserData(timelines);
+    }
+    
+    private javafx.scene.layout.Region region() {
+        return dashboardRoot;
+    }
+
+    /**
+     * Called when the dismiss button (✕) on the warning banner is clicked.
+     * Hides the warning banner but keeps it available for re-display if overdue books still exist.
+     */
+    @FXML
+    public void dismissOverdueWarning() {
+        overdueWarningBanner.setVisible(false);
+        overdueWarningBanner.setManaged(false);
+    }
+
+    /**
+     * TEST METHOD - Simulates overdue books for testing the warning system.
+     * Press Ctrl+Shift+O in the "My Borrowed" table to trigger this.
+     * This adds temporary test books with overdue dates to demonstrate the warning.
+     */
+    private void testOverdueWarning() {
+        // Create test books with overdue dates
+        Book testBook1 = new Book("TEST-ISBN-001", "Test Overdue Book 1", "Test Author", "Fiction", 
+                                  currentUserId, false, currentUserId, 
+                                  LocalDate.now().minusDays(10), LocalDate.now().minusDays(5), true);
+        
+        Book testBook2 = new Book("TEST-ISBN-002", "Test Overdue Book 2", "Another Author", "Mystery", 
+                                  currentUserId, false, currentUserId, 
+                                  LocalDate.now().minusDays(8), LocalDate.now().minusDays(2), true);
+        
+        // Add test books to the display list
+        borrowedList.add(testBook1);
+        borrowedList.add(testBook2);
+        
+        // Trigger the overdue check
+        checkForOverdueBooks();
+        
+        // Show a tooltip
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Test Mode");
+        alert.setHeaderText("Overdue Warning Test Activated");
+        alert.setContentText("Two test overdue books have been added. You should see the red warning banner above.\n\n" +
+                           "Press Ctrl+Shift+R to remove test books.");
+        alert.showAndWait();
+    }
+
+    /**
+     * TEST METHOD - Removes test overdue books and reloads the real data.
+     * Press Ctrl+Shift+R in the "My Borrowed" table to trigger this.
+     */
+    private void removeTestOverdueBooks() {
+        // Reload the actual borrowed books from database
+        loadMyBorrowedBooks();
+        
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Test Mode");
+        alert.setHeaderText("Test Books Removed");
+        alert.setContentText("Test books have been removed and real data has been reloaded.");
+        alert.showAndWait();
     }
 }

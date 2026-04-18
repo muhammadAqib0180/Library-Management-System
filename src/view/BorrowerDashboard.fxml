@@ -5,6 +5,7 @@
 
 <BorderPane xmlns:fx="http://javafx.com/fxml"
             fx:controller="controller.BorrowerDashboardController"
+            fx:id="dashboardRoot"
             prefWidth="980" prefHeight="640"
             style="-fx-background-color: #f5f0fa;">
 
@@ -130,10 +131,42 @@
     </left>
 
     <center>
-        <StackPane style="-fx-padding: 28;">
+        <VBox style="-fx-padding: 0; -fx-background-color: #f5f0fa;">
+            
+            <!-- OVERDUE WARNING BANNER -->
+            <HBox fx:id="overdueWarningBanner" 
+                  visible="false" managed="false"
+                  alignment="CENTER_LEFT" spacing="16"
+                  style="-fx-background-color: linear-gradient(to right, #c0392b, #e74c3c);
+                         -fx-padding: 16 24;
+                         -fx-effect: dropshadow(gaussian, #c0392b99, 24, 0.8, 0, 3);
+                         -fx-background-radius: 8; -fx-margin: 14 14 0 14;
+                         -fx-border-color: #e74c3c; -fx-border-width: 2; -fx-border-radius: 8;">
+                <Label text="⚠️" style="-fx-font-size: 24px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 4, 0, 1, 2);"/>
+                <VBox spacing="2" HBox.hgrow="ALWAYS">
+                    <Label fx:id="overdueWarningTitle" text="Overdue Books Alert"
+                           style="-fx-text-fill: white; -fx-font-size: 15px; -fx-font-weight: bold;
+                                  -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 2, 0, 0, 1);"/>
+                    <Label fx:id="overdueWarningMessage" text="You have overdue books. Check the My Borrowed section."
+                           style="-fx-text-fill: rgba(255,255,255,0.95); -fx-font-size: 12px;
+                                  -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 2, 0, 0, 1);"/>
+                </VBox>
+                <Button text="✕" 
+                        style="-fx-background-color: rgba(255,255,255,0.25); 
+                               -fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold;
+                               -fx-background-radius: 20; -fx-padding: 8 14;
+                               -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 4, 0, 0, 1);"
+                        onAction="#dismissOverdueWarning"/>
+            </HBox>
 
-            <!-- MY BORROWED PANEL -->
-            <VBox fx:id="myBooksPanel" spacing="14"
+            <!-- VIGNETTE OVERLAY - Layered on top -->
+            <StackPane fx:id="vignetteOverlay" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent;"/>
+
+            <!-- MAIN CONTENT STACK -->
+            <StackPane style="-fx-padding: 28;" VBox.vgrow="ALWAYS">
+
+                <!-- MY BORROWED PANEL -->
+                <VBox fx:id="myBooksPanel" spacing="14"
                   StackPane.alignment="TOP_LEFT"
                   style="-fx-background-color: white; -fx-background-radius: 14;
                          -fx-padding: 28; -fx-effect: dropshadow(gaussian, #d7bde2, 12, 0, 0, 4);">
@@ -268,7 +301,8 @@
                 </HBox>
             </VBox>
 
-        </StackPane>
+            </StackPane>
+        </VBox>
     </center>
 
     <!-- BOTTOM BAR - SYSTEM STATUS -->

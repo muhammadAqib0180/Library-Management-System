@@ -381,6 +381,7 @@ public class LenderDashboardController extends BaseDashboardController {
         if (lentBooksPanel != null) { lentBooksPanel.setVisible(false); lentBooksPanel.setManaged(false); }
         setActiveButton(btnAddBook);
         setInactiveButton(btnInventory); setInactiveButton(btnPendingRequests); setInactiveButton(btnLentBooks);
+
     }
 
     @FXML

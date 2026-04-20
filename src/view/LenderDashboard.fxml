@@ -83,8 +83,7 @@
             <Label text="WORKSPACE"
                    style="-fx-text-fill: #5EEAD4; -fx-font-size: 11px; -fx-font-weight: 800; -fx-padding: 0 12 12 12; -fx-letter-spacing: 1.0;"/>
 
-            <Button fx:id="btnAddBook" text="Add New Book"
-                    onAction="#showAddBookPanel" maxWidth="Infinity"/>
+            <Button fx:id="btnAddBook" text="Add New Book" onAction="#showAddBookPanel" maxWidth="Infinity"/>
 
             <Button fx:id="btnInventory" text="My Inventory"
                     onAction="#showInventoryPanel" maxWidth="Infinity"/>
@@ -107,60 +106,71 @@
     <center>
         <StackPane fx:id="contentArea" style="-fx-padding: 32;">
 
+
             <VBox fx:id="addBookPanel" spacing="24"
-                  maxWidth="700" maxHeight="300"
-                  StackPane.alignment="TOP_LEFT"
+                  StackPane.alignment="TOP_LEFT" visible="true" managed="true"
                   style="-fx-background-color: #FFFFFF; -fx-background-radius: 12;
-                         -fx-padding: 32; -fx-border-color: #E5E7EB; -fx-border-radius: 12;">
+                             -fx-padding: 32; -fx-border-color: #E5E7EB; -fx-border-radius: 12;">
                 <effect><DropShadow color="#0000000D" radius="20" spread="0.0" offsetY="4"/></effect>
 
-                <HBox alignment="CENTER_LEFT" spacing="12">
-                    <Label text="➕" style="-fx-font-size: 20px; -fx-background-color: #CCFBF1; -fx-padding: 8; -fx-background-radius: 8;"/>
-                    <VBox spacing="4">
-                        <Label text="List a New Asset" style="-fx-font-size: 20px; -fx-font-weight: 800; -fx-text-fill: #111827;"/>
-                        <Label text="Enter the book details below to add it to your public catalog." style="-fx-font-size: 13px; -fx-text-fill: #6B7280;"/>
-                    </VBox>
-                </HBox>
+                <VBox spacing="4">
+                    <Label text="Publish New Asset" style="-fx-font-size: 20px; -fx-font-weight: 800; -fx-text-fill: #111827;"/>
+                    <Label text="Add a new book to your inventory to start lending." style="-fx-font-size: 13px; -fx-text-fill: #6B7280;"/>
+                </VBox>
 
-                <HBox spacing="16" alignment="CENTER_LEFT">
-                    <VBox spacing="6">
-                        <Label text="ISBN" style="-fx-font-size: 11px; -fx-font-weight: 700; -fx-text-fill: #4B5563;"/>
-                        <TextField fx:id="isbnField" promptText="e.g. 978-3..." prefWidth="140"
-                                   style="-fx-background-radius: 6; -fx-border-color: #E5E7EB; -fx-border-radius: 6; -fx-padding: 10 12; -fx-font-size: 13px; -fx-background-color: #F9FAFB;"/>
-                    </VBox>
-                    <VBox spacing="6">
-                        <Label text="Title" style="-fx-font-size: 11px; -fx-font-weight: 700; -fx-text-fill: #4B5563;"/>
-                        <TextField fx:id="titleField" promptText="Book Title" prefWidth="180"
-                                   style="-fx-background-radius: 6; -fx-border-color: #E5E7EB; -fx-border-radius: 6; -fx-padding: 10 12; -fx-font-size: 13px; -fx-background-color: #F9FAFB;"/>
-                    </VBox>
-                    <VBox spacing="6">
-                        <Label text="Author" style="-fx-font-size: 11px; -fx-font-weight: 700; -fx-text-fill: #4B5563;"/>
-                        <TextField fx:id="authorField" promptText="Author Name" prefWidth="160"
-                                   style="-fx-background-radius: 6; -fx-border-color: #E5E7EB; -fx-border-radius: 6; -fx-padding: 10 12; -fx-font-size: 13px; -fx-background-color: #F9FAFB;"/>
-                    </VBox>
-                    <VBox spacing="6">
-                        <Label text="Genre" style="-fx-font-size: 11px; -fx-font-weight: 700; -fx-text-fill: #4B5563;"/>
-                        <TextField fx:id="genreField" promptText="e.g. Sci-Fi" prefWidth="120"
-                                   style="-fx-background-radius: 6; -fx-border-color: #E5E7EB; -fx-border-radius: 6; -fx-padding: 10 12; -fx-font-size: 13px; -fx-background-color: #F9FAFB;"/>
-                    </VBox>
-                    <VBox spacing="5">
-                        <Label text="Book Condition" style="-fx-font-weight: bold;"/>
-                        <ComboBox fx:id="conditionCombo" prefWidth="200" promptText="Select Condition"/>
-                    </VBox>
-                    <VBox spacing="5">
-                        <Label text="Physical Book Photo (Optional)" style="-fx-font-weight: bold;"/>
-                        <HBox spacing="10" alignment="CENTER_LEFT">
-                            <TextField fx:id="bookImageField" prefWidth="200" promptText="No file selected" editable="false" />
-                            <Button fx:id="bookImageBtn" text="Browse..." style="-fx-cursor: hand;" />
-                        </HBox>
-                    </VBox>
-                </HBox>
+                <HBox spacing="40" VBox.vgrow="ALWAYS">
 
-                <HBox spacing="16" alignment="CENTER_LEFT">
-                    <Button text="Publish to Catalog" onAction="#handleAddBook"
-                            style="-fx-background-color: #0F766E; -fx-text-fill: #FFFFFF; -fx-background-radius: 6;
-                                   -fx-font-weight: 700; -fx-font-size: 13px; -fx-padding: 12 24; -fx-cursor: hand;"/>
-                    <Label fx:id="statusLabel" style="-fx-font-size: 13px; -fx-font-weight: 600;"/>
+                    <VBox spacing="16" prefWidth="380">
+                        <VBox spacing="6">
+                            <Label text="ISBN Number" style="-fx-font-weight: 700; -fx-text-fill: #374151; -fx-font-size: 13px;"/>
+                            <TextField fx:id="isbnField" promptText="e.g., 978-3-16-148410-0"
+                                       style="-fx-padding: 10; -fx-background-radius: 6; -fx-border-color: #D1D5DB; -fx-border-radius: 6;"/>
+                        </VBox>
+
+                        <VBox spacing="6">
+                            <Label text="Book Title" style="-fx-font-weight: 700; -fx-text-fill: #374151; -fx-font-size: 13px;"/>
+                            <TextField fx:id="titleField" promptText="e.g., The Pragmatic Programmer"
+                                       style="-fx-padding: 10; -fx-background-radius: 6; -fx-border-color: #D1D5DB; -fx-border-radius: 6;"/>
+                        </VBox>
+
+                        <VBox spacing="6">
+                            <Label text="Author" style="-fx-font-weight: 700; -fx-text-fill: #374151; -fx-font-size: 13px;"/>
+                            <TextField fx:id="authorField" promptText="e.g., Andy Hunt"
+                                       style="-fx-padding: 10; -fx-background-radius: 6; -fx-border-color: #D1D5DB; -fx-border-radius: 6;"/>
+                        </VBox>
+
+                        <VBox spacing="6">
+                            <Label text="Genre" style="-fx-font-weight: 700; -fx-text-fill: #374151; -fx-font-size: 13px;"/>
+                            <TextField fx:id="genreField" promptText="e.g., Technology, Fiction"
+                                       style="-fx-padding: 10; -fx-background-radius: 6; -fx-border-color: #D1D5DB; -fx-border-radius: 6;"/>
+                        </VBox>
+                    </VBox>
+
+                    <VBox spacing="16" prefWidth="380">
+                        <VBox spacing="6">
+                            <Label text="Book Condition" style="-fx-font-weight: 700; -fx-text-fill: #374151; -fx-font-size: 13px;"/>
+                            <ComboBox fx:id="conditionCombo" prefWidth="400" promptText="Select Condition"
+                                      style="-fx-padding: 6; -fx-background-radius: 6; -fx-border-color: #D1D5DB; -fx-border-radius: 6;"/>
+                        </VBox>
+
+                        <VBox spacing="6">
+                            <Label text="Physical Book Photo (Optional)" style="-fx-font-weight: 700; -fx-text-fill: #374151; -fx-font-size: 13px;"/>
+                            <HBox spacing="10" alignment="CENTER_LEFT">
+                                <TextField fx:id="bookImageField" HBox.hgrow="ALWAYS" promptText="No file selected" editable="false"
+                                           style="-fx-padding: 10; -fx-background-radius: 6; -fx-border-color: #D1D5DB; -fx-border-radius: 6;"/>
+                                <Button fx:id="bookImageBtn" text="Browse..."
+                                        style="-fx-background-color: #E5E7EB; -fx-text-fill: #374151; -fx-font-weight: bold; -fx-padding: 10 16; -fx-background-radius: 6; -fx-cursor: hand;"/>
+                            </HBox>
+                        </VBox>
+
+                        <Region VBox.vgrow="ALWAYS" minHeight="40"/>
+
+                        <VBox spacing="10" alignment="BOTTOM_RIGHT" VBox.vgrow="ALWAYS">
+                            <Label fx:id="statusLabel" text="" style="-fx-font-size: 13px; -fx-font-weight: bold;" maxWidth="Infinity" alignment="CENTER_LEFT"/>
+                            <Button fx:id="btnNavAddBook" text="Publish Asset to Catalog" onAction="#handleAddBook" style="-fx-background-color: #C0C0C0; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px; -fx-padding: 12 24; -fx-background-radius: 8; -fx-cursor: hand; -fx-pref-width: 400;"/>
+                        </VBox>
+                    </VBox>
+
                 </HBox>
             </VBox>
 

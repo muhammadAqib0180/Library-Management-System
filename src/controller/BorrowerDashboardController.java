@@ -464,33 +464,51 @@ public class BorrowerDashboardController extends BaseDashboardController {
         if (book == null) return;
 
         try {
+            // Load the FXML
             javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(
-                    AvailabilityPanelController.class.getResource("/view/AvailabilityPanel.fxml")
+                    getClass().getResource("/view/AvailabilityPanel.fxml")
             );
             VBox availabilityPanel = loader.load();
             availabilityController = loader.getController();
 
+            // 1. Create the Dialog object FIRST
+            // 1. Create the Dialog object
+            // 1. Create the Dialog object
+            Dialog<ButtonType> availabilityDialog = new Dialog<>();
+
+            // ---> KILL THE WINDOWS BORDER <---
+            availabilityDialog.initStyle(javafx.stage.StageStyle.TRANSPARENT);
+
+            availabilityDialog.setHeaderText(null);
+            availabilityDialog.setGraphic(null);
+
+            // Force the background to be transparent so our rounded corners show!
+            availabilityDialog.getDialogPane().setStyle("-fx-background-color: transparent; -fx-padding: 0;");
+            availabilityDialog.getDialogPane().getScene().setFill(javafx.scene.paint.Color.TRANSPARENT);
+
+            // 2. Wire up the buttons
             availabilityController.setOnBorrowClickedListener((lenderId) -> {
+                availabilityDialog.setResult(ButtonType.CLOSE);
+                availabilityDialog.close();
                 this.onBorrowFromAvailability(isbn, lenderId, book.getTitle());
             });
 
+            // Make our custom "X" button close the dialog
+            availabilityController.setOnCloseClickedListener(() -> {
+                availabilityDialog.setResult(ButtonType.CLOSE);
+                availabilityDialog.close();
+            });
+
+            // 3. Load the data
             availabilityController.loadAvailability(isbn);
 
-            // --- THE POP-UP DIALOG UX ---
-            Dialog<ButtonType> dialog = new Dialog<>();
-            dialog.setTitle("Asset Availability");
-            dialog.setHeaderText("Available Copies: " + book.getTitle());
-
-            // Put your AvailabilityPanel FXML directly inside the pop-up!
-            dialog.getDialogPane().setContent(availabilityPanel);
-
-            // Add a close button so they can dismiss it
-            dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
-
-            dialog.showAndWait();
+            // 4. Show the popup (We don't need to add a default ButtonType.CLOSE anymore!)
+            availabilityDialog.getDialogPane().setContent(availabilityPanel);
+            availabilityDialog.showAndWait();
 
         } catch (java.io.IOException e) {
-            System.err.println("[BorrowerDashboard] Failed to load AvailabilityPanel: " + e.getMessage());
+            System.err.println("[BorrowerDashboard] FXML Load Crash!");
+            e.printStackTrace(); // This will print the exact red error line if your file is missing!
         }
     }
 

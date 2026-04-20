@@ -1,0 +1,508 @@
+* LOGIN SCREEN DARK THEME */
+.login-screen, .dark-bg {
+    -fx-background-color: #0F172A;
+}
+
+.login-card, .dark-card {
+    -fx-background-color: #1E293B;
+    -fx-background-radius: 18;
+    -fx-effect: dropshadow(gaussian, rgba(79, 70, 229, 0.18), 24, 0, 0, 8);
+}
+
+.login-field, .dark-text-field {
+    -fx-background-color: #0F172A;
+    -fx-border-color: #6366F1;
+    -fx-border-radius: 10;
+    -fx-border-width: 2;
+    -fx-text-fill: #E2E8F0;
+    -fx-prompt-text-fill: #64748B;
+    -fx-padding: 13 16;
+    -fx-font-size: 14px;
+}
+.login-field:focused, .dark-text-field:focused {
+    -fx-border-color: #F59E0B;
+    -fx-effect: dropshadow(gaussian, #6366F1AA, 12, 0, 0, 4);
+}
+
+.toggle-password-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: #A5B4FC;
+    -fx-cursor: hand;
+    -fx-padding: 0 12 0 0;
+}
+
+.login-submit-btn {
+    -fx-background-color: linear-gradient(to right, #6366F1, #8e44ad);
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 15px;
+    -fx-background-radius: 10;
+    -fx-padding: 13 0;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, #6366F1AA, 8, 0, 0, 2);
+}
+.login-submit-btn:hover {
+    -fx-background-color: linear-gradient(to right, #8e44ad, #6366F1);
+}
+
+.login-status-label {
+    -fx-text-fill: #F59E0B;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+.system-status-label {
+    -fx-text-fill: #A5B4FC;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
+/* ============================================================================
+   MODERN GEN-Z THEME - Library Nexus
+   Three distinct dark theme color schemes for each dashboard
+   ============================================================================ */
+
+/* ============================================================================
+   GLOBAL STYLES - Applied to all dashboards
+   ============================================================================ */
+
+.root {
+    -fx-font-family: "Segoe UI", "Helvetica Neue", sans-serif;
+    -fx-font-smoothing-type: lcd;
+}
+
+/* Smooth transitions for all interactive elements */
+.button, .text-field, .combo-box, .spinner {
+    -fx-transition: all 0.25s ease-in-out;
+}
+
+/* ============================================================================
+   BORROWER DASHBOARD THEME - Purple Midnight
+   Primary: #6D28D9 | Accent: #EC4899 | Background: #0F172A
+   ============================================================================ */
+
+.borrower-dashboard {
+    -fx-background-color: #0F172A;
+}
+
+.borrower-header {
+    -fx-background-color: linear-gradient(to right, #5B21B6, #7C3AED, #6D28D9);
+    -fx-text-fill: white;
+}
+
+.borrower-sidebar {
+    -fx-background-color: #1E293B;
+    -fx-border-width: 0 3 0 0;
+    -fx-border-color: #6D28D9;
+}
+
+.borrower-content {
+    -fx-background-color: #0F172A;
+}
+
+.borrower-card {
+    -fx-background-color: #1E293B;
+    -fx-background-radius: 18;
+    -fx-border-color: rgba(147, 51, 234, 0.3);
+    -fx-border-radius: 18;
+    -fx-border-width: 2;
+    -fx-effect: dropshadow(gaussian, rgba(147, 51, 234, 0.25), 16, 0, 0, 8);
+    -fx-padding: 24;
+}
+
+.borrower-button-active {
+    -fx-background-color: linear-gradient(to right, #6D28D9, #7C3AED);
+    -fx-text-fill: white;
+    -fx-border-width: 0 0 0 4;
+    -fx-border-color: #EC4899;
+    -fx-padding: 16 24;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8;
+}
+
+.borrower-button-inactive {
+    -fx-background-color: transparent;
+    -fx-text-fill: #94A3B8;
+    -fx-padding: 16 24;
+    -fx-font-size: 13px;
+}
+
+.borrower-button-inactive:hover {
+    -fx-background-color: rgba(147, 51, 234, 0.15);
+    -fx-text-fill: #CBD5E1;
+}
+
+.borrower-accent-button {
+    -fx-background-color: linear-gradient(to right, #EC4899, #DB2777);
+    -fx-text-fill: white;
+    -fx-background-radius: 10;
+    -fx-padding: 12 28;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, rgba(236, 72, 153, 0.4), 12, 0, 0, 4);
+}
+
+.borrower-accent-button:hover {
+    -fx-background-color: linear-gradient(to right, #DB2777, #BE185D);
+    -fx-effect: dropshadow(gaussian, rgba(236, 72, 153, 0.6), 16, 0, 0, 6);
+}
+
+.borrower-text-field {
+    -fx-background-color: #0F172A;
+    -fx-border-color: rgba(147, 51, 234, 0.5);
+    -fx-border-radius: 10;
+    -fx-border-width: 2;
+    -fx-text-fill: #E2E8F0;
+    -fx-padding: 12 16;
+    -fx-font-size: 13px;
+}
+
+.borrower-text-field:focused {
+    -fx-border-color: #EC4899;
+    -fx-effect: dropshadow(gaussian, rgba(236, 72, 153, 0.4), 12, 0, 0, 4);
+}
+
+.borrower-label-primary {
+    -fx-text-fill: #E2E8F0;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+.borrower-label-secondary {
+    -fx-text-fill: #94A3B8;
+    -fx-font-size: 12px;
+}
+
+.borrower-label-accent {
+    -fx-text-fill: #EC4899;
+    -fx-font-weight: bold;
+}
+
+/* ============================================================================
+   LENDER DASHBOARD THEME - Cyan Ocean
+   Primary: #0891B2 | Accent: #10B981 | Background: #082F49
+   ============================================================================ */
+
+.lender-dashboard {
+    -fx-background-color: #082F49;
+}
+
+.lender-header {
+    -fx-background-color: linear-gradient(to right, #06397E, #0891B2, #0E7490);
+    -fx-text-fill: white;
+}
+
+.lender-sidebar {
+    -fx-background-color: #0C4A6E;
+    -fx-border-width: 0 3 0 0;
+    -fx-border-color: #0891B2;
+}
+
+.lender-content {
+    -fx-background-color: #082F49;
+}
+
+.lender-card {
+    -fx-background-color: #0C4A6E;
+    -fx-background-radius: 18;
+    -fx-border-color: rgba(8, 145, 178, 0.3);
+    -fx-border-radius: 18;
+    -fx-border-width: 2;
+    -fx-effect: dropshadow(gaussian, rgba(8, 145, 178, 0.25), 16, 0, 0, 8);
+    -fx-padding: 24;
+}
+
+.lender-button-active {
+    -fx-background-color: linear-gradient(to right, #0891B2, #06B6D4);
+    -fx-text-fill: white;
+    -fx-border-width: 0 0 0 4;
+    -fx-border-color: #10B981;
+    -fx-padding: 16 24;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8;
+}
+
+.lender-button-inactive {
+    -fx-background-color: transparent;
+    -fx-text-fill: #7DD3FC;
+    -fx-padding: 16 24;
+    -fx-font-size: 13px;
+}
+
+.lender-button-inactive:hover {
+    -fx-background-color: rgba(8, 145, 178, 0.15);
+    -fx-text-fill: #CFFAFE;
+}
+
+.lender-accent-button {
+    -fx-background-color: linear-gradient(to right, #10B981, #059669);
+    -fx-text-fill: white;
+    -fx-background-radius: 10;
+    -fx-padding: 12 28;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, rgba(16, 185, 129, 0.4), 12, 0, 0, 4);
+}
+
+.lender-accent-button:hover {
+    -fx-background-color: linear-gradient(to right, #059669, #047857);
+    -fx-effect: dropshadow(gaussian, rgba(16, 185, 129, 0.6), 16, 0, 0, 6);
+}
+
+.lender-text-field {
+    -fx-background-color: #082F49;
+    -fx-border-color: rgba(8, 145, 178, 0.5);
+    -fx-border-radius: 10;
+    -fx-border-width: 2;
+    -fx-text-fill: #E0F2FE;
+    -fx-padding: 12 16;
+    -fx-font-size: 13px;
+}
+
+.lender-text-field:focused {
+    -fx-border-color: #10B981;
+    -fx-effect: dropshadow(gaussian, rgba(16, 185, 129, 0.4), 12, 0, 0, 4);
+}
+
+.lender-label-primary {
+    -fx-text-fill: #E0F2FE;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+.lender-label-secondary {
+    -fx-text-fill: #7DD3FC;
+    -fx-font-size: 12px;
+}
+
+.lender-label-accent {
+    -fx-text-fill: #10B981;
+    -fx-font-weight: bold;
+}
+
+/* ============================================================================
+   ADMIN DASHBOARD THEME - Indigo Authority
+   Primary: #4F46E5 | Accent: #F59E0B | Background: #0F172A
+   ============================================================================ */
+
+.admin-dashboard {
+    -fx-background-color: #0F172A;
+}
+
+.admin-header {
+    -fx-background-color: linear-gradient(to right, #312E81, #4F46E5, #6366F1);
+    -fx-text-fill: white;
+}
+
+.admin-sidebar {
+    -fx-background-color: #1E1B4B;
+    -fx-border-width: 0 3 0 0;
+    -fx-border-color: #4F46E5;
+}
+
+.admin-content {
+    -fx-background-color: #0F172A;
+}
+
+.admin-card {
+    -fx-background-color: #1E1B4B;
+    -fx-background-radius: 18;
+    -fx-border-color: rgba(79, 70, 229, 0.3);
+    -fx-border-radius: 18;
+    -fx-border-width: 2;
+    -fx-effect: dropshadow(gaussian, rgba(79, 70, 229, 0.25), 16, 0, 0, 8);
+    -fx-padding: 24;
+}
+
+.admin-button-active {
+    -fx-background-color: linear-gradient(to right, #4F46E5, #6366F1);
+    -fx-text-fill: white;
+    -fx-border-width: 0 0 0 4;
+    -fx-border-color: #F59E0B;
+    -fx-padding: 16 24;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8;
+}
+
+.admin-button-inactive {
+    -fx-background-color: transparent;
+    -fx-text-fill: #A5B4FC;
+    -fx-padding: 16 24;
+    -fx-font-size: 13px;
+}
+
+.admin-button-inactive:hover {
+    -fx-background-color: rgba(79, 70, 229, 0.15);
+    -fx-text-fill: #C7D2FE;
+}
+
+.admin-accent-button {
+    -fx-background-color: linear-gradient(to right, #F59E0B, #D97706);
+    -fx-text-fill: white;
+    -fx-background-radius: 10;
+    -fx-padding: 12 28;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, rgba(245, 158, 11, 0.4), 12, 0, 0, 4);
+}
+
+.admin-accent-button:hover {
+    -fx-background-color: linear-gradient(to right, #D97706, #B45309);
+    -fx-effect: dropshadow(gaussian, rgba(245, 158, 11, 0.6), 16, 0, 0, 6);
+}
+
+.admin-text-field {
+    -fx-background-color: #0F172A;
+    -fx-border-color: rgba(79, 70, 229, 0.5);
+    -fx-border-radius: 10;
+    -fx-border-width: 2;
+    -fx-text-fill: #E0E7FF;
+    -fx-padding: 12 16;
+    -fx-font-size: 13px;
+}
+
+.admin-text-field:focused {
+    -fx-border-color: #F59E0B;
+    -fx-effect: dropshadow(gaussian, rgba(245, 158, 11, 0.4), 12, 0, 0, 4);
+}
+
+.admin-label-primary {
+    -fx-text-fill: #E0E7FF;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+.admin-label-secondary {
+    -fx-text-fill: #A5B4FC;
+    -fx-font-size: 12px;
+}
+
+.admin-label-accent {
+    -fx-text-fill: #F59E0B;
+    -fx-font-weight: bold;
+}
+
+/* ============================================================================
+   SHARED UTILITY STYLES
+   ============================================================================ */
+
+.scroll-pane {
+    -fx-padding: 0;
+    -fx-background-color: transparent;
+}
+
+.scroll-pane .viewport {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar:vertical .increment-button,
+.scroll-bar:vertical .decrement-button,
+.scroll-bar:horizontal .increment-button,
+.scroll-bar:horizontal .decrement-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+.scroll-bar:vertical .thumb,
+.scroll-bar:horizontal .thumb {
+    -fx-background-radius: 6;
+    -fx-background-color: rgba(148, 163, 184, 0.4);
+}
+
+.scroll-bar:vertical .thumb:hover,
+.scroll-bar:horizontal .thumb:hover {
+    -fx-background-color: rgba(148, 163, 184, 0.7);
+}
+
+/* Notification badge */
+.notification-badge {
+    -fx-background-radius: 10;
+    -fx-padding: 2 6;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+}
+
+/* Status labels */
+.status-success {
+    -fx-text-fill: #10B981;
+}
+
+.status-error {
+    -fx-text-fill: #EF4444;
+}
+
+.status-warning {
+    -fx-text-fill: #F59E0B;
+}
+
+.status-info {
+    -fx-text-fill: #0891B2;
+}
+
+/* Tooltip styling */
+.tooltip {
+    -fx-background-color: rgba(30, 41, 59, 0.95);
+    -fx-text-fill: #E2E8F0;
+    -fx-border-color: rgba(147, 51, 234, 0.3);
+    -fx-border-radius: 8;
+    -fx-padding: 8 12;
+    -fx-border-width: 1;
+    -fx-font-size: 12px;
+}
+
+/* Context menu styling */
+.context-menu {
+    -fx-background-color: #1E293B;
+    -fx-text-fill: #E2E8F0;
+}
+
+.context-menu .menu-item:focused {
+    -fx-background-color: rgba(147, 51, 234, 0.2);
+}
+
+/* Choice box styling */
+.choice-box {
+    -fx-background-color: #1E293B;
+    -fx-border-color: rgba(147, 51, 234, 0.3);
+    -fx-border-radius: 8;
+    -fx-text-fill: #E2E8F0;
+    -fx-padding: 10 12;
+}
+
+.choice-box:focused {
+    -fx-border-color: rgba(147, 51, 234, 0.8);
+}
+
+/* Table view styling for admin reports */
+.table-view {
+    -fx-background-color: #0F172A;
+    -fx-border-color: rgba(79, 70, 229, 0.2);
+    -fx-text-fill: #E2E8F0;
+}
+
+.table-view .column-header {
+    -fx-background-color: #1E1B4B;
+    -fx-text-fill: #E0E7FF;
+    -fx-font-weight: bold;
+    -fx-border-color: rgba(79, 70, 229, 0.3);
+}
+
+.table-view .table-row-cell {
+    -fx-background-color: #0F172A;
+    -fx-text-fill: #E2E8F0;
+    -fx-padding: 10px;
+}
+
+.table-view .table-row-cell:hover {
+    -fx-background-color: rgba(79, 70, 229, 0.15);
+}
+
+/* VBox & HBox default styles */
+.vbox, .hbox {
+    -fx-spacing: 0;
+}
+
+/* Separator styling */
+.separator {
+    -fx-border-color: rgba(148, 163, 184, 0.2);
+}

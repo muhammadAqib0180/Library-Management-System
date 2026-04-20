@@ -21,22 +21,9 @@ public class DatabaseHandler {
                     active   BOOLEAN DEFAULT TRUE
                 )
             """);
-            
-            // Add active column if it doesn't exist (for existing tables)
-            try {
-                stmt.execute("""
-                    ALTER TABLE users
-                    ADD COLUMN active BOOLEAN DEFAULT TRUE
-                """);
-                System.out.println("Added 'active' column to users table.");
-            } catch (SQLException e) {
-                if (e.getMessage().contains("already exists")) {
-                    System.out.println("Column 'active' already exists in users table.");
-                } else {
-                    System.err.println("Error adding 'active' column: " + e.getMessage());
-                }
-            }
-            
+            safeExec(stmt, "ALTER TABLE users ADD COLUMN active BOOLEAN DEFAULT TRUE", "users.active");
+
+            // ----------- BOOKS -----------
             stmt.execute("""
                 CREATE TABLE IF NOT EXISTS books (
                     isbn            VARCHAR(255) PRIMARY KEY UNIQUE NOT NULL,
@@ -51,109 +38,15 @@ public class DatabaseHandler {
                     listed          BOOLEAN DEFAULT TRUE
                 )
             """);
-            
-            // Add new columns if they don't exist (for existing tables)
-            try {
-                stmt.execute("""
-                    ALTER TABLE books
-                    ADD COLUMN borrow_date DATE
-                """);
-                System.out.println("Added 'borrow_date' column to books table.");
-            } catch (SQLException e) {
-                if (!e.getMessage().contains("already exists") && !e.getMessage().contains("duplicate")) {
-                    System.err.println("Note: 'borrow_date' column status: " + e.getMessage());
-                }
-            }
-            
-            try {
-                stmt.execute("""
-                    ALTER TABLE books
-                    ADD COLUMN due_date DATE
-                """);
-                System.out.println("Added 'due_date' column to books table.");
-            } catch (SQLException e) {
-                if (!e.getMessage().contains("already exists") && !e.getMessage().contains("duplicate")) {
-                    System.err.println("Note: 'due_date' column status: " + e.getMessage());
-                }
-            }
-            
-            try {
-                stmt.execute("""
-                    ALTER TABLE books
-                    ADD COLUMN listed BOOLEAN DEFAULT TRUE
-                """);
-                System.out.println("Added 'listed' column to books table.");
-            } catch (SQLException e) {
-                if (!e.getMessage().contains("already exists") && !e.getMessage().contains("duplicate")) {
-                    System.err.println("Note: 'listed' column status: " + e.getMessage());
-                }
-            }
-            
-            // Convert borrowed_by from VARCHAR to INTEGER if needed
-            try {
-                stmt.execute("""
-                    ALTER TABLE books
-                    DROP CONSTRAINT IF EXISTS books_borrowed_by_fkey
-                """);
-                System.out.println("Dropped old foreign key constraint on borrowed_by.");
-            } catch (SQLException e) {
-                System.out.println("Note: Could not drop constraint (may not exist): " + e.getMessage());
-            }
-            
-            try {
-                // Try to convert the column type
-                stmt.execute("""
-                    ALTER TABLE books
-                    ALTER COLUMN borrowed_by TYPE INTEGER USING borrowed_by::INTEGER
-                """);
-                System.out.println("Converted borrowed_by column to INTEGER.");
-            } catch (SQLException e) {
-                if (e.getMessage().contains("already exists") || e.getMessage().contains("cannot cast")) {
-                    System.out.println("Note: borrowed_by column already INTEGER or contains non-integer values.");
-                    // Try to just recreate with proper type
-                    try {
-                        stmt.execute("""
-                            DROP TABLE IF EXISTS books_temp;
-                            CREATE TABLE books_temp AS SELECT * FROM books;
-                            DROP TABLE books;
-                            CREATE TABLE books (
-                                isbn VARCHAR(255) PRIMARY KEY UNIQUE NOT NULL,
-                                title VARCHAR(255) NOT NULL,
-                                author VARCHAR(255),
-                                genre VARCHAR(100),
-                                owner_id INTEGER REFERENCES users(id),
-                                available BOOLEAN DEFAULT TRUE,
-                                borrowed_by INTEGER REFERENCES users(id),
-                                borrow_date DATE,
-                                due_date DATE,
-                                listed BOOLEAN DEFAULT TRUE
-                            );
-                            INSERT INTO books SELECT * FROM books_temp;
-                            DROP TABLE books_temp;
-                        """);
-                        System.out.println("Recreated books table with correct schema.");
-                    } catch (SQLException e2) {
-                        System.out.println("Note: Could not migrate borrowed_by: " + e2.getMessage());
-                    }
-                } else {
-                    System.err.println("Note: borrowed_by conversion: " + e.getMessage());
-                }
-            }
-            
-            // Add foreign key constraint for borrowed_by
-            try {
-                stmt.execute("""
-                    ALTER TABLE books
-                    ADD CONSTRAINT books_borrowed_by_fkey FOREIGN KEY (borrowed_by) REFERENCES users(id)
-                """);
-                System.out.println("Added foreign key constraint on borrowed_by.");
-            } catch (SQLException e) {
-                if (e.getMessage().contains("already exists")) {
-                    System.out.println("Foreign key constraint already exists.");
-                }
-            }
-            
-            // Create borrow_requests table for request-based borrowing workflow
+            safeExec(stmt, "ALTER TABLE books ADD COLUMN borrow_date DATE", "books.borrow_date");
+            safeExec(stmt, "ALTER TABLE books ADD COLUMN due_date DATE", "books.due_date");
+            safeExec(stmt, "ALTER TABLE books ADD COLUMN listed BOOLEAN DEFAULT TRUE", "books.listed");
+            // Sprint 3 — US-3 & US-7 new columns
+            safeExec(stmt, "ALTER TABLE books ADD COLUMN condition VARCHAR(20) DEFAULT 'Good'", "books.condition");
+            safeExec(stmt, "ALTER TABLE books ADD COLUMN cover_url TEXT", "books.cover_url");
+            safeExec(stmt, "ALTER TABLE books ADD COLUMN borrow_count INTEGER DEFAULT 0", "books.borrow_count");
+
+            // ----------- BORROW_REQUESTS -----------
             stmt.execute("""
                 CREATE TABLE IF NOT EXISTS borrow_requests (
                     request_id       SERIAL PRIMARY KEY,
@@ -167,9 +60,39 @@ public class DatabaseHandler {
                     rejection_reason TEXT
                 )
             """);
-            System.out.println("Created borrow_requests table.");
-            
-            // Create notifications table for all users (lender, borrower, admin)
+            // Sprint 3 — US-1 handover columns
+            safeExec(stmt, "ALTER TABLE borrow_requests ADD COLUMN handover_method VARCHAR(20)", "br.handover_method");
+            safeExec(stmt, "ALTER TABLE borrow_requests ADD COLUMN otp VARCHAR(10)", "br.otp");
+            safeExec(stmt, "ALTER TABLE borrow_requests ADD COLUMN return_otp VARCHAR(10)", "br.return_otp");
+            safeExec(stmt, "ALTER TABLE borrow_requests ADD COLUMN meetup_location TEXT", "br.meetup_location");
+            safeExec(stmt, "ALTER TABLE borrow_requests ADD COLUMN meetup_time TIMESTAMP", "br.meetup_time");
+            safeExec(stmt, "ALTER TABLE borrow_requests ADD COLUMN courier_service VARCHAR(100)", "br.courier_service");
+            safeExec(stmt, "ALTER TABLE borrow_requests ADD COLUMN courier_person VARCHAR(255)", "br.courier_person");
+            safeExec(stmt, "ALTER TABLE borrow_requests ADD COLUMN vehicle_plate VARCHAR(50)", "br.vehicle_plate");
+            safeExec(stmt, "ALTER TABLE borrow_requests ADD COLUMN vehicle_type VARCHAR(20)", "br.vehicle_type");
+            safeExec(stmt, "ALTER TABLE borrow_requests ADD COLUMN proof_image_url TEXT", "br.proof_image_url");
+            safeExec(stmt, "ALTER TABLE borrow_requests ADD COLUMN return_courier_service VARCHAR(100)", "br.return_courier_service");
+            safeExec(stmt, "ALTER TABLE borrow_requests ADD COLUMN return_courier_person VARCHAR(255)", "br.return_courier_person");
+            safeExec(stmt, "ALTER TABLE borrow_requests ADD COLUMN return_vehicle_plate VARCHAR(50)", "br.return_vehicle_plate");
+            safeExec(stmt, "ALTER TABLE borrow_requests ADD COLUMN return_vehicle_type VARCHAR(20)", "br.return_vehicle_type");
+            safeExec(stmt, "ALTER TABLE borrow_requests ADD COLUMN return_proof_image_url TEXT", "br.return_proof_image_url");
+            safeExec(stmt, "ALTER TABLE borrow_requests ADD COLUMN received_at TIMESTAMP", "br.received_at");
+            safeExec(stmt, "ALTER TABLE borrow_requests ADD COLUMN returned_at TIMESTAMP", "br.returned_at");
+
+            // State history (timeline) — one row per state transition
+            stmt.execute("""
+                CREATE TABLE IF NOT EXISTS state_history (
+                    id          SERIAL PRIMARY KEY,
+                    request_id  INTEGER NOT NULL REFERENCES borrow_requests(request_id) ON DELETE CASCADE,
+                    from_state  VARCHAR(50),
+                    to_state    VARCHAR(50) NOT NULL,
+                    actor_id    INTEGER REFERENCES users(id),
+                    note        TEXT,
+                    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            """);
+
+            // ----------- NOTIFICATIONS -----------
             stmt.execute("""
                 CREATE TABLE IF NOT EXISTS notifications (
                     notification_id  SERIAL PRIMARY KEY,
@@ -184,11 +107,60 @@ public class DatabaseHandler {
                     action_url       VARCHAR(255)
                 )
             """);
-            System.out.println("Created notifications table.");
-            
-            System.out.println("Database initialized successfully.");
+            safeExec(stmt, "ALTER TABLE notifications ADD COLUMN related_request_id INTEGER", "notif.related_request_id");
+
+            // ----------- AUDIT LOG (US-4) -----------
+            stmt.execute("""
+                CREATE TABLE IF NOT EXISTS audit_log (
+                    id              SERIAL PRIMARY KEY,
+                    timestamp       TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    actor_user_id   INTEGER REFERENCES users(id),
+                    actor_username  VARCHAR(255),
+                    action_type     VARCHAR(100) NOT NULL,
+                    target_type     VARCHAR(100),
+                    target_id       VARCHAR(255),
+                    details         TEXT
+                )
+            """);
+            safeExec(stmt, "CREATE INDEX IF NOT EXISTS idx_audit_timestamp ON audit_log(timestamp DESC)", "idx_audit_ts");
+            safeExec(stmt, "CREATE INDEX IF NOT EXISTS idx_audit_actor ON audit_log(actor_user_id)", "idx_audit_actor");
+            safeExec(stmt, "CREATE INDEX IF NOT EXISTS idx_audit_action ON audit_log(action_type)", "idx_audit_action");
+
+            // ----------- RATINGS (US-6) -----------
+            stmt.execute("""
+                CREATE TABLE IF NOT EXISTS ratings (
+                    id              SERIAL PRIMARY KEY,
+                    request_id      INTEGER REFERENCES borrow_requests(request_id) ON DELETE CASCADE,
+                    rater_id        INTEGER NOT NULL REFERENCES users(id),
+                    target_type     VARCHAR(20) NOT NULL, -- 'USER' or 'BOOK'
+                    target_user_id  INTEGER REFERENCES users(id),
+                    target_book_isbn VARCHAR(255) REFERENCES books(isbn),
+                    stars           INTEGER NOT NULL CHECK (stars BETWEEN 1 AND 5),
+                    comment         TEXT,
+                    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    UNIQUE(request_id, rater_id, target_type, target_user_id, target_book_isbn)
+                )
+            """);
+            safeExec(stmt, "CREATE INDEX IF NOT EXISTS idx_ratings_target_user ON ratings(target_user_id)", "idx_rate_user");
+            safeExec(stmt, "CREATE INDEX IF NOT EXISTS idx_ratings_target_book ON ratings(target_book_isbn)", "idx_rate_book");
+
+            System.out.println("Database initialized successfully (Sprint 3 schema).");
         } catch (SQLException e) {
             System.err.println("Failed to initialize database: " + e.getMessage());
+        }
+    }
+
+    /** Helper — run DDL and ignore "already exists" / "duplicate column" errors. */
+    private static void safeExec(Statement stmt, String sql, String label) {
+        try {
+            stmt.execute(sql);
+        } catch (SQLException e) {
+            String msg = e.getMessage() == null ? "" : e.getMessage().toLowerCase();
+            if (msg.contains("already exists") || msg.contains("duplicate")) {
+                // normal — column/index already present
+            } else {
+                System.err.println("Note [" + label + "]: " + e.getMessage());
+            }
         }
     }
 }

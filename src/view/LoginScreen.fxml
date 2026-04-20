@@ -3,128 +3,85 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.effect.GaussianBlur?>
 <?import javafx.scene.shape.Circle?>
 
 <StackPane prefHeight="560.0" prefWidth="960.0"
-           style="-fx-background-color: linear-gradient(to bottom right, #0f0c29, #302b63, #24243e);"
+           style="-fx-background-color: #0F172A; -fx-font-family: '-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif';"
            xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
            fx:controller="controller.LoginController">
 
-    <!-- Decorative blurred circle top-left -->
-    <StackPane maxWidth="260" maxHeight="260"
-               style="-fx-background-color: rgba(52,152,219,0.18); -fx-background-radius: 130;"
-               StackPane.alignment="TOP_LEFT" translateX="-60" translateY="-60"/>
+    <Circle radius="250" fill="#1E3A8A" StackPane.alignment="TOP_LEFT" translateX="-50" translateY="-50" style="-fx-opacity: 0.6;">
+        <effect><GaussianBlur radius="60"/></effect>
+    </Circle>
 
-    <!-- Decorative blurred circle bottom-right -->
-    <StackPane maxWidth="200" maxHeight="200"
-               style="-fx-background-color: rgba(155,89,182,0.18); -fx-background-radius: 100;"
-               StackPane.alignment="BOTTOM_RIGHT" translateX="60" translateY="60"/>
+    <Circle radius="300" fill="#5B21B6" StackPane.alignment="BOTTOM_RIGHT" translateX="100" translateY="100" style="-fx-opacity: 0.5;">
+        <effect><GaussianBlur radius="60"/></effect>
+    </Circle>
 
-    <!-- Card -->
-    <VBox alignment="CENTER" maxWidth="480.0" spacing="14.0"
-          style="-fx-background-color: rgba(255,255,255,0.18);
-                 -fx-background-radius: 20;
-                 -fx-border-color: rgba(255,255,255,0.30);
-                 -fx-border-radius: 20;
-                 -fx-border-width: 1;">
+    <Circle radius="200" fill="#0F766E" StackPane.alignment="CENTER" translateX="150" translateY="-150" style="-fx-opacity: 0.4;">
+        <effect><GaussianBlur radius="60"/></effect>
+    </Circle>
+
+    <VBox alignment="CENTER" maxWidth="420.0" spacing="24.0"
+          style="-fx-background-color: linear-gradient(to bottom right, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+                 -fx-background-radius: 24; -fx-border-color: rgba(255,255,255,0.15); -fx-border-width: 1; -fx-border-radius: 24;">
         <padding>
-            <Insets top="40" bottom="40" left="55" right="55"/>
+            <Insets top="48" bottom="48" left="48" right="48"/>
         </padding>
-        <effect><DropShadow color="#00000088" radius="40" spread="0.1"/></effect>
+        <effect>
+            <DropShadow color="#00000066" radius="40" spread="0.0" offsetY="15"/>
+        </effect>
 
-        <!-- Logo / Title -->
-        <Label text="📚" style="-fx-font-size: 42px;"/>
-        <Label text="LIBRARY NEXUS"
-               style="-fx-font-size: 28px; -fx-font-weight: bold;
-                      -fx-text-fill: white; -fx-letter-spacing: 3;"/>
-        <Label text="Your gateway to knowledge"
-               style="-fx-font-size: 12px; -fx-text-fill: rgba(255,255,255,0.45);"/>
+        <VBox alignment="CENTER" spacing="8">
+            <Label text="Library Nexus"
+                   style="-fx-text-fill: #F8FAFC; -fx-font-size: 28px; -fx-font-weight: 900; -fx-letter-spacing: -0.5;"/>
+            <Label text="Authenticate to access your workspace."
+                   style="-fx-text-fill: #94A3B8; -fx-font-size: 13px;"/>
+        </VBox>
 
-        <!-- Tab switcher -->
-        <HBox alignment="CENTER" spacing="0" style="-fx-padding: 10 0 4 0;">
-            <ToggleButton fx:id="loginTab" selected="true" text="LOGIN"
+        <HBox alignment="CENTER" spacing="20" style="-fx-padding: 0 0 10 0;">
+            <ToggleButton fx:id="loginTab" selected="true" text="Sign In"
                           onAction="#showLoginView"
-                          style="-fx-background-radius: 25 0 0 25;
-                                 -fx-padding: 9 40;
-                                 -fx-cursor: hand;
-                                 -fx-font-weight: bold;
-                                 -fx-font-size: 12px;"/>
-            <ToggleButton fx:id="signupTab" text="SIGN UP"
+                          style="-fx-background-color: transparent; -fx-cursor: hand;"/>
+            <ToggleButton fx:id="signupTab" text="Create Account"
                           onAction="#showSignupView"
-                          style="-fx-background-radius: 0 25 25 0;
-                                 -fx-padding: 9 40;
-                                 -fx-cursor: hand;
-                                 -fx-font-weight: bold;
-                                 -fx-font-size: 12px;"/>
+                          style="-fx-background-color: transparent; -fx-cursor: hand;"/>
         </HBox>
 
-        <!-- Fields -->
-        <TextField fx:id="usernameField" promptText="👤  Username"
-                   maxWidth="370.0"
-                   style="-fx-background-radius: 10;
-                          -fx-background-color: rgba(255,255,255,0.1);
-                          -fx-text-fill: white;
-                          -fx-prompt-text-fill: rgba(255,255,255,0.4);
-                          -fx-padding: 13 16;
-                          -fx-border-color: rgba(255,255,255,0.15);
-                          -fx-border-radius: 10;
-                          -fx-font-size: 13px;"/>
+        <VBox spacing="16">
+            <TextField fx:id="usernameField" promptText="Username"
+                       style="-fx-background-color: rgba(0,0,0,0.25); -fx-text-fill: #F8FAFC; -fx-prompt-text-fill: #64748B; -fx-border-color: rgba(255,255,255,0.1); -fx-border-width: 1; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 12 16; -fx-font-size: 14px;"/>
 
-        <StackPane maxWidth="370.0" alignment="CENTER_RIGHT">
-            <TextField fx:id="passwordVisibleField" promptText="🔒  Password"
-                       visible="false" managed="false"
-                       style="-fx-background-radius: 10;
-                              -fx-background-color: rgba(255,255,255,0.1);
-                              -fx-text-fill: white;
-                              -fx-prompt-text-fill: rgba(255,255,255,0.4);
-                              -fx-padding: 13 40 13 16;
-                              -fx-border-color: rgba(255,255,255,0.15);
-                              -fx-border-radius: 10;
-                              -fx-font-size: 13px;"/>
-            <PasswordField fx:id="passwordField" promptText="🔒  Password"
-                           style="-fx-background-radius: 10;
-                                  -fx-background-color: rgba(255,255,255,0.1);
-                                  -fx-text-fill: white;
-                                  -fx-prompt-text-fill: rgba(255,255,255,0.4);
-                                  -fx-padding: 13 40 13 16;
-                                  -fx-border-color: rgba(255,255,255,0.15);
-                                  -fx-border-radius: 10;
-                                  -fx-font-size: 13px;"/>
-            <ToggleButton fx:id="togglePasswordBtn" text="👁" onAction="#togglePasswordVisibility"
-                          style="-fx-background-color: transparent; -fx-text-fill: rgba(255,255,255,0.6);
-                                 -fx-cursor: hand; -fx-padding: 0 12 0 0;"
-                          StackPane.alignment="CENTER_RIGHT"/>
-        </StackPane>
+            <StackPane alignment="CENTER_RIGHT">
+                <TextField fx:id="passwordVisibleField" promptText="Password"
+                           visible="false" managed="false"
+                           style="-fx-background-color: rgba(0,0,0,0.25); -fx-text-fill: #F8FAFC; -fx-prompt-text-fill: #64748B; -fx-border-color: rgba(255,255,255,0.1); -fx-border-width: 1; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 12 16; -fx-font-size: 14px;"/>
 
-        <ComboBox fx:id="roleComboBox" visible="false" managed="false"
-                  prefWidth="370.0" promptText="Select Role"
-                  style="-fx-background-radius: 10;
-                         -fx-prompt-text-fill: rgba(255,255,255,0.4);
-                         -fx-background-color: rgba(255,255,255,0.1);
-                         -fx-font-size: 13px;"/>
+                <PasswordField fx:id="passwordField" promptText="Password"
+                               style="-fx-background-color: rgba(0,0,0,0.25); -fx-text-fill: #F8FAFC; -fx-prompt-text-fill: #64748B; -fx-border-color: rgba(255,255,255,0.1); -fx-border-width: 1; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 12 16; -fx-font-size: 14px;"/>
 
-        <!-- Submit -->
-        <Button fx:id="submitButton" text="SIGN IN" onAction="#handleSubmit"
-                maxWidth="370.0"
-                style="-fx-background-color: linear-gradient(to right, #3498db, #8e44ad);
-                       -fx-text-fill: white;
-                       -fx-font-weight: bold;
-                       -fx-font-size: 14px;
-                       -fx-background-radius: 10;
-                       -fx-padding: 13 0;
-                       -fx-cursor: hand;"/>
+                <ToggleButton fx:id="togglePasswordBtn" text="Show" onAction="#togglePasswordVisibility"
+                              style="-fx-background-color: transparent; -fx-text-fill: #94A3B8; -fx-font-size: 11px; -fx-font-weight: bold; -fx-cursor: hand; -fx-padding: 0 16 0 0;" />
+            </StackPane>
 
-        <Label fx:id="statusLabel"
-               minHeight="20"
-               style="-fx-font-size: 12px; -fx-font-weight: bold;"/>
+            <ComboBox fx:id="roleComboBox" visible="false" managed="false"
+                      maxWidth="Infinity" promptText="Select Role"
+                      style="-fx-background-color: rgba(0,0,0,0.25); -fx-border-color: rgba(255,255,255,0.1); -fx-border-width: 1; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 4; -fx-font-size: 14px;"/>
+        </VBox>
+
+        <Button fx:id="submitButton" text="Sign In" onAction="#handleSubmit"
+                maxWidth="Infinity"
+                style="-fx-background-color: #F8FAFC; -fx-text-fill: #0F172A; -fx-font-weight: 800; -fx-font-size: 14px; -fx-padding: 14; -fx-background-radius: 8; -fx-cursor: hand;"/>
+
+        <Label fx:id="statusLabel" minHeight="20" style="-fx-font-size: 12px;"/>
     </VBox>
 
-    <!-- System Status Indicator -->
-    <HBox alignment="CENTER_LEFT" spacing="8"
+    <HBox alignment="CENTER_LEFT" spacing="6"
           StackPane.alignment="BOTTOM_LEFT" maxWidth="150" maxHeight="30"
-          translateX="20" translateY="-20">
-        <Circle fx:id="systemStatusCircle" radius="6" fill="GRAY"/>
+          translateX="24" translateY="-24">
+        <Circle fx:id="systemStatusCircle" radius="4" fill="#94A3B8"/>
         <Label text="System Status"
-               style="-fx-text-fill: rgba(255,255,255,0.7); -fx-font-size: 11px; -fx-font-weight: bold;"/>
+               style="-fx-text-fill: #94A3B8; -fx-font-size: 11px; -fx-font-weight: bold;"/>
     </HBox>
 </StackPane>

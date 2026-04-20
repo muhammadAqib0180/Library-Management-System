@@ -2,74 +2,75 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.effect.DropShadow?>
 
 <BorderPane xmlns:fx="http://javafx.com/fxml"
             fx:controller="controller.BorrowerDashboardController"
             fx:id="dashboardRoot"
-            prefWidth="980" prefHeight="640"
-            style="-fx-background-color: #f5f0fa;">
+            prefWidth="1100" prefHeight="720"
+            stylesheets="@../css/modern-table.css"
+            style="-fx-background-color: #F3F4F6; -fx-font-family: '-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif';">
 
     <top>
-        <BorderPane>
+        <BorderPane style="-fx-background-color: #5B21B6; -fx-border-color: #4C1D95; -fx-border-width: 0 0 1 0; -fx-padding: 16 28;">
             <center>
-                <HBox alignment="CENTER_LEFT" spacing="14"
-                      style="-fx-background-color: linear-gradient(to right, #6c3483, #8e44ad);
-                             -fx-padding: 14 24;
-                             -fx-effect: dropshadow(gaussian, #00000055, 8, 0, 0, 3);">
-                    <Label text="📖" style="-fx-font-size: 22px;"/>
-                    <VBox spacing="0">
+                <HBox alignment="CENTER_LEFT" spacing="16">
+                    <Label text="LN"
+                           style="-fx-font-size: 18px; -fx-font-weight: 900; -fx-text-fill: #5B21B6; -fx-background-color: #EDE9FE; -fx-padding: 4 8; -fx-background-radius: 6;"/>
+                    <VBox spacing="2">
                         <Label text="Library Nexus"
-                               style="-fx-text-fill: white; -fx-font-size: 17px; -fx-font-weight: bold;"/>
-                        <Label text="Borrower Portal"
-                               style="-fx-text-fill: rgba(255,255,255,0.5); -fx-font-size: 10px;"/>
+                               style="-fx-text-fill: #FFFFFF; -fx-font-size: 16px; -fx-font-weight: 800; -fx-letter-spacing: -0.5;"/>
+                        <Label text="Member Explorer"
+                               style="-fx-text-fill: #A78BFA; -fx-font-size: 11px; -fx-font-weight: 600; -fx-text-transform: uppercase;"/>
                     </VBox>
                     <Region HBox.hgrow="ALWAYS"/>
                     <Label fx:id="welcomeLabel"
-                           style="-fx-text-fill: rgba(255,255,255,0.92); -fx-font-size: 12px;"/>
-                    <StackPane prefWidth="30" prefHeight="30" alignment="TOP_RIGHT" style="-fx-padding: 0;">
+                           style="-fx-text-fill: #EDE9FE; -fx-font-size: 13px; -fx-font-weight: 600; -fx-padding: 0 16 0 0;"/>
+
+                    <StackPane prefWidth="32" prefHeight="32" alignment="TOP_RIGHT" style="-fx-padding: 0;">
                         <Label fx:id="notificationBell" text="🔔"
-                               style="-fx-font-size: 20px; -fx-text-fill: white; -fx-cursor: hand;"
+                               style="-fx-font-size: 18px; -fx-text-fill: #EDE9FE; -fx-cursor: hand;"
                                onMouseClicked="#toggleNotificationPanel"
-                               StackPane.alignment="CENTER_LEFT"/>
-                        <Label fx:id="notificationBadge" text="3"
-                               style="-fx-text-fill: white; -fx-background-color: #e74c3c;
+                               StackPane.alignment="CENTER"/>
+                        <Label fx:id="notificationBadge" text="0"
+                               style="-fx-text-fill: white; -fx-background-color: #EF4444;
                                       -fx-font-size: 9px; -fx-font-weight: bold;
-                                      -fx-padding: 0 3; -fx-background-radius: 8;
+                                      -fx-padding: 0 4; -fx-background-radius: 8;
                                       -fx-alignment: CENTER; -fx-min-width: 16; -fx-min-height: 16;"
                                onMouseClicked="#toggleNotificationPanel"
-                               StackPane.alignment="TOP_RIGHT"/>
+                               StackPane.alignment="TOP_RIGHT" translateX="4" translateY="-4"/>
                     </StackPane>
-                    <Button text="Become a Lender"
+
+                    <Button text="Switch to Lender"
                             onAction="#switchToLender"
-                            style="-fx-background-color: rgba(255,255,255,0.15);
-                                   -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 12px;
-                                   -fx-background-radius: 20; -fx-padding: 8 20; -fx-cursor: hand;
-                                   -fx-border-color: rgba(255,255,255,0.4); -fx-border-radius: 20;
-                                   -fx-border-width: 1;"/>
+                            style="-fx-background-color: rgba(255,255,255,0.1); -fx-text-fill: #FFFFFF; -fx-font-weight: 700; -fx-font-size: 12px;
+                                   -fx-background-radius: 6; -fx-padding: 8 16; -fx-cursor: hand;
+                                   -fx-border-color: rgba(255,255,255,0.2); -fx-border-radius: 6; -fx-border-width: 1; -fx-margin: 0 0 0 16;"/>
                 </HBox>
             </center>
+
             <right>
                 <VBox fx:id="notificationPanel" visible="false" managed="false"
-                      prefWidth="320" maxWidth="320" maxHeight="500" minHeight="100"
-                      style="-fx-background-color: white; -fx-border-color: #ddd;
-                             -fx-border-radius: 8; -fx-background-radius: 8;
-                             -fx-effect: dropshadow(gaussian, #00000033, 10, 0, 2, 4);
+                      prefWidth="320" maxWidth="320" maxHeight="400" minHeight="100"
+                      style="-fx-background-color: #FFFFFF; -fx-border-color: #E5E7EB;
+                             -fx-border-radius: 12; -fx-background-radius: 12;
                              -fx-padding: 0; -fx-spacing: 0; -fx-border-width: 1;
-                             -fx-margin: 8 8 0 0;">
+                             -fx-translate-y: 10;">
+                    <effect><DropShadow color="#00000033" radius="24" spread="0.0" offsetY="8"/></effect>
                     <HBox alignment="CENTER_LEFT" spacing="10"
-                          style="-fx-background-color: #6c3483; -fx-padding: 12 16;
-                                 -fx-text-fill: white; -fx-background-radius: 8 8 0 0;">
-                        <Label text="🔔" style="-fx-font-size: 14px;"/>
-                        <Label text="Notifications" style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px;"/>
+                          style="-fx-background-color: #F9FAFB; -fx-padding: 16;
+                                 -fx-border-color: transparent transparent #E5E7EB transparent; -fx-border-width: 1; -fx-background-radius: 12 12 0 0;">
+                        <Label text="Notifications" style="-fx-text-fill: #111827; -fx-font-weight: 800; -fx-font-size: 14px;"/>
                         <Region HBox.hgrow="ALWAYS"/>
                         <Button text="✕" onAction="#toggleNotificationPanel"
-                                style="-fx-font-size: 16px; -fx-text-fill: white;
-                                       -fx-background-color: transparent; -fx-cursor: hand;
-                                       -fx-padding: 0 4; -fx-minimize-button: true;"/>
+                                style="-fx-font-size: 14px; -fx-text-fill: #6B7280; -fx-font-weight: bold;
+                                       -fx-background-color: transparent; -fx-cursor: hand; -fx-padding: 0 4;"/>
                     </HBox>
-                    <ScrollPane fitToWidth="true" style="-fx-background-color: white; -fx-padding: 0;" VBox.vgrow="ALWAYS">
-                        <VBox fx:id="notificationListContainer" spacing="8" style="-fx-padding: 12; -fx-background-color: white;">
-                            <Label text="Loading notifications..." style="-fx-text-fill: #999; -fx-font-size: 12px;"/>
+                    <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-padding: 0;" VBox.vgrow="ALWAYS">
+                        <VBox fx:id="notificationListContainer" spacing="0" style="-fx-background-color: transparent;">
+                            <Label text="Loading notifications..." style="-fx-text-fill: #9CA3AF; -fx-font-size: 12px; -fx-padding: 16;"/>
                         </VBox>
                     </ScrollPane>
                 </VBox>
@@ -78,242 +79,160 @@
     </top>
 
     <left>
-        <VBox prefWidth="210"
-              style="-fx-background-color: #8e44ad; -fx-padding: 20 0;">
+        <VBox prefWidth="240"
+              style="-fx-background-color: linear-gradient(to bottom, #5B21B6, #4C1D95); -fx-padding: 24 16; -fx-spacing: 8;">
 
-            <Label text="MY ACTIVITIES"
-                   style="-fx-text-fill: rgba(255,255,255,0.5); -fx-font-size: 10px;
-                          -fx-font-weight: bold; -fx-padding: 0 20 12 20; -fx-letter-spacing: 1.5;"/>
+            <Label text="DISCOVER"
+                   style="-fx-text-fill: #C4B5FD; -fx-font-size: 11px; -fx-font-weight: 800; -fx-padding: 0 12 12 12; -fx-letter-spacing: 1.0;"/>
 
-            <Button fx:id="btnMyBooks" text="  📚  My Borrowed"
-                    onAction="#showMyBooks"
-                    maxWidth="Infinity"
-                    style="-fx-background-color: rgba(0,0,0,0.2);
-                           -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 13px;
-                           -fx-padding: 14 20; -fx-cursor: hand; -fx-background-radius: 0;
-                           -fx-border-color: transparent transparent transparent white;
-                           -fx-border-width: 0 0 0 3; -fx-alignment: CENTER_LEFT;"/>
+            <Button fx:id="btnMyBooks" text="My Borrowed"
+                    onAction="#showMyBooks" maxWidth="Infinity"/>
 
-            <Button fx:id="btnMyRequests" text="  📋  My Requests"
-                    onAction="#showMyRequests"
-                    maxWidth="Infinity"
-                    style="-fx-background-color: transparent;
-                           -fx-text-fill: rgba(255,255,255,0.7); -fx-font-size: 13px;
-                           -fx-padding: 14 20; -fx-cursor: hand; -fx-background-radius: 0;
-                           -fx-alignment: CENTER_LEFT;"/>
+            <Button fx:id="btnMyRequests" text="My Requests"
+                    onAction="#showMyRequests" maxWidth="Infinity"/>
 
-            <Button fx:id="btnBrowse" text="  🔎  Browse Books"
-                    onAction="#showBrowseCatalog"
-                    maxWidth="Infinity"
-                    style="-fx-background-color: transparent;
-                           -fx-text-fill: rgba(255,255,255,0.7); -fx-font-size: 13px;
-                           -fx-padding: 14 20; -fx-cursor: hand; -fx-background-radius: 0;
-                           -fx-alignment: CENTER_LEFT;"/>
+            <Button fx:id="btnBrowse" text="Browse Catalog"
+                    onAction="#showBrowseCatalog" maxWidth="Infinity"/>
 
             <Region VBox.vgrow="ALWAYS"/>
 
-            <Button text="🚪  Logout"
+            <Button text="Sign Out"
                     onAction="#handleLogout"
                     maxWidth="Infinity"
-                    style="-fx-background-color: rgba(0,0,0,0.2); -fx-text-fill: #ffcccc;
-                           -fx-font-size: 13px; -fx-font-weight: bold; -fx-padding: 12 20;
-                           -fx-cursor: hand; -fx-background-radius: 0; -fx-alignment: CENTER_LEFT;"/>
-
-            <VBox style="-fx-padding: 12 16; -fx-background-color: rgba(0,0,0,0.1);
-                         -fx-background-radius: 8; -fx-margin: 0 10;">
-                <Label text="💡 Tip"
-                       style="-fx-text-fill: rgba(255,255,255,0.5); -fx-font-size: 10px; -fx-font-weight: bold;"/>
-                <Label text="Browse the catalog and borrow books from lenders."
-                       wrapText="true"
-                       style="-fx-text-fill: rgba(255,255,255,0.35); -fx-font-size: 10px;"/>
-            </VBox>
+                    style="-fx-background-color: rgba(0,0,0,0.15); -fx-text-fill: #FDA4AF; -fx-font-size: 13px; -fx-font-weight: 700; -fx-padding: 12 16; -fx-cursor: hand; -fx-background-radius: 8; -fx-alignment: CENTER_LEFT; -fx-border-color: rgba(255,255,255,0.05); -fx-border-radius: 8;"/>
         </VBox>
     </left>
 
     <center>
-        <VBox style="-fx-padding: 0; -fx-background-color: #f5f0fa;">
-            
-            <!-- OVERDUE WARNING BANNER -->
-            <HBox fx:id="overdueWarningBanner" 
+        <VBox style="-fx-background-color: #F3F4F6;">
+            <HBox fx:id="overdueWarningBanner"
                   visible="false" managed="false"
                   alignment="CENTER_LEFT" spacing="16"
-                  style="-fx-background-color: linear-gradient(to right, #c0392b, #e74c3c);
-                         -fx-padding: 16 24;
-                         -fx-effect: dropshadow(gaussian, #c0392b99, 24, 0.8, 0, 3);
-                         -fx-background-radius: 8; -fx-margin: 14 14 0 14;
-                         -fx-border-color: #e74c3c; -fx-border-width: 2; -fx-border-radius: 8;">
-                <Label text="⚠️" style="-fx-font-size: 24px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 4, 0, 1, 2);"/>
-                <VBox spacing="2" HBox.hgrow="ALWAYS">
+                  style="-fx-background-color: #FEF2F2; -fx-padding: 16 24;
+                         -fx-background-radius: 8; -fx-margin: 24 32 0 32;
+                         -fx-border-color: #FECACA; -fx-border-width: 1; -fx-border-radius: 8;">
+                <Label text="🚨" style="-fx-font-size: 24px;"/>
+                <VBox spacing="4" HBox.hgrow="ALWAYS">
                     <Label fx:id="overdueWarningTitle" text="Overdue Books Alert"
-                           style="-fx-text-fill: white; -fx-font-size: 15px; -fx-font-weight: bold;
-                                  -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 2, 0, 0, 1);"/>
+                           style="-fx-text-fill: #991B1B; -fx-font-size: 15px; -fx-font-weight: 800;"/>
                     <Label fx:id="overdueWarningMessage" text="You have overdue books. Check the My Borrowed section."
-                           style="-fx-text-fill: rgba(255,255,255,0.95); -fx-font-size: 12px;
-                                  -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 2, 0, 0, 1);"/>
+                           style="-fx-text-fill: #B91C1C; -fx-font-size: 13px; -fx-font-weight: 600;"/>
                 </VBox>
-                <Button text="✕" 
-                        style="-fx-background-color: rgba(255,255,255,0.25); 
-                               -fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold;
-                               -fx-background-radius: 20; -fx-padding: 8 14;
-                               -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 4, 0, 0, 1);"
-                        onAction="#dismissOverdueWarning"/>
+                <Button text="✕" onAction="#dismissOverdueWarning"
+                        style="-fx-background-color: transparent; -fx-text-fill: #991B1B; -fx-font-size: 16px; -fx-font-weight: bold; -fx-cursor: hand;"/>
             </HBox>
 
-            <!-- VIGNETTE OVERLAY - Layered on top -->
-            <StackPane fx:id="vignetteOverlay" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent;"/>
+            <StackPane style="-fx-padding: 32;" VBox.vgrow="ALWAYS">
 
-            <!-- MAIN CONTENT STACK -->
-            <StackPane style="-fx-padding: 28;" VBox.vgrow="ALWAYS">
+                <VBox fx:id="myBooksPanel" spacing="20"
+                      StackPane.alignment="TOP_LEFT"
+                      style="-fx-background-color: #FFFFFF; -fx-background-radius: 12;
+                             -fx-padding: 32; -fx-border-color: #E5E7EB; -fx-border-radius: 12;">
+                    <effect><DropShadow color="#0000000D" radius="20" spread="0.0" offsetY="4"/></effect>
 
-                <!-- MY BORROWED PANEL -->
-                <VBox fx:id="myBooksPanel" spacing="14"
-                  StackPane.alignment="TOP_LEFT"
-                  style="-fx-background-color: white; -fx-background-radius: 14;
-                         -fx-padding: 28; -fx-effect: dropshadow(gaussian, #d7bde2, 12, 0, 0, 4);">
-                <HBox alignment="CENTER_LEFT" spacing="10">
-                    <Label text="📚"
-                           style="-fx-background-color: #f5eef8; -fx-font-size: 16px;
-                                  -fx-padding: 6 10; -fx-background-radius: 8;"/>
-                    <VBox spacing="1">
-                        <Label text="My Borrowed Books"
-                               style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1a1a2e;"/>
-                        <Label text="Review your active loans and due dates."
-                               style="-fx-font-size: 11px; -fx-text-fill: #aab4c8;"/>
-                    </VBox>
-                </HBox>
+                    <HBox alignment="CENTER_LEFT" spacing="12">
+                        <Label text="📚" style="-fx-font-size: 20px; -fx-background-color: #F3E8FF; -fx-padding: 8; -fx-background-radius: 8;"/>
+                        <VBox spacing="4">
+                            <Label text="My Reading List" style="-fx-font-size: 20px; -fx-font-weight: 800; -fx-text-fill: #111827;"/>
+                            <Label text="Review your active loans and due dates." style="-fx-font-size: 13px; -fx-text-fill: #6B7280;"/>
+                        </VBox>
+                    </HBox>
 
-                <TableView fx:id="borrowedTableView" VBox.vgrow="ALWAYS" prefHeight="390"
-                           style="-fx-background-radius: 10; -fx-border-color: #e8d5f0;
-                                  -fx-border-radius: 10; -fx-font-size: 13px;">
-                    <columns>
-                        <TableColumn fx:id="titleColumn"      text="Book Title"    prefWidth="280"/>
-                        <TableColumn fx:id="authorColumn"     text="Author"        prefWidth="180"/>
-                        <TableColumn fx:id="borrowDateColumn" text="Date Borrowed" prefWidth="130"/>
-                        <TableColumn fx:id="dueDateColumn"    text="Due Date"      prefWidth="120"/>
-                        <TableColumn fx:id="statusColumn"     text="Status"        prefWidth="100"/>
-                    </columns>
-                    <placeholder>
-                        <Label text="You haven't borrowed any books yet."
-                               style="-fx-text-fill: #c0c8d8; -fx-font-size: 13px;"/>
-                    </placeholder>
-                </TableView>
+                    <TableView fx:id="borrowedTableView" VBox.vgrow="ALWAYS" prefHeight="380"
+                               style="-fx-background-radius: 8; -fx-border-color: #E5E7EB; -fx-border-radius: 8; -fx-font-size: 13px;">
+                        <columns>
+                            <TableColumn fx:id="titleColumn"      text="Title"         prefWidth="260"/>
+                            <TableColumn fx:id="authorColumn"     text="Author"        prefWidth="180"/>
+                            <TableColumn fx:id="borrowDateColumn" text="Date Borrowed" prefWidth="130"/>
+                            <TableColumn fx:id="dueDateColumn"    text="Due Date"      prefWidth="130"/>
+                            <TableColumn fx:id="statusColumn"     text="Status"        prefWidth="120"/>
+                        </columns>
+                    </TableView>
 
-                <HBox alignment="CENTER_RIGHT" spacing="12">
-                    <Button fx:id="renewButton" text="Renew Book"
-                            disable="true"
-                            style="-fx-background-color: #6c3483; -fx-text-fill: white;
-                                   -fx-font-weight: bold; -fx-padding: 10 20;
-                                   -fx-background-radius: 8; -fx-cursor: hand;"/>
-                    <Button fx:id="returnButton" text="Return Book"
-                            disable="true"
-                            style="-fx-background-color: #8e44ad; -fx-text-fill: white;
-                                   -fx-font-weight: bold; -fx-padding: 10 20;
-                                   -fx-background-radius: 8; -fx-cursor: hand;"/>
-                </HBox>
-            </VBox>
+                    <HBox alignment="CENTER_RIGHT" spacing="12">
+                        <Button fx:id="renewButton" text="Renew Book" disable="true"
+                                style="-fx-background-color: #F3F4F6; -fx-text-fill: #111827; -fx-font-weight: 700; -fx-padding: 10 20; -fx-background-radius: 6; -fx-font-size: 13px; -fx-cursor: hand; -fx-border-color: #E5E7EB; -fx-border-radius: 6;"/>
+                        <Button fx:id="returnButton" text="Return Book" disable="true"
+                                style="-fx-background-color: #6366F1; -fx-text-fill: #FFFFFF; -fx-font-weight: 700; -fx-padding: 10 20; -fx-background-radius: 6; -fx-font-size: 13px; -fx-cursor: hand;"/>
+                    </HBox>
+                </VBox>
 
-            <!-- MY REQUESTS PANEL -->
-            <VBox fx:id="myRequestsPanel" spacing="14"
-                  StackPane.alignment="TOP_LEFT"
-                  visible="false" managed="false"
-                  style="-fx-background-color: white; -fx-background-radius: 14;
-                         -fx-padding: 28; -fx-effect: dropshadow(gaussian, #d7bde2, 12, 0, 0, 4);">
-                <HBox alignment="CENTER_LEFT" spacing="10">
-                    <Label text="📋"
-                           style="-fx-background-color: #f5eef8; -fx-font-size: 16px;
-                                  -fx-padding: 6 10; -fx-background-radius: 8;"/>
-                    <VBox spacing="1">
-                        <Label text="My Requests"
-                               style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1a1a2e;"/>
-                        <Label text="Track your borrow requests pending lender approval."
-                               style="-fx-font-size: 11px; -fx-text-fill: #aab4c8;"/>
-                    </VBox>
-                </HBox>
+                <VBox fx:id="myRequestsPanel" spacing="20"
+                      StackPane.alignment="TOP_LEFT" visible="false" managed="false"
+                      style="-fx-background-color: #FFFFFF; -fx-background-radius: 12;
+                             -fx-padding: 32; -fx-border-color: #E5E7EB; -fx-border-radius: 12;">
+                    <effect><DropShadow color="#0000000D" radius="20" spread="0.0" offsetY="4"/></effect>
 
-                <TableView fx:id="requestsTableView" VBox.vgrow="ALWAYS" prefHeight="390"
-                           style="-fx-background-radius: 10; -fx-border-color: #e8d5f0;
-                                  -fx-border-radius: 10; -fx-font-size: 13px;">
-                    <columns>
-                        <TableColumn fx:id="reqBookTitleColumn"  text="Book Title"      prefWidth="240"/>
-                        <TableColumn fx:id="reqAuthorColumn"     text="Author"         prefWidth="150"/>
-                        <TableColumn fx:id="reqStatusColumn"     text="Status"         prefWidth="100"/>
-                        <TableColumn fx:id="reqDueDateColumn"    text="Requested Due"  prefWidth="120"/>
-                        <TableColumn fx:id="reqDateRequestedColumn" text="Requested On" prefWidth="120"/>
-                    </columns>
-                    <placeholder>
-                        <Label text="No pending requests. Browse books and make requests!"
-                               style="-fx-text-fill: #c0c8d8; -fx-font-size: 13px;"/>
-                    </placeholder>
-                </TableView>
+                    <HBox alignment="CENTER_LEFT" spacing="12">
+                        <Label text="📋" style="-fx-font-size: 20px; -fx-background-color: #F3E8FF; -fx-padding: 8; -fx-background-radius: 8;"/>
+                        <VBox spacing="4">
+                            <Label text="My Requests" style="-fx-font-size: 20px; -fx-font-weight: 800; -fx-text-fill: #111827;"/>
+                            <Label text="Track your borrow requests pending lender approval." style="-fx-font-size: 13px; -fx-text-fill: #6B7280;"/>
+                        </VBox>
+                    </HBox>
 
-                <HBox alignment="CENTER_RIGHT" spacing="12">
-                    <Button fx:id="cancelRequestButton" text="Cancel Request"
-                            disable="true"
-                            style="-fx-background-color: #e74c3c; -fx-text-fill: white;
-                                   -fx-font-weight: bold; -fx-padding: 10 20;
-                                   -fx-background-radius: 8; -fx-cursor: hand;"/>
-                </HBox>
-            </VBox>
+                    <TableView fx:id="requestsTableView" VBox.vgrow="ALWAYS" prefHeight="380"
+                               style="-fx-background-radius: 8; -fx-border-color: #E5E7EB; -fx-border-radius: 8; -fx-font-size: 13px;">
+                        <columns>
+                            <TableColumn fx:id="reqBookTitleColumn"  text="Asset"          prefWidth="260"/>
+                            <TableColumn fx:id="reqAuthorColumn"     text="Author"         prefWidth="180"/>
+                            <TableColumn fx:id="reqStatusColumn"     text="Status"         prefWidth="130"/>
+                            <TableColumn fx:id="reqDueDateColumn"    text="Requested Due"     prefWidth="130"/>
+                            <TableColumn fx:id="reqDateRequestedColumn" text="Requested On" prefWidth="120"/>
+                            <TableColumn fx:id="reqActionColumn"        text="Handover Action" prefWidth="180"  style="-fx-alignment: CENTER;" />
+                        </columns>
+                    </TableView>
 
-            <!-- BROWSE CATALOG PANEL -->
-            <VBox fx:id="browseCatalogPanel" spacing="14"
-                  StackPane.alignment="TOP_LEFT"
-                  visible="false" managed="false"
-                  style="-fx-background-color: white; -fx-background-radius: 14;
-                         -fx-padding: 28; -fx-effect: dropshadow(gaussian, #d7bde2, 12, 0, 0, 4);">
-                            <HBox spacing="10" alignment="CENTER_LEFT">
-                                   <Label text="🔍" style="-fx-font-size: 15px;"/>
-                                   <TextField fx:id="catalogSearchField" promptText="Search by title, author, ISBN, genre..." style="-fx-background-radius: 8; -fx-padding: 8 12; -fx-font-size: 13px;"/>
-                            </HBox>
-                <HBox alignment="CENTER_LEFT" spacing="10">
-                    <Label text="🔎"
-                           style="-fx-background-color: #f5eef8; -fx-font-size: 16px;
-                                  -fx-padding: 6 10; -fx-background-radius: 8;"/>
-                    <VBox spacing="1">
-                        <Label text="Browse Catalog"
-                               style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1a1a2e;"/>
-                        <Label text="All books available from lenders in the library."
-                               style="-fx-font-size: 11px; -fx-text-fill: #aab4c8;"/>
-                    </VBox>
-                </HBox>
+                    <HBox alignment="CENTER_RIGHT" spacing="12">
+                        <Button fx:id="cancelRequestButton" text="Cancel Request" disable="true"
+                                style="-fx-background-color: #FEF2F2; -fx-text-fill: #EF4444; -fx-font-weight: 700; -fx-padding: 10 20; -fx-background-radius: 6; -fx-font-size: 13px; -fx-cursor: hand; -fx-border-color: #FECACA; -fx-border-radius: 6;"/>
+                    </HBox>
+                </VBox>
 
-                <TableView fx:id="catalogTableView" VBox.vgrow="ALWAYS" prefHeight="440"
-                           style="-fx-background-radius: 10; -fx-border-color: #e8d5f0;
-                                  -fx-border-radius: 10; -fx-font-size: 13px;">
-                    <columns>
-                        <TableColumn fx:id="catIsbnColumn"   text="ISBN"   prefWidth="150"/>
-                        <TableColumn fx:id="catTitleColumn"  text="Title"  prefWidth="280"/>
-                        <TableColumn fx:id="catAuthorColumn" text="Author" prefWidth="200"/>
-                        <TableColumn fx:id="catStatusColumn" text="Status" prefWidth="110"/>
-                    </columns>
-                    <placeholder>
-                        <Label text="No books available in the catalog."
-                               style="-fx-text-fill: #c0c8d8; -fx-font-size: 13px;"/>
-                    </placeholder>
-                </TableView>
+                <VBox fx:id="browseCatalogPanel" spacing="15"
+                      StackPane.alignment="TOP_LEFT" visible="false" managed="false"
+                      style="-fx-background-color: #FFFFFF; -fx-background-radius: 12;
+             -fx-padding: 32; -fx-border-color: #E5E7EB; -fx-border-radius: 12;">
+                    <effect><DropShadow color="#0000000D" radius="20" spread="0.0" offsetY="4"/></effect>
 
-                <HBox alignment="CENTER_RIGHT" spacing="12">
-                    <Button fx:id="borrowButton" text="Borrow Book"
-                            disable="true"
-                            style="-fx-background-color: #8e44ad; -fx-text-fill: white;
-                                   -fx-font-weight: bold; -fx-padding: 10 20;
-                                   -fx-background-radius: 8; -fx-cursor: hand;"/>
-                </HBox>
-            </VBox>
+                    <HBox alignment="CENTER_LEFT" spacing="12">
+                        <Label text="🔎" style="-fx-font-size: 20px; -fx-background-color: #F3E8FF; -fx-padding: 8; -fx-background-radius: 8;"/>
+                        <VBox spacing="4">
+                            <Label text="Discover Assets" style="-fx-font-size: 20px; -fx-font-weight: 800; -fx-text-fill: #111827;"/>
+                            <Label text="Search, filter, and discover books from the community." style="-fx-font-size: 13px; -fx-text-fill: #6B7280;"/>
+                        </VBox>
+                    </HBox>
 
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <TextField fx:id="searchField" prefWidth="400" promptText="Quick search title, author, or genre..."
+                                   style="-fx-padding: 10; -fx-background-radius: 6; -fx-border-color: #D1D5DB; -fx-border-radius: 6;"/>
+                    </HBox>
+
+                    <TitledPane text="Advanced Filters &amp; Sorting" expanded="false"
+                                style="-fx-font-weight: bold; -fx-text-fill: #4B5563; -fx-background-color: transparent;">
+                        <content>
+                            <VBox fx:id="searchFilterContainer" spacing="10" style="-fx-background-color: #F9FAFB; -fx-padding: 15;"/>
+                        </content>
+                    </TitledPane>
+
+                    <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;" VBox.vgrow="ALWAYS">
+                        <content>
+                            <FlowPane fx:id="bookGrid" hgap="25" vgap="25" style="-fx-padding: 10;" />
+                        </content>
+                    </ScrollPane>
+                </VBox>
+
+                <StackPane fx:id="vignetteOverlay" mouseTransparent="true" pickOnBounds="false" style="-fx-background-color: transparent;"/>
             </StackPane>
         </VBox>
     </center>
 
-    <!-- BOTTOM BAR - SYSTEM STATUS -->
     <bottom>
         <HBox alignment="CENTER_LEFT" spacing="8"
-              style="-fx-padding: 10 24; -fx-background-color: transparent;">
-            <?import javafx.scene.shape.Circle?>
-            <Circle fx:id="systemStatusCircle" radius="5" fill="GRAY"/>
-            <Label text="System Status"
-                   style="-fx-text-fill: #7f8c8d; -fx-font-size: 11px; -fx-font-weight: bold;"/>
+              style="-fx-padding: 12 28; -fx-background-color: #FFFFFF; -fx-border-color: #E5E7EB transparent transparent transparent; -fx-border-width: 1;">
+            <Circle fx:id="systemStatusCircle" radius="4" fill="#9CA3AF"/>
+            <Label text="System Operational"
+                   style="-fx-text-fill: #6B7280; -fx-font-size: 11px; -fx-font-weight: 600;"/>
         </HBox>
     </bottom>
-
 </BorderPane>

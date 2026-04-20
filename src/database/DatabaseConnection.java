@@ -6,12 +6,11 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 public class DatabaseConnection {
-    private static final String URL =
-        "jdbc:postgresql://aws-1-ap-northeast-1.pooler.supabase.com:6543/postgres";
-    private static final String USER     = "postgres.tyzwmebiitvlvorurvip";
+    // I recommend moving these to a .env file later for security!
+    private static final String URL = "jdbc:postgresql://aws-1-ap-northeast-1.pooler.supabase.com:6543/postgres?prepareThreshold=0";    private static final String USER = "postgres.tyzwmebiitvlvorurvip";
     private static final String PASSWORD = "Qxv6_b.KGGX_xUU";
 
-    private static HikariDataSource dataSource;
+    private static final HikariDataSource dataSource;
 
     static {
         try {
@@ -19,18 +18,20 @@ public class DatabaseConnection {
             config.setJdbcUrl(URL);
             config.setUsername(USER);
             config.setPassword(PASSWORD);
-            config.setMaximumPoolSize(10);  // Max 10 concurrent connections
-            config.setMinimumIdle(2);       // Keep 2 connections idle
-            config.setConnectionTimeout(10000);  // 10 seconds to get a connection
-            config.setIdleTimeout(600000);  // 10 minutes idle timeout
-            config.setMaxLifetime(1800000); // 30 minutes max lifetime
-            config.setAutoCommit(true);
+
+            // Optimization for Supabase
+            config.setMaximumPoolSize(10);
+            config.setMinimumIdle(2);
+            config.setConnectionTimeout(10000);
+            config.setIdleTimeout(600000);
+            config.setMaxLifetime(1800000);
+
             config.setPoolName("LibraryPool");
 
             dataSource = new HikariDataSource(config);
-            System.out.println("Connection pool initialized successfully.");
+            System.out.println("HikariCP initialized successfully.");
         } catch (Exception e) {
-            System.err.println("Failed to initialize connection pool: " + e.getMessage());
+            System.err.println("Pool initialization failed: " + e.getMessage());
             throw new RuntimeException(e);
         }
     }

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox spacing="15" style="-fx-background-color: transparent;" xmlns:fx="http://javafx.com/fxml" fx:controller="controller.SearchFilterPanelController">
+    <HBox spacing="20" alignment="CENTER_LEFT">
+        <VBox spacing="5">
+            <Label text="Genre" style="-fx-font-weight: bold; -fx-text-fill: #4B5563;"/>
+            <ComboBox fx:id="genreCombo" prefWidth="150" />
+        </VBox>
+        <VBox spacing="5">
+            <Label text="Condition" style="-fx-font-weight: bold; -fx-text-fill: #4B5563;"/>
+            <ComboBox fx:id="conditionCombo" prefWidth="150" />
+        </VBox>
+        <VBox spacing="5">
+            <Label text="Sort By" style="-fx-font-weight: bold; -fx-text-fill: #4B5563;"/>
+            <ComboBox fx:id="sortByCombo" prefWidth="150" />
+        </VBox>
+        <VBox spacing="5" alignment="CENTER_LEFT" style="-fx-padding: 15 0 0 0;">
+            <CheckBox fx:id="availableOnlyCheck" text="Available Only" style="-fx-font-weight: bold; -fx-text-fill: #4B5563;"/>
+        </VBox>
+    </HBox>
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+        <Button fx:id="clearFiltersBtn" text="Clear Filters" style="-fx-background-color: transparent; -fx-text-fill: #6B7280; -fx-cursor: hand; -fx-font-weight: bold;" />
+        <Button fx:id="applyFiltersBtn" text="Apply Filters" style="-fx-background-color: #8B5CF6; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 6 16; -fx-background-radius: 6; -fx-cursor: hand;" />
+    </HBox>
+</VBox>

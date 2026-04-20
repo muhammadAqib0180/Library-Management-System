@@ -18,11 +18,16 @@ public class Main extends Application {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/LoginScreen.fxml"));
         Parent root = loader.load();
 
+        // Create scene and apply modern theme CSS
+        Scene scene = new Scene(root);
+        String cssResource = getClass().getResource("/modern-theme.css").toExternalForm();
+        scene.getStylesheets().add(cssResource);
+
         // Branding: title and minimum size
         primaryStage.setTitle("Library Nexus — Sign In");
         primaryStage.setMinWidth(860);
         primaryStage.setMinHeight(580);
-        primaryStage.setScene(new Scene(root));
+        primaryStage.setScene(scene);
 
         // Load app icon if it exists in resources
         try {

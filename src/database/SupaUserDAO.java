@@ -68,6 +68,32 @@ public class SupaUserDAO implements UserDAO {
         return null;
     }
 
+    public User getUserById(int userId) {
+        String sql = "SELECT * FROM Users WHERE id = ?";
+        try (Connection conn = DatabaseHandler.getConnection();
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, userId);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                boolean active = true;
+                String lastLogin = "Never";
+                try {
+                    active = rs.getBoolean("active");
+                    lastLogin = rs.getString("last_login");
+                    if (lastLogin == null)
+                        lastLogin = "Never";
+                } catch (SQLException e) {
+                    System.out.println("Warning: 'active' or 'last_login' column not found, defaulting.");
+                }
+                return new User(rs.getInt("id"), rs.getString("username"),
+                        rs.getString("password"), rs.getString("role"), active, lastLogin);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error fetching user by ID: " + e.getMessage());
+        }
+        return null;
+    }
+
     @Override
     public boolean validateLogin(String username, String password) {
         User user = getUserByUsername(username);

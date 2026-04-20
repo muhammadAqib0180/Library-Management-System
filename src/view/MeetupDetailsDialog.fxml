@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Dialog?>
+<?import javafx.scene.control.DialogPane?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Spinner?>
+<?import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Text?>
+
+<Dialog fx:id="dialog" title="Meetup Details" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.MeetupDetailsDialogController">
+    <dialogPane>
+        <DialogPane>
+            <content>
+                <VBox spacing="15" style="-fx-padding: 20;">
+                    <!-- Location -->
+                    <VBox spacing="5">
+                        <Label text="Meetup Location" style="-fx-font-weight: bold; -fx-font-size: 12;" />
+                        <TextArea fx:id="locationField" wrapText="true" prefHeight="60" promptText="e.g., Coffee House near Main Street, Downtown" />
+                        <Text fx:id="locationError" style="-fx-fill: #d32f2f; -fx-font-size: 10;" />
+                    </VBox>
+
+                    <!-- Date & Time -->
+                    <GridPane hgap="10" vgap="5">
+                        <!-- Date Picker -->
+                        <VBox spacing="5" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                            <Label text="Date" style="-fx-font-weight: bold; -fx-font-size: 12;" />
+                            <DatePicker fx:id="dateField" prefWidth="150" />
+                            <Text fx:id="dateError" style="-fx-fill: #d32f2f; -fx-font-size: 10;" />
+                        </VBox>
+
+                        <!-- Time (Hour & Minute) -->
+                        <VBox spacing="5" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                            <Label text="Time (HH:MM)" style="-fx-font-weight: bold; -fx-font-size: 12;" />
+                            <HBox spacing="5">
+                                <Spinner fx:id="hourSpinner" prefWidth="60">
+                                    <valueFactory>
+                                        <SpinnerValueFactory.IntegerSpinnerValueFactory min="0" max="23" initialValue="10" />
+                                    </valueFactory>
+                                </Spinner>
+                                <Text text=":" style="-fx-font-size: 14; -fx-font-weight: bold;" />
+                                <Spinner fx:id="minuteSpinner" prefWidth="60">
+                                    <valueFactory>
+                                        <SpinnerValueFactory.IntegerSpinnerValueFactory min="0" max="59" initialValue="0" amountToStepBy="15" />
+                                    </valueFactory>
+                                </Spinner>
+                            </HBox>
+                            <Text fx:id="timeError" style="-fx-fill: #d32f2f; -fx-font-size: 10;" />
+                        </VBox>
+                    </GridPane>
+
+                    <!-- Buttons -->
+                    <HBox spacing="10" style="-fx-alignment: center-right; -fx-padding: 10 0 0 0;">
+                        <Button fx:id="cancelButton" text="Cancel" style="-fx-padding: 8 20;" />
+                        <Button fx:id="confirmButton" text="Confirm Meetup" style="-fx-padding: 8 20; -fx-font-weight: bold;" />
+                    </HBox>
+                </VBox>
+            </content>
+        </DialogPane>
+    </dialogPane>
+</Dialog>

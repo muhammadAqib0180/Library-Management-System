@@ -6,7 +6,7 @@ import java.util.List;
 import java.time.LocalDate;
 
 public interface BookDAO {
-    void insert(Book book);
+    boolean insert(Book book);
     List<Book> getAll();
     Book findByIsbn(String isbn);
     boolean updateBook(Book book);

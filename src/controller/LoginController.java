@@ -21,42 +21,36 @@ import javafx.concurrent.Task;
 
 public class LoginController {
 
-    @FXML
-    private TextField usernameField;
-    @FXML
-    private PasswordField passwordField;
-    @FXML
-    private TextField passwordVisibleField;
-    @FXML
-    private ToggleButton togglePasswordBtn;
-    @FXML
-    private Label statusLabel;
-    @FXML
-    private Circle systemStatusCircle;
-    @FXML
-    private ComboBox<String> roleComboBox;
-    @FXML
-    private Button submitButton;
-    @FXML
-    private ToggleButton loginTab;
-    @FXML
-    private ToggleButton signupTab;
+    @FXML private TextField usernameField;
+    @FXML private PasswordField passwordField;
+    @FXML private TextField passwordVisibleField;
+    @FXML private ToggleButton togglePasswordBtn;
+    @FXML private Label statusLabel;
+    @FXML private Circle systemStatusCircle;
+    @FXML private ComboBox<String> roleComboBox;
+    @FXML private Button submitButton;
+    @FXML private ToggleButton loginTab;
+    @FXML private ToggleButton signupTab;
 
     private UserDAO userDAO = new SupaUserDAO();
 
-    private static final String ACTIVE_STYLE = "-fx-background-color: #3498db; -fx-text-fill: white; " +
-            "-fx-font-weight: bold; -fx-font-size: 12px; -fx-cursor: hand;";
+    // Clean Minimalist Styles
+    // Active tab gets a stark black underline and bold text
+    // High-Contrast Glassmorphism Styles
+    private static final String ACTIVE_STYLE = "-fx-background-color: transparent; -fx-text-fill: #F8FAFC; " +
+            "-fx-font-weight: 800; -fx-font-size: 14px; -fx-cursor: hand; -fx-border-color: transparent transparent #F8FAFC transparent; -fx-border-width: 0 0 2 0; -fx-padding: 0 4 4 4;";
 
-    private static final String INACTIVE_STYLE = "-fx-background-color: rgba(255,255,255,0.1); -fx-text-fill: rgba(255,255,255,0.7); "
-            +
-            "-fx-font-weight: bold; -fx-font-size: 12px; -fx-cursor: hand;";
+    private static final String INACTIVE_STYLE = "-fx-background-color: transparent; -fx-text-fill: #64748B; " +
+            "-fx-font-weight: normal; -fx-font-size: 14px; -fx-cursor: hand; -fx-border-color: transparent; -fx-padding: 0 4 4 4;";
+
+    private static final String SUBMIT_BTN_STYLE = "-fx-background-color: #F8FAFC; -fx-text-fill: #0F172A; " +
+            "-fx-font-weight: 800; -fx-font-size: 14px; -fx-padding: 14; -fx-background-radius: 8; -fx-cursor: hand;";
 
     @FXML
     public void initialize() {
         roleComboBox.setItems(FXCollections.observableArrayList("Admin", "Member"));
         roleComboBox.setPromptText("Select Role");
 
-        // Press Enter from either field to submit
         usernameField.setOnAction(e -> handleSubmit());
         passwordField.setOnAction(e -> handleSubmit());
         if (passwordVisibleField != null) {
@@ -66,12 +60,10 @@ public class LoginController {
 
         showLoginView();
 
-        // Pre-warm DB connection in background so first login isn't slow
         new Thread(() -> {
             try {
                 database.DatabaseConnection.getConnection();
-            } catch (Exception ignored) {
-            }
+            } catch (Exception ignored) {}
         }, "db-warmup").start();
 
         startStatusCheck();
@@ -84,17 +76,18 @@ public class LoginController {
             passwordVisibleField.setManaged(true);
             passwordField.setVisible(false);
             passwordField.setManaged(false);
+            togglePasswordBtn.setText("Hide");
         } else {
             passwordVisibleField.setVisible(false);
             passwordVisibleField.setManaged(false);
             passwordField.setVisible(true);
             passwordField.setManaged(true);
+            togglePasswordBtn.setText("Show");
         }
     }
 
     private void startStatusCheck() {
-        if (systemStatusCircle == null)
-            return;
+        if (systemStatusCircle == null) return;
         javafx.animation.Timeline timeline = new javafx.animation.Timeline(
                 new javafx.animation.KeyFrame(javafx.util.Duration.seconds(3), e -> checkSystemStatus()));
         timeline.setCycleCount(javafx.animation.Animation.INDEFINITE);
@@ -118,13 +111,13 @@ public class LoginController {
         };
         task.setOnSucceeded(e -> {
             if (task.getValue()) {
-                systemStatusCircle.setFill(javafx.scene.paint.Color.rgb(46, 204, 113));
+                systemStatusCircle.setFill(javafx.scene.paint.Color.web("#10B981")); // Emerald Green
             } else {
-                systemStatusCircle.setFill(javafx.scene.paint.Color.rgb(231, 76, 60));
+                systemStatusCircle.setFill(javafx.scene.paint.Color.web("#EF4444")); // Red
             }
         });
         task.setOnFailed(e -> {
-            systemStatusCircle.setFill(javafx.scene.paint.Color.rgb(231, 76, 60));
+            systemStatusCircle.setFill(javafx.scene.paint.Color.web("#EF4444"));
         });
         new Thread(task).start();
     }
@@ -133,16 +126,14 @@ public class LoginController {
         signupTab.setSelected(false);
         loginTab.setSelected(true);
 
-        loginTab.setStyle(ACTIVE_STYLE + " -fx-background-radius: 25 0 0 25; -fx-padding: 9 40;");
-        signupTab.setStyle(INACTIVE_STYLE + " -fx-background-radius: 0 25 25 0; -fx-padding: 9 40;");
+        loginTab.setStyle(ACTIVE_STYLE);
+        signupTab.setStyle(INACTIVE_STYLE);
 
         roleComboBox.setVisible(false);
         roleComboBox.setManaged(false);
 
-        submitButton.setText("SIGN IN");
-        submitButton.setStyle("-fx-background-color: linear-gradient(to right, #3498db, #8e44ad); " +
-                "-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px; " +
-                "-fx-background-radius: 10; -fx-padding: 13 0; -fx-cursor: hand;");
+        submitButton.setText("Sign In");
+        submitButton.setStyle(SUBMIT_BTN_STYLE);
         statusLabel.setText("");
     }
 
@@ -151,22 +142,17 @@ public class LoginController {
         loginTab.setSelected(false);
         signupTab.setSelected(true);
 
-        signupTab.setStyle(ACTIVE_STYLE + " -fx-background-radius: 0 25 25 0; -fx-padding: 9 40;");
-        loginTab.setStyle(INACTIVE_STYLE + " -fx-background-radius: 25 0 0 25; -fx-padding: 9 40;");
+        signupTab.setStyle(ACTIVE_STYLE);
+        loginTab.setStyle(INACTIVE_STYLE);
 
         roleComboBox.setVisible(true);
         roleComboBox.setManaged(true);
 
-        submitButton.setText("CREATE ACCOUNT");
-        submitButton.setStyle("-fx-background-color: linear-gradient(to right, #3498db, #8e44ad); " +
-                "-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px; " +
-                "-fx-background-radius: 10; -fx-padding: 13 0; -fx-cursor: hand;");
+        submitButton.setText("Create Account");
+        submitButton.setStyle(SUBMIT_BTN_STYLE);
         statusLabel.setText("");
     }
 
-    /**
-     * Determines which action to take based on the selected tab
-     */
     @FXML
     public void handleSubmit() {
         if (loginTab.isSelected()) {
@@ -181,19 +167,18 @@ public class LoginController {
         String pass = passwordField.getText();
 
         if (user.isEmpty() || pass.isEmpty()) {
-            statusLabel.setTextFill(javafx.scene.paint.Color.RED);
-            statusLabel.setText("Please enter credentials.");
+            statusLabel.setTextFill(javafx.scene.paint.Color.web("#EF4444"));
+            statusLabel.setText("Please enter both username and password.");
             return;
         }
 
         submitButton.setDisable(true);
-        statusLabel.setTextFill(javafx.scene.paint.Color.WHITE);
+        statusLabel.setTextFill(javafx.scene.paint.Color.web("#6B7280"));
         statusLabel.setText("Signing in...");
 
         Task<model.User> loginTask = new Task<>() {
             @Override
             protected model.User call() {
-                // Single DB call — gets user and validates password AND active status
                 model.User found = userDAO.getUserByUsername(user);
                 if (found != null && found.getPassword().equals(pass) && found.isActive()) {
                     return found;
@@ -206,12 +191,11 @@ public class LoginController {
             model.User loggedInUser = loginTask.getValue();
             submitButton.setDisable(false);
             if (loggedInUser == null) {
-                statusLabel.setTextFill(javafx.scene.paint.Color.RED);
-                statusLabel.setText("Account not found or invalid password.");
+                statusLabel.setTextFill(javafx.scene.paint.Color.web("#EF4444"));
+                statusLabel.setText("Incorrect username or password.");
                 return;
             }
 
-            // Register Last Login Audit
             new Thread(() -> userDAO.updateLastLogin(loggedInUser.getId())).start();
 
             if ("Member".equals(loggedInUser.getRole())) {
@@ -227,8 +211,8 @@ public class LoginController {
 
         loginTask.setOnFailed(e -> {
             submitButton.setDisable(false);
-            statusLabel.setTextFill(javafx.scene.paint.Color.RED);
-            statusLabel.setText("Connection error. Try again.");
+            statusLabel.setTextFill(javafx.scene.paint.Color.web("#EF4444"));
+            statusLabel.setText("Network error. Please try again.");
         });
 
         new Thread(loginTask).start();
@@ -245,7 +229,7 @@ public class LoginController {
             stage.setTitle(title);
             stage.show();
         } catch (IOException e) {
-            statusLabel.setTextFill(javafx.scene.paint.Color.RED);
+            statusLabel.setTextFill(javafx.scene.paint.Color.web("#EF4444"));
             statusLabel.setText("Failed to load dashboard.");
             e.printStackTrace();
         }
@@ -257,18 +241,18 @@ public class LoginController {
         String role = roleComboBox.getValue();
 
         if (user.isEmpty() || pass.isEmpty() || role == null) {
-            statusLabel.setTextFill(javafx.scene.paint.Color.RED);
+            statusLabel.setTextFill(javafx.scene.paint.Color.web("#EF4444"));
             statusLabel.setText("Please fill all fields and select a role.");
             return;
         }
 
         model.User newUser = new model.User(user, pass, role);
         if (userDAO.addUser(newUser)) {
-            statusLabel.setTextFill(javafx.scene.paint.Color.BLUE);
-            statusLabel.setText("Account created as " + role + "!");
+            statusLabel.setTextFill(javafx.scene.paint.Color.web("#10B981"));
+            statusLabel.setText("Account created successfully. You can now sign in.");
         } else {
-            statusLabel.setTextFill(javafx.scene.paint.Color.RED);
-            statusLabel.setText("Username already exists.");
+            statusLabel.setTextFill(javafx.scene.paint.Color.web("#EF4444"));
+            statusLabel.setText("That username is already taken.");
         }
     }
 }

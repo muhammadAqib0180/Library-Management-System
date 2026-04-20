@@ -10,178 +10,108 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.input.KeyCode;
-import model.Book;
-import model.BorrowRequest;
-import model.Notification;
+import javafx.scene.paint.Color;
+import model.*;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Optional;
+import java.util.List;
 
 public class BorrowerDashboardController extends BaseDashboardController {
 
-    // Sidebar buttons
-    @FXML
-    private Button btnMyBooks;
-    @FXML
-    private Button btnMyRequests;
-    @FXML
-    private Button btnBrowse;
+    @FXML private Button btnMyBooks;
+    @FXML private Button btnMyRequests;
+    @FXML private Button btnBrowse;
 
-    // Notification badge
-    @FXML
-    private Label notificationBell;
-    @FXML
-    private Label notificationBadge;
-    @FXML
-    private VBox notificationPanel;
-    @FXML
-    private VBox notificationListContainer;
+    @FXML private Label notificationBell;
+    @FXML private Label notificationBadge;
+    @FXML private VBox notificationPanel;
+    @FXML private VBox notificationListContainer;
 
-    // Overdue Warning Banner
-    @FXML
-    private HBox overdueWarningBanner;
-    @FXML
-    private Label overdueWarningTitle;
-    @FXML
-    private Label overdueWarningMessage;
+    @FXML private HBox overdueWarningBanner;
+    @FXML private Label overdueWarningTitle;
+    @FXML private Label overdueWarningMessage;
 
-    // Root Dashboard
-    @FXML
-    private BorderPane dashboardRoot;
+    @FXML private BorderPane dashboardRoot;
+    @FXML private javafx.scene.layout.StackPane vignetteOverlay;
 
-    // Red vignette overlay (defined in FXML)
-    @FXML
-    private javafx.scene.layout.StackPane vignetteOverlay;
+    @FXML private VBox myBooksPanel;
+    @FXML private VBox myRequestsPanel;
+    @FXML private VBox browseCatalogPanel;
 
-    // Panels
-    @FXML
-    private VBox myBooksPanel;
-    @FXML
-    private VBox myRequestsPanel;
-    @FXML
-    private VBox browseCatalogPanel;
+    @FXML private TableView<Book> borrowedTableView;
+    @FXML private TableColumn<Book, String> titleColumn;
+    @FXML private TableColumn<Book, String> authorColumn;
+    @FXML private TableColumn<Book, String> borrowDateColumn;
+    @FXML private TableColumn<Book, String> dueDateColumn;
+    @FXML private TableColumn<Book, String> statusColumn;
 
-    // My Borrowed table
-    @FXML
-    private TableView<Book> borrowedTableView;
-    @FXML
-    private TableColumn<Book, String> titleColumn;
-    @FXML
-    private TableColumn<Book, String> authorColumn;
-    @FXML
-    private TableColumn<Book, String> borrowDateColumn;
-    @FXML
-    private TableColumn<Book, String> dueDateColumn;
-    @FXML
-    private TableColumn<Book, String> statusColumn;
-    @FXML
-    private Button renewButton;
-    @FXML
-    private Button returnButton;
+    // --- SPRINT 3: GRID VIEW UPDATES ---
+    @FXML private FlowPane bookGrid;
+    @FXML private TextField searchField;
 
-    // Browse catalog table
-    @FXML
-    private TableView<Book> catalogTableView;
-    @FXML
-    private TableColumn<Book, String> catIsbnColumn;
-    @FXML
-    private TableColumn<Book, String> catTitleColumn;
-    @FXML
-    private TableColumn<Book, String> catAuthorColumn;
-    @FXML
-    private TableColumn<Book, String> catStatusColumn;
-    @FXML
-    private Button borrowButton;
+    @FXML private Button renewButton;
+    @FXML private Button returnButton;
 
-    @FXML
-    private TextField catalogSearchField;
+    private AvailabilityPanelController availabilityController;
+    private String selectedBookIsbn = null;
 
-    // My Requests table
-    @FXML
-    private TableView<BorrowRequest> requestsTableView;
-    @FXML
-    private TableColumn<BorrowRequest, String> reqBookTitleColumn;
-    @FXML
-    private TableColumn<BorrowRequest, String> reqAuthorColumn;
-    @FXML
-    private TableColumn<BorrowRequest, String> reqStatusColumn;
-    @FXML
-    private TableColumn<BorrowRequest, String> reqDueDateColumn;
-    @FXML
-    private TableColumn<BorrowRequest, String> reqDateRequestedColumn;
-    @FXML
-    private Button cancelRequestButton;
+    @FXML private TableView<BorrowRequest> requestsTableView;
+    @FXML private TableColumn<BorrowRequest, String> reqBookTitleColumn;
+    @FXML private TableColumn<BorrowRequest, String> reqAuthorColumn;
+    @FXML private TableColumn<BorrowRequest, String> reqStatusColumn;
+    @FXML private TableColumn<BorrowRequest, String> reqDueDateColumn;
+    @FXML private TableColumn<BorrowRequest, String> reqDateRequestedColumn;
+    @FXML private TableColumn<BorrowRequest, Void> reqActionColumn;
+    @FXML private Button cancelRequestButton;
+
+    @FXML private VBox searchFilterContainer;
+    private SearchFilterPanelController searchFilterController;
 
     private final BookDAO bookDAO = new SupaBookDAO();
     private final BorrowRequestDAO borrowRequestDAO = new SupaBorrowRequestDAO();
     private final NotificationDAO notificationDAO = new SupaNotificationDAO();
     private final ObservableList<Book> borrowedList = FXCollections.observableArrayList();
-    private final ObservableList<Book> catalogList = FXCollections.observableArrayList();
     private final ObservableList<BorrowRequest> requestsList = FXCollections.observableArrayList();
+
+    private java.util.Map<String, Book> cachedBooks = new java.util.HashMap<>();
 
     @FXML
     public void initialize() {
-        // Setup My Borrowed Books table columns
-        titleColumn.setCellValueFactory(data -> 
-            new javafx.beans.property.SimpleStringProperty(data.getValue().getTitle()));
-        authorColumn.setCellValueFactory(data -> 
-            new javafx.beans.property.SimpleStringProperty(data.getValue().getAuthor()));
-        borrowDateColumn.setCellValueFactory(data -> 
-            new javafx.beans.property.SimpleStringProperty(
-                data.getValue().getBorrowDate() != null ? data.getValue().getBorrowDate().toString() : "N/A"));
-        dueDateColumn.setCellValueFactory(data -> 
-            new javafx.beans.property.SimpleStringProperty(
-                data.getValue().getDueDate() != null ? data.getValue().getDueDate().toString() : "N/A"));
-        statusColumn.setCellValueFactory(data -> 
-            new javafx.beans.property.SimpleStringProperty(getDueStatus(data.getValue().getDueDate())));
+        // --- 1. MY BORROWED BOOKS TABLE (The books you currently have) ---
+        titleColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().getTitle()));
+        authorColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().getAuthor()));
+        borrowDateColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().getBorrowDate() != null ? data.getValue().getBorrowDate().toString() : "N/A"));
+        dueDateColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().getDueDate() != null ? data.getValue().getDueDate().toString() : "N/A"));
+        statusColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(getDueStatus(data.getValue().getDueDate())));
 
-        borrowedTableView.setItems(borrowedList);
-        
-        // Add keyboard shortcut for testing overdue warning: Ctrl+Shift+O
-        borrowedTableView.setOnKeyPressed(event -> {
-            if (event.isControlDown() && event.isShiftDown()) {
-                if (event.getCode() == javafx.scene.input.KeyCode.O) {
-                    testOverdueWarning();
-                    event.consume();
-                } else if (event.getCode() == javafx.scene.input.KeyCode.R) {
-                    removeTestOverdueBooks();
-                    event.consume();
+        statusColumn.setCellFactory(col -> new TableCell<>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) { setText(null); setStyle(""); return; }
+                setText(item);
+                if (item.equals("OVERDUE")) {
+                    setStyle("-fx-text-fill: #EF4444; -fx-font-weight: 800;");
+                } else if (item.equals("Due Today")) {
+                    setStyle("-fx-text-fill: #F59E0B; -fx-font-weight: 700;");
+                } else {
+                    setStyle("-fx-text-fill: #6366F1; -fx-font-weight: 700;");
                 }
             }
         });
-        
-        // Setup the vignette overlay with the red gradient
-        setupVignetteOverlay();
-        
-        // Setup button handlers
-        renewButton.setOnAction(e -> {
-            Book selected = borrowedTableView.getSelectionModel().getSelectedItem();
-            if (selected != null) handleRenew(selected);
-        });
-        returnButton.setOnAction(e -> {
-            Book selected = borrowedTableView.getSelectionModel().getSelectedItem();
-            if (selected != null) handleReturn(selected);
-        });
-        borrowButton.setOnAction(e -> {
-            Book selected = catalogTableView.getSelectionModel().getSelectedItem();
-            if (selected != null) handleBorrow(selected);
-        });
 
-        // Enable/disable buttons based on selection
-        borrowedTableView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
-            boolean hasSelection = newVal != null;
-            renewButton.setDisable(!hasSelection);
-            returnButton.setDisable(!hasSelection);
-        });
+        borrowedTableView.setItems(borrowedList);
 
-        catalogTableView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
-            borrowButton.setDisable(newVal == null);
-        });
-
-        // My Requests table columns
+        // --- 2. MY REQUESTS TABLE (The status of your borrow requests) ---
         reqBookTitleColumn.setCellValueFactory(data -> {
             Book book = cachedBooks.getOrDefault(data.getValue().getBookIsbn(), null);
             if (book == null) {
@@ -198,71 +128,101 @@ public class BorrowerDashboardController extends BaseDashboardController {
             }
             return new javafx.beans.property.SimpleStringProperty(book != null ? book.getAuthor() : "N/A");
         });
-        reqStatusColumn.setCellValueFactory(data -> 
-            new javafx.beans.property.SimpleStringProperty(data.getValue().getStatus()));
-        reqDueDateColumn.setCellValueFactory(data ->
-            new javafx.beans.property.SimpleStringProperty(
-                data.getValue().getRequestedDueDate() != null ? data.getValue().getRequestedDueDate().toString() : "N/A"));
-        reqDateRequestedColumn.setCellValueFactory(data ->
-            new javafx.beans.property.SimpleStringProperty(
-                data.getValue().getCreatedAt() != null ? data.getValue().getCreatedAt().toLocalDate().toString() : "N/A"));
+        reqStatusColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().getStatus()));
+        reqDueDateColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().getRequestedDueDate() != null ? data.getValue().getRequestedDueDate().toString() : "N/A"));
+        reqDateRequestedColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().getCreatedAt() != null ? data.getValue().getCreatedAt().toLocalDate().toString() : "N/A"));
+
+        // US-1: DYNAMIC ACTION COLUMN FOR HANDOVER
+        reqActionColumn.setCellFactory(col -> new TableCell<BorrowRequest, Void>() {
+            private final Button actionBtn = new Button();
+
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setGraphic(null);
+                } else {
+                    BorrowRequest req = getTableView().getItems().get(getIndex());
+                    String status = req.getStatus();
+
+                    actionBtn.setMaxWidth(Double.MAX_VALUE);
+                    actionBtn.setStyle("-fx-font-weight: bold; -fx-text-fill: white; -fx-background-radius: 6; -fx-cursor: hand;");
+
+                    if ("IN_TRANSIT".equals(status)) {
+                        actionBtn.setText("Confirm Receipt");
+                        actionBtn.setStyle(actionBtn.getStyle() + "-fx-background-color: #10B981;");
+                        actionBtn.setOnAction(e -> handleConfirmReceipt(req));
+                        setGraphic(actionBtn);
+                    } else if ("AWAITING_HANDOVER".equals(status)) {
+                        actionBtn.setText("Show OTP");
+                        actionBtn.setStyle(actionBtn.getStyle() + "-fx-background-color: #6366F1;");
+                        actionBtn.setOnAction(e -> showMeetupDetails(req));
+                        setGraphic(actionBtn);
+                    } else if ("PENDING".equals(status)) {
+                        setGraphic(null);
+                    } else {
+                        setGraphic(null);
+                    }
+                }
+            }
+        });
 
         requestsTableView.setItems(requestsList);
 
-        // Cancel request button handler
+        // --- 3. EVENT HANDLERS & NAVIGATION ---
+        borrowedTableView.setOnKeyPressed(event -> {
+            if (event.isControlDown() && event.isShiftDown()) {
+                if (event.getCode() == KeyCode.O) { testOverdueWarning(); event.consume(); }
+                else if (event.getCode() == KeyCode.R) { removeTestOverdueBooks(); event.consume(); }
+            }
+        });
+
+        setupVignetteOverlay();
+
+        renewButton.setOnAction(e -> {
+            Book selected = borrowedTableView.getSelectionModel().getSelectedItem();
+            if (selected != null) handleRenew(selected);
+        });
+
+        returnButton.setOnAction(e -> {
+            Book selected = borrowedTableView.getSelectionModel().getSelectedItem();
+            if (selected != null) handleReturn(selected);
+        });
+
+        borrowedTableView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+            boolean hasSelection = newVal != null;
+            renewButton.setDisable(!hasSelection);
+            returnButton.setDisable(!hasSelection);
+        });
+
         cancelRequestButton.setOnAction(e -> {
             BorrowRequest selected = requestsTableView.getSelectionModel().getSelectedItem();
             if (selected != null) handleCancelRequest(selected);
         });
 
-        // Enable/disable cancel button based on selection
         requestsTableView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
             boolean hasSelection = newVal != null && "PENDING".equals(newVal.getStatus());
             cancelRequestButton.setDisable(!hasSelection);
         });
 
-        // Browse catalog columns
-        catIsbnColumn.setCellValueFactory(data -> 
-            new javafx.beans.property.SimpleStringProperty(data.getValue().getIsbn()));
-        catTitleColumn.setCellValueFactory(data -> 
-            new javafx.beans.property.SimpleStringProperty(data.getValue().getTitle()));
-        catAuthorColumn.setCellValueFactory(data -> 
-            new javafx.beans.property.SimpleStringProperty(data.getValue().getAuthor()));
-        catStatusColumn.setCellValueFactory(data -> 
-            new javafx.beans.property.SimpleStringProperty(
-                data.getValue().isAvailable() ? "Available" : "Borrowed"));
+        // Search Bar Real-Time Listener
+        if (searchField != null) {
+            searchField.textProperty().addListener((obs, oldVal, newVal) -> {
+                loadBrowseBooks();
+            });
+        }
 
-        catalogTableView.setItems(catalogList);
-
-            // Catalog search bar logic
-            if (catalogSearchField != null) {
-                catalogSearchField.textProperty().addListener((obs, oldVal, newVal) -> {
-                    filterCatalogBooks(newVal);
-                });
-            }
-
-        // Update notification badge
         updateNotificationBadge();
-
-        // Start on My Borrowed panel
         showMyBooks();
+        initializeSearchFilterPanel();
     }
 
     private void updateNotificationBadge() {
         int unreadCount = notificationDAO.getUnreadCount(currentUserId);
         if (unreadCount > 0) {
             notificationBadge.setText(String.valueOf(unreadCount));
-            notificationBadge.setStyle("-fx-text-fill: white; -fx-background-color: #e74c3c; " +
-                    "-fx-font-size: 9px; -fx-font-weight: bold; " +
-                    "-fx-padding: 0 3; -fx-background-radius: 8; " +
-                    "-fx-alignment: CENTER; -fx-min-width: 16; -fx-min-height: 16;");
             notificationBadge.setVisible(true);
         } else {
-            notificationBadge.setText("0");
-            notificationBadge.setStyle("-fx-text-fill: white; -fx-background-color: #e74c3c; " +
-                    "-fx-font-size: 9px; -fx-font-weight: bold; " +
-                    "-fx-padding: 0 3; -fx-background-radius: 8; " +
-                    "-fx-alignment: CENTER; -fx-min-width: 16; -fx-min-height: 16;");
             notificationBadge.setVisible(false);
         }
     }
@@ -275,82 +235,53 @@ public class BorrowerDashboardController extends BaseDashboardController {
         } else {
             notificationPanel.setVisible(true);
             notificationPanel.setManaged(true);
-            // Load notifications in background to avoid UI freezing
             new Thread(() -> {
                 java.util.List<Notification> notifications = notificationDAO.getUnreadNotifications(currentUserId);
                 javafx.application.Platform.runLater(() -> {
                     notificationListContainer.getChildren().clear();
                     if (notifications.isEmpty()) {
-                        Label emptyLabel = new Label("No new notifications");
-                        emptyLabel.setStyle("-fx-text-fill: #999; -fx-font-size: 13px;");
+                        Label emptyLabel = new Label("No new notifications.");
+                        emptyLabel.setStyle("-fx-text-fill: #9CA3AF; -fx-font-size: 13px; -fx-padding: 16;");
                         notificationListContainer.getChildren().add(emptyLabel);
                         return;
                     }
                     for (Notification notif : notifications) {
-                        VBox notificationItem = createNotificationItem(notif);
-                        notificationListContainer.getChildren().add(notificationItem);
+                        notificationListContainer.getChildren().add(createNotificationItem(notif));
                     }
                 });
             }).start();
         }
     }
 
-    private void loadNotifications() {
-        java.util.List<Notification> notifications = notificationDAO.getUnreadNotifications(currentUserId);
-        notificationListContainer.getChildren().clear();
-
-        if (notifications.isEmpty()) {
-            Label emptyLabel = new Label("No new notifications");
-            emptyLabel.setStyle("-fx-text-fill: #999; -fx-font-size: 13px;");
-            notificationListContainer.getChildren().add(emptyLabel);
-            return;
-        }
-
-        for (Notification notif : notifications) {
-            VBox notificationItem = createNotificationItem(notif);
-            notificationListContainer.getChildren().add(notificationItem);
-        }
-    }
-
     private VBox createNotificationItem(Notification notif) {
         VBox item = new VBox(6);
-        item.setStyle("-fx-border-color: #e8e8e8; -fx-border-width: 0 0 1 0; -fx-padding: 12 8; -fx-cursor: hand;");
-        item.setOnMouseEntered(e -> item.setStyle("-fx-background-color: #f5f5f5; -fx-border-color: #e8e8e8; -fx-border-width: 0 0 1 0; -fx-padding: 12 8; -fx-cursor: hand;"));
-        item.setOnMouseExited(e -> item.setStyle("-fx-border-color: #e8e8e8; -fx-border-width: 0 0 1 0; -fx-padding: 12 8; -fx-cursor: hand;"));
+        item.setStyle("-fx-border-color: transparent transparent #F3F4F6 transparent; -fx-border-width: 1; -fx-padding: 16; -fx-cursor: hand;");
+        item.setOnMouseEntered(e -> item.setStyle("-fx-background-color: #F9FAFB; -fx-border-color: transparent transparent #F3F4F6 transparent; -fx-border-width: 1; -fx-padding: 16; -fx-cursor: hand;"));
+        item.setOnMouseExited(e -> item.setStyle("-fx-background-color: transparent; -fx-border-color: transparent transparent #F3F4F6 transparent; -fx-border-width: 1; -fx-padding: 16; -fx-cursor: hand;"));
         item.setOnMouseClicked(e -> handleNotificationClick(notif));
 
         Label titleLabel = new Label(notif.getTitle());
-        titleLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 13px; -fx-text-fill: #1a1a2e;");
+        titleLabel.setStyle("-fx-font-weight: 700; -fx-font-size: 13px; -fx-text-fill: #111827;");
         titleLabel.setWrapText(true);
 
         Label messageLabel = new Label(notif.getMessage());
-        messageLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: #666; -fx-wrap-text: true;");
+        messageLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #6B7280; -fx-wrap-text: true;");
         messageLabel.setWrapText(true);
 
         Label timeLabel = new Label(getTimeAgo(notif.getCreatedAt()));
-        timeLabel.setStyle("-fx-font-size: 10px; -fx-text-fill: #999;");
+        timeLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: #9CA3AF; -fx-font-weight: 600;");
 
         item.getChildren().addAll(titleLabel, messageLabel, timeLabel);
         return item;
     }
 
     private void handleNotificationClick(Notification notif) {
-        // Mark notification as read
         notificationDAO.markAsRead(notif.getNotificationId());
-
-        // Navigate based on notification type
-        if ("BORROW_REQUEST".equals(notif.getType())) {
-            // Lender's view - not applicable for borrower
-        } else if ("REQUEST_ACCEPTED".equals(notif.getType()) || "REQUEST_REJECTED".equals(notif.getType())) {
-            // Show my requests
+        if ("REQUEST_ACCEPTED".equals(notif.getType()) || "REQUEST_REJECTED".equals(notif.getType())) {
             showMyRequests();
         }
-
-        // Close the panel
         notificationPanel.setVisible(false);
         notificationPanel.setManaged(false);
-
-        // Update badge
         updateNotificationBadge();
     }
 
@@ -379,48 +310,231 @@ public class BorrowerDashboardController extends BaseDashboardController {
 
     @FXML
     public void showMyBooks() {
-        myBooksPanel.setVisible(true);
-        myBooksPanel.setManaged(true);
-        myRequestsPanel.setVisible(false);
-        myRequestsPanel.setManaged(false);
-        browseCatalogPanel.setVisible(false);
-        browseCatalogPanel.setManaged(false);
-        setActiveButton(btnMyBooks);
-        setInactiveButton(btnMyRequests);
-        setInactiveButton(btnBrowse);
+        myBooksPanel.setVisible(true); myBooksPanel.setManaged(true);
+        myRequestsPanel.setVisible(false); myRequestsPanel.setManaged(false);
+        browseCatalogPanel.setVisible(false); browseCatalogPanel.setManaged(false);
+        setActiveButton(btnMyBooks); setInactiveButton(btnMyRequests); setInactiveButton(btnBrowse);
         loadMyBorrowedBooks();
     }
 
     @FXML
     public void showMyRequests() {
-        myRequestsPanel.setVisible(true);
-        myRequestsPanel.setManaged(true);
-        myBooksPanel.setVisible(false);
-        myBooksPanel.setManaged(false);
-        browseCatalogPanel.setVisible(false);
-        browseCatalogPanel.setManaged(false);
-        setActiveButton(btnMyRequests);
-        setInactiveButton(btnMyBooks);
-        setInactiveButton(btnBrowse);
+        myRequestsPanel.setVisible(true); myRequestsPanel.setManaged(true);
+        myBooksPanel.setVisible(false); myBooksPanel.setManaged(false);
+        browseCatalogPanel.setVisible(false); browseCatalogPanel.setManaged(false);
+        setActiveButton(btnMyRequests); setInactiveButton(btnMyBooks); setInactiveButton(btnBrowse);
         loadMyRequests();
-        // Still check for overdue books to keep warning visible
         checkForOverdueBooks();
     }
 
     @FXML
     public void showBrowseCatalog() {
-        browseCatalogPanel.setVisible(true);
-        browseCatalogPanel.setManaged(true);
-        myBooksPanel.setVisible(false);
-        myBooksPanel.setManaged(false);
-        myRequestsPanel.setVisible(false);
-        myRequestsPanel.setManaged(false);
-        setActiveButton(btnBrowse);
-        setInactiveButton(btnMyBooks);
-        setInactiveButton(btnMyRequests);
-        loadCatalog();
-        // Still check for overdue books to keep warning visible
+        browseCatalogPanel.setVisible(true); browseCatalogPanel.setManaged(true);
+        myBooksPanel.setVisible(false); myBooksPanel.setManaged(false);
+        myRequestsPanel.setVisible(false); myRequestsPanel.setManaged(false);
+        setActiveButton(btnBrowse); setInactiveButton(btnMyBooks); setInactiveButton(btnMyRequests);
         checkForOverdueBooks();
+        loadBrowseBooks();
+    }
+
+    // --- SPRINT 3: GRID VIEW LOAD LOGIC ---
+    private void loadBrowseBooks() {
+        // 1. Grab Main Search Bar Text
+        String query = searchField != null && searchField.getText() != null ? searchField.getText().trim() : null;
+
+        // 2. Grab Advanced Filter Values (safely)
+        String genre = searchFilterController != null ? searchFilterController.getGenre() : null;
+        String condition = searchFilterController != null ? searchFilterController.getCondition() : null;
+        boolean availableOnly = searchFilterController != null && searchFilterController.isAvailableOnly();
+        String sortBy = searchFilterController != null ? searchFilterController.getSortBy() : "newest";
+
+        new Thread(() -> {
+            // 3. Use the US-3 Database Method!
+            SupaBookDAO supaBookDAO = (SupaBookDAO) bookDAO;
+            java.util.List<Book> searchResults = supaBookDAO.findByFilters(query, genre, condition, availableOnly, sortBy, 50, 0);
+
+            // Filter out books the user owns themselves
+            java.util.List<Book> finalBooks = searchResults.stream()
+                    .filter(b -> b.getOwnerId() != currentUserId)
+                    .toList();
+
+            // 4. Update the Grid
+            javafx.application.Platform.runLater(() -> {
+                if (bookGrid != null) {
+                    bookGrid.getChildren().clear();
+
+                    if (finalBooks.isEmpty()) {
+                        Label noResults = new Label("No assets found matching your criteria.");
+                        noResults.setStyle("-fx-font-size: 14px; -fx-text-fill: #6B7280; -fx-padding: 20;");
+                        bookGrid.getChildren().add(noResults);
+                    } else {
+                        for (Book book : finalBooks) {
+                            bookGrid.getChildren().add(createBookCard(book));
+                        }
+                    }
+                }
+            });
+        }).start();
+    }
+
+    private VBox createBookCard(Book book) {
+        VBox card = new VBox(10);
+        card.setStyle("-fx-background-color: white; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 5); -fx-padding: 15; -fx-alignment: top-center;");
+        card.setPrefWidth(200);
+        card.setMaxWidth(200);
+
+        javafx.scene.layout.StackPane imageContainer = new javafx.scene.layout.StackPane();
+        imageContainer.setPrefSize(150, 200);
+
+        if (book.getCoverUrl() != null && !book.getCoverUrl().isEmpty()) {
+            ImageView cover = new ImageView();
+            cover.setFitWidth(150);
+            cover.setFitHeight(200);
+            cover.setPreserveRatio(true);
+            cover.setImage(new Image(book.getCoverUrl(), 150, 200, true, true));
+            imageContainer.getChildren().add(cover);
+        } else {
+            javafx.scene.shape.Rectangle fallbackRect = new javafx.scene.shape.Rectangle(150, 200, Color.web("#E5E7EB"));
+            fallbackRect.setArcWidth(10); fallbackRect.setArcHeight(10);
+            Label fallbackText = new Label(book.getTitle());
+            fallbackText.setWrapText(true);
+            fallbackText.setStyle("-fx-text-fill: #6B7280; -fx-font-weight: bold; -fx-alignment: center; -fx-padding: 10;");
+            fallbackText.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
+            imageContainer.getChildren().addAll(fallbackRect, fallbackText);
+        }
+
+        Label title = new Label(book.getTitle());
+        title.setStyle("-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #111827;");
+        title.setWrapText(true);
+        title.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
+        title.setMaxHeight(40);
+
+        Label author = new Label(book.getAuthor());
+        author.setStyle("-fx-text-fill: #6B7280; -fx-font-size: 12px;");
+
+        String conditionText = book.getCondition() != null ? book.getCondition() : "Good";
+        Label condition = new Label(conditionText);
+
+        if ("Like New".equals(conditionText)) {
+            condition.setStyle("-fx-background-color: #D1FAE5; -fx-text-fill: #065F46; -fx-padding: 3 8; -fx-background-radius: 12; -fx-font-size: 10px; -fx-font-weight: bold;");
+        } else if ("Very Good".equals(conditionText) || "Good".equals(conditionText)) {
+            condition.setStyle("-fx-background-color: #E0E7FF; -fx-text-fill: #4338CA; -fx-padding: 3 8; -fx-background-radius: 12; -fx-font-size: 10px; -fx-font-weight: bold;");
+        } else {
+            condition.setStyle("-fx-background-color: #FEF3C7; -fx-text-fill: #92400E; -fx-padding: 3 8; -fx-background-radius: 12; -fx-font-size: 10px; -fx-font-weight: bold;");
+        }
+
+        Button requestBtn = new Button("Request Asset");
+        requestBtn.setMaxWidth(Double.MAX_VALUE);
+        requestBtn.setStyle("-fx-background-color: #3B82F6; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand; -fx-padding: 8; -fx-background-radius: 6;");
+
+        requestBtn.setOnAction(e -> handleBorrowRequest(book));
+
+        card.getChildren().addAll(imageContainer, title, author, condition, requestBtn);
+        return card;
+    }
+
+    private void initializeSearchFilterPanel() {
+        try {
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(
+                    SearchFilterPanelController.class.getResource("/view/SearchFilterPanel.fxml")
+            );
+            VBox searchPanel = loader.load();
+            searchFilterController = loader.getController();
+
+            // WHEN "APPLY FILTERS" IS CLICKED -> REFRESH THE GRID!
+            searchFilterController.setOnFilterAppliedListener(this::loadBrowseBooks);
+
+            if (searchFilterContainer != null) {
+                searchFilterContainer.getChildren().clear();
+                searchFilterContainer.getChildren().add(searchPanel);
+            }
+
+        } catch (java.io.IOException e) {
+            System.err.println("[BorrowerDashboard] Failed to load SearchFilterPanel: " + e.getMessage());
+        }
+    }
+
+    private void handleBorrowRequest(Book book) {
+        showAvailabilityForBook(book.getIsbn());
+    }
+
+    private void showAvailabilityForBook(String isbn) {
+        selectedBookIsbn = isbn;
+        Book book = bookDAO.findByIsbn(isbn);
+        if (book == null) return;
+
+        try {
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(
+                    AvailabilityPanelController.class.getResource("/view/AvailabilityPanel.fxml")
+            );
+            VBox availabilityPanel = loader.load();
+            availabilityController = loader.getController();
+
+            availabilityController.setOnBorrowClickedListener((lenderId) -> {
+                this.onBorrowFromAvailability(isbn, lenderId, book.getTitle());
+            });
+
+            availabilityController.loadAvailability(isbn);
+
+            // --- THE POP-UP DIALOG UX ---
+            Dialog<ButtonType> dialog = new Dialog<>();
+            dialog.setTitle("Asset Availability");
+            dialog.setHeaderText("Available Copies: " + book.getTitle());
+
+            // Put your AvailabilityPanel FXML directly inside the pop-up!
+            dialog.getDialogPane().setContent(availabilityPanel);
+
+            // Add a close button so they can dismiss it
+            dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
+
+            dialog.showAndWait();
+
+        } catch (java.io.IOException e) {
+            System.err.println("[BorrowerDashboard] Failed to load AvailabilityPanel: " + e.getMessage());
+        }
+    }
+
+    private void onBorrowFromAvailability(String isbn, int lenderId, String title) {
+        Dialog<LocalDate> dialog = new Dialog<>();
+        dialog.setTitle("Request to Borrow Book");
+        dialog.setHeaderText("Request: " + title);
+
+        DatePicker dueDate = new DatePicker(LocalDate.now().plusDays(14));
+        dueDate.setStyle("-fx-font-size: 13px; -fx-padding: 10;");
+
+        javafx.scene.layout.GridPane grid = new javafx.scene.layout.GridPane();
+        grid.setHgap(10); grid.setVgap(10); grid.setPadding(new javafx.geometry.Insets(10));
+        grid.add(new Label("Requested Due Date (default 14 days):"), 0, 0);
+        grid.add(dueDate, 1, 0);
+
+        dialog.getDialogPane().setContent(grid);
+        dialog.getDialogPane().getButtonTypes().addAll(javafx.scene.control.ButtonType.OK, javafx.scene.control.ButtonType.CANCEL);
+
+        dialog.setResultConverter(buttonType -> buttonType == javafx.scene.control.ButtonType.OK ? dueDate.getValue() : null);
+
+        if (dialog.showAndWait().isPresent()) {
+            LocalDate selectedDueDate = dialog.getResult();
+            if (selectedDueDate != null && selectedDueDate.isAfter(LocalDate.now())) {
+                BorrowRequest request = new BorrowRequest(isbn, currentUserId, lenderId, selectedDueDate);
+                int requestId = borrowRequestDAO.createBorrowRequest(request);
+
+                if (requestId > 0) {
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setHeaderText("Borrow Request Created!");
+                    alert.setContentText("Your request has been sent to the lender. Check 'My Requests' for status.");
+                    alert.showAndWait();
+
+                    loadBrowseBooks(); // Refresh grid
+                    loadMyRequests();
+                    showMyRequests();
+                } else {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setHeaderText("Request Failed");
+                    alert.setContentText("Unable to create borrow request. Please try again.");
+                    alert.showAndWait();
+                }
+            }
+        }
     }
 
     private void loadMyBorrowedBooks() {
@@ -430,141 +544,27 @@ public class BorrowerDashboardController extends BaseDashboardController {
     }
 
     private void loadMyRequests() {
-        // Load requests asynchronously to avoid blocking UI
         new Thread(() -> {
             java.util.List<BorrowRequest> requests = borrowRequestDAO.getMyRequests(currentUserId);
-            
-            // Pre-fetch all book details to avoid multiple DB queries
             java.util.Map<String, Book> bookCache = new java.util.HashMap<>();
             for (BorrowRequest req : requests) {
                 if (!bookCache.containsKey(req.getBookIsbn())) {
                     Book book = bookDAO.findByIsbn(req.getBookIsbn());
-                    if (book != null) {
-                        bookCache.put(req.getBookIsbn(), book);
-                    }
+                    if (book != null) bookCache.put(req.getBookIsbn(), book);
                 }
             }
-            
-            // Store cache for cell value factories to use
             cachedBooks = bookCache;
-            
-            // Update UI on JavaFX thread
             javafx.application.Platform.runLater(() -> {
                 requestsList.clear();
                 requestsList.addAll(requests);
             });
         }).start();
     }
-    
-    // Cache for books to avoid repeated queries
-    private java.util.Map<String, Book> cachedBooks = new java.util.HashMap<>();
-
-    private void loadCatalog() {
-            catalogList.clear();
-            catalogList.addAll(
-                bookDAO.getAll().stream()
-                    .filter(book -> book.isAvailable() && book.isListed() && book.getOwnerId() != currentUserId)
-                    .collect(java.util.stream.Collectors.toList()));
-            // Re-apply filter if search bar is not empty
-            if (catalogSearchField != null && !catalogSearchField.getText().isEmpty()) {
-                filterCatalogBooks(catalogSearchField.getText());
-            }
-        }
-
-        private void filterCatalogBooks(String filter) {
-            if (filter == null || filter.isEmpty()) {
-                catalogTableView.setItems(catalogList);
-                return;
-            }
-            String lower = filter.toLowerCase();
-            ObservableList<Book> filtered = catalogList.filtered(book ->
-                (book.getTitle() != null && book.getTitle().toLowerCase().contains(lower)) ||
-                (book.getAuthor() != null && book.getAuthor().toLowerCase().contains(lower)) ||
-                (book.getIsbn() != null && book.getIsbn().toLowerCase().contains(lower)) ||
-                (book.getGenre() != null && book.getGenre().toLowerCase().contains(lower))
-            );
-            catalogTableView.setItems(filtered);
-    }
 
     @FXML
     private void switchToLender() {
         navigateTo("/view/LenderDashboard.fxml", "Lender Dashboard",
-                ctrl -> ((LenderDashboardController) ctrl).setUsername(currentUsername));
-    }
-
-    @FXML
-    private void handleBorrow(Book book) {
-        Dialog<LocalDate> dialog = new Dialog<>();
-        dialog.setTitle("Request to Borrow Book");
-        dialog.setHeaderText("Request: " + book.getTitle());
-
-        DatePicker dueDate = new DatePicker(LocalDate.now().plusDays(14));
-        dueDate.setStyle("-fx-font-size: 13px; -fx-padding: 10;");
-        
-        javafx.scene.layout.GridPane grid = new javafx.scene.layout.GridPane();
-        grid.setHgap(10);
-        grid.setVgap(10);
-        grid.setPadding(new javafx.geometry.Insets(10));
-        grid.add(new Label("Requested Due Date (default 14 days):"), 0, 0);
-        grid.add(dueDate, 1, 0);
-        
-        dialog.getDialogPane().setContent(grid);
-        dialog.getDialogPane().getButtonTypes().addAll(javafx.scene.control.ButtonType.OK, javafx.scene.control.ButtonType.CANCEL);
-
-        dialog.setResultConverter(buttonType -> 
-            buttonType == javafx.scene.control.ButtonType.OK ? dueDate.getValue() : null);
-
-        if (dialog.showAndWait().isPresent()) {
-            LocalDate selectedDueDate = dialog.getResult();
-            if (selectedDueDate != null && selectedDueDate.isAfter(LocalDate.now())) {
-                // Create a borrow request instead of immediately borrowing
-                BorrowRequest request = new BorrowRequest(
-                    book.getIsbn(),
-                    currentUserId,
-                    book.getOwnerId(),
-                    selectedDueDate
-                );
-                
-                int requestId = borrowRequestDAO.createBorrowRequest(request);
-                
-                if (requestId > 0) {
-                    // Create notification for the lender
-                    Notification lenderNotif = new Notification(
-                        book.getOwnerId(),
-                        "BORROW_REQUEST",
-                        "New Request for " + book.getTitle(),
-                        "User has requested to borrow \"" + book.getTitle() + "\" until " + selectedDueDate,
-                        book.getIsbn(),
-                        currentUserId,
-                        "pending-requests"
-                    );
-                    notificationDAO.createNotification(lenderNotif);
-                    updateNotificationBadge();
-                    
-                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                    alert.setTitle("Request Sent");
-                    alert.setHeaderText("Borrow Request Submitted!");
-                    alert.setContentText("Your request for \"" + book.getTitle() + "\" has been sent to the lender.\n\n" +
-                                        "Requested Return Date: " + selectedDueDate + "\n\n" +
-                                        "The lender will review your request and notify you of their decision.");
-                    alert.showAndWait();
-                    
-                    loadCatalog();
-                    showMyRequests();
-                } else {
-                    Alert alert = new Alert(Alert.AlertType.ERROR);
-                    alert.setTitle("Error");
-                    alert.setHeaderText("Failed to create request");
-                    alert.setContentText("Could not submit your borrow request. Please try again.");
-                    alert.showAndWait();
-                }
-            } else {
-                Alert alert = new Alert(Alert.AlertType.WARNING);
-                alert.setTitle("Invalid Date");
-                alert.setHeaderText("Due date must be in the future!");
-                alert.showAndWait();
-            }
-        }
+                ctrl -> ((BaseDashboardController) ctrl).setUsername(currentUsername, currentUserId));
     }
 
     @FXML
@@ -572,45 +572,29 @@ public class BorrowerDashboardController extends BaseDashboardController {
         Dialog<LocalDate> dialog = new Dialog<>();
         dialog.setTitle("Renew Book");
         dialog.setHeaderText("Renew: " + book.getTitle());
-        
+
         LocalDate currentDue = book.getDueDate();
         LocalDate suggestedDue = currentDue != null ? currentDue.plusDays(14) : LocalDate.now().plusDays(14);
 
         DatePicker newDueDate = new DatePicker(suggestedDue);
         newDueDate.setStyle("-fx-font-size: 13px; -fx-padding: 10;");
-        
+
         javafx.scene.layout.GridPane grid = new javafx.scene.layout.GridPane();
-        grid.setHgap(10);
-        grid.setVgap(10);
-        grid.setPadding(new javafx.geometry.Insets(10));
+        grid.setHgap(10); grid.setVgap(10); grid.setPadding(new javafx.geometry.Insets(10));
         grid.add(new Label("Current Due Date:"), 0, 0);
         grid.add(new Label(currentDue != null ? currentDue.toString() : "N/A"), 1, 0);
         grid.add(new Label("New Due Date:"), 0, 1);
         grid.add(newDueDate, 1, 1);
-        
+
         dialog.getDialogPane().setContent(grid);
         dialog.getDialogPane().getButtonTypes().addAll(javafx.scene.control.ButtonType.OK, javafx.scene.control.ButtonType.CANCEL);
-
-        dialog.setResultConverter(buttonType -> 
-            buttonType == javafx.scene.control.ButtonType.OK ? newDueDate.getValue() : null);
+        dialog.setResultConverter(buttonType -> buttonType == javafx.scene.control.ButtonType.OK ? newDueDate.getValue() : null);
 
         if (dialog.showAndWait().isPresent()) {
             LocalDate selectedDueDate = dialog.getResult();
             if (selectedDueDate != null && selectedDueDate.isAfter(LocalDate.now())) {
                 bookDAO.renewBook(book.getIsbn(), selectedDueDate);
-                
-                Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                alert.setTitle("Success");
-                alert.setHeaderText("Book Renewed!");
-                alert.setContentText("New due date: " + selectedDueDate);
-                alert.showAndWait();
-                
                 loadMyBorrowedBooks();
-            } else {
-                Alert alert = new Alert(Alert.AlertType.WARNING);
-                alert.setTitle("Invalid Date");
-                alert.setHeaderText("New due date must be in the future!");
-                alert.showAndWait();
             }
         }
     }
@@ -618,90 +602,95 @@ public class BorrowerDashboardController extends BaseDashboardController {
     @FXML
     private void handleReturn(Book book) {
         Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
-        confirmAlert.setTitle("Return Book");
-        confirmAlert.setHeaderText("Return: " + book.getTitle());
-        confirmAlert.setContentText("Are you sure you want to return this book?");
+        confirmAlert.setHeaderText("Initiate Return: " + book.getTitle());
+        confirmAlert.setContentText("This will start the return process. You will need to choose a handover method.");
 
-        if (confirmAlert.showAndWait().isPresent() && 
-            confirmAlert.getResult() == javafx.scene.control.ButtonType.OK) {
-            bookDAO.returnBook(book.getIsbn());
-            
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("Success");
-            alert.setHeaderText("Book Returned!");
-            alert.setContentText("Thank you for returning \"" + book.getTitle() + "\"");
-            alert.showAndWait();
-            
-            loadMyBorrowedBooks();
-            loadCatalog();
+        if (confirmAlert.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) return;
+
+        SupaBorrowRequestDAO dao = (SupaBorrowRequestDAO) borrowRequestDAO;
+        List<BorrowRequest> active = dao.getActiveRequestsFor(currentUserId);
+        BorrowRequest currentReq = active.stream()
+                .filter(r -> r.getBookIsbn().equals(book.getIsbn()) && "BORROWED".equals(r.getStatus()))
+                .findFirst().orElse(null);
+
+        if (currentReq == null) {
+            Alert error = new Alert(Alert.AlertType.WARNING);
+            error.setHeaderText("Action Not Allowed");
+            error.setContentText("The system doesn't register this book as officially 'BORROWED' yet.\n\nMake sure the Lender has verified your OTP or you have confirmed the Courier receipt!");
+            error.showAndWait();
+            return;
         }
+
+        Optional<HandoverMethodDialogController.HandoverMethod> methodOpt = HandoverMethodDialogController.show();
+        if (methodOpt.isEmpty()) return;
+
+        if (methodOpt.get() == HandoverMethodDialogController.HandoverMethod.MEETUP) {
+            if (dao.initiateReturnMeetup(currentReq.getRequestId())) {
+                BorrowRequest updated = dao.getRequestById(currentReq.getRequestId());
+                String returnOtp = (updated.getHandover() != null) ? updated.getHandover().getReturnOtp() : "N/A";
+
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setHeaderText("Return Meetup Initiated");
+                alert.setContentText("Show this Return OTP to the lender when you meet: " + returnOtp);
+                alert.showAndWait();
+            }
+        } else {
+            Optional<CourierFormDialogController.CourierDetails> courierOpt = CourierFormDialogController.show();
+            if (courierOpt.isPresent()) {
+                CourierFormDialogController.CourierDetails d = courierOpt.get();
+                HandoverDetails h = new HandoverDetails();
+                h.setReturnCourierService(d.service);
+                h.setReturnCourierPerson(d.personName);
+                h.setReturnVehiclePlate(d.vehiclePlate);
+                h.setReturnVehicleType(d.vehicleType);
+                h.setReturnProofImageUrl(d.proofImagePath);
+
+                if (dao.initiateReturnCourier(currentReq.getRequestId(), h)) {
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION, "Book is in transit back to the lender.");
+                    alert.show();
+                }
+            }
+        }
+
+        loadMyBorrowedBooks();
+        loadMyRequests();
     }
 
     private void handleCancelRequest(BorrowRequest request) {
         Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
-        confirmAlert.setTitle("Cancel Request");
         confirmAlert.setHeaderText("Cancel Borrow Request");
         confirmAlert.setContentText("Are you sure you want to cancel this request?");
 
-        if (confirmAlert.showAndWait().isPresent() && 
-            confirmAlert.getResult() == javafx.scene.control.ButtonType.OK) {
-            
-            boolean cancelled = borrowRequestDAO.cancelBorrowRequest(request.getRequestId());
-            
-            if (cancelled) {
-                Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                alert.setTitle("Success");
-                alert.setHeaderText("Request Cancelled");
-                alert.setContentText("Your borrow request has been cancelled.");
-                alert.showAndWait();
-                
+        if (confirmAlert.showAndWait().isPresent() && confirmAlert.getResult() == javafx.scene.control.ButtonType.OK) {
+            if (borrowRequestDAO.cancelBorrowRequest(request.getRequestId())) {
                 loadMyRequests();
-            } else {
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Error");
-                alert.setHeaderText("Could not cancel request");
-                alert.setContentText("The request may have already been processed.");
-                alert.showAndWait();
             }
         }
     }
 
     private void setActiveButton(Button btn) {
-        btn.setStyle("-fx-background-color: rgba(0,0,0,0.2); " +
-                "-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 13px; " +
-                "-fx-padding: 14 20; -fx-cursor: hand; -fx-background-radius: 0; " +
-                "-fx-border-color: transparent transparent transparent white; " +
-                "-fx-border-width: 0 0 0 3; -fx-alignment: CENTER_LEFT;");
+        btn.setStyle("-fx-background-color: rgba(0,0,0,0.2); -fx-text-fill: #FFFFFF; -fx-font-weight: 700; -fx-padding: 10 16; -fx-cursor: hand; -fx-background-radius: 6; -fx-border-color: transparent transparent transparent #8B5CF6; -fx-border-width: 0 0 0 3;");
     }
 
     private void setInactiveButton(Button btn) {
-        btn.setStyle("-fx-background-color: transparent; -fx-text-fill: rgba(255,255,255,0.7); " +
-                "-fx-font-size: 13px; -fx-padding: 14 20; -fx-cursor: hand; " +
-                "-fx-background-radius: 0; -fx-alignment: CENTER_LEFT;");
+        btn.setStyle("-fx-background-color: transparent; -fx-text-fill: #C4B5FD; -fx-font-weight: 600; -fx-padding: 10 16; -fx-cursor: hand; -fx-background-radius: 6; -fx-border-width: 0;");
     }
 
-    /**
-     * Checks for overdue books in the borrowed list and displays the warning banner if any are found.
-     * If called from another panel, also loads borrowed books from database.
-     */
     private void checkForOverdueBooks() {
-        // Load borrowed books to check for overdue
         java.util.List<Book> booksToCheck = borrowedList;
-        
-        // If borrowedList is empty and we're not on the My Borrowed tab, load from DB
         if (booksToCheck.isEmpty() && !myBooksPanel.isVisible()) {
             booksToCheck = bookDAO.findBorrowedByUser(currentUserId);
         }
-        
+
         java.util.List<Book> overdueBooks = new java.util.ArrayList<>();
         LocalDate today = LocalDate.now();
-        
+
         for (Book book : booksToCheck) {
             if (book.getDueDate() != null && book.getDueDate().isBefore(today)) {
                 overdueBooks.add(book);
             }
         }
-        
+
         if (!overdueBooks.isEmpty()) {
             displayOverdueWarning(overdueBooks);
         } else {
@@ -709,279 +698,155 @@ public class BorrowerDashboardController extends BaseDashboardController {
         }
     }
 
-    /**
-     * Displays the overdue warning banner with information about overdue books.
-     * Applies pulsing animation for visual "bleeding" effect on both banner and entire dashboard.
-     */
     private void displayOverdueWarning(java.util.List<Book> overdueBooks) {
         overdueWarningBanner.setVisible(true);
         overdueWarningBanner.setManaged(true);
-        
-        // Update message with number of overdue books
         int count = overdueBooks.size();
         String title = count == 1 ? "1 Overdue Book" : count + " Overdue Books";
-        String message = "⏰ Due " + (count == 1 ? "date" : "dates") + " passed. " + 
-                        "Return " + (count == 1 ? "it" : "them") + " as soon as possible.";
-        
+        String message = "⏰ Due " + (count == 1 ? "date" : "dates") + " passed. Return " + (count == 1 ? "it" : "them") + " as soon as possible.";
+
         overdueWarningTitle.setText(title);
         overdueWarningMessage.setText(message);
-        
-        // Apply pulsing animation to both banner and dashboard
         applyOverdueAnimation();
         applyDashboardBleedingEffect();
     }
 
-    /**
-     * Hides the overdue warning banner and stops all animations.
-     */
     private void hideOverdueWarning() {
         overdueWarningBanner.setVisible(false);
         overdueWarningBanner.setManaged(false);
-        
+
         if (vignetteOverlay != null) {
-            // Fade vignette back to baseline opacity instead of hiding completely
             javafx.animation.Timeline fadeOut = new javafx.animation.Timeline(
-                new javafx.animation.KeyFrame(javafx.util.Duration.millis(300),
-                    new javafx.animation.KeyValue(vignetteOverlay.opacityProperty(), 0.25))
+                    new javafx.animation.KeyFrame(javafx.util.Duration.millis(300),
+                            new javafx.animation.KeyValue(vignetteOverlay.opacityProperty(), 0.25))
             );
             fadeOut.play();
         }
-        
-        // Stop banner animation
-        if (overdueWarningBanner.getUserData() instanceof javafx.animation.Timeline) {
-            ((javafx.animation.Timeline) overdueWarningBanner.getUserData()).stop();
-        }
-        
-        // Stop all dashboard animations
-        Object userData = dashboardRoot.getUserData();
-        if (userData instanceof Object[]) {
-            Object[] timelines = (Object[]) userData;
+
+        if (dashboardRoot.getUserData() instanceof Object[]) {
+            Object[] timelines = (Object[]) dashboardRoot.getUserData();
             for (Object timeline : timelines) {
                 if (timeline instanceof javafx.animation.Timeline) {
                     ((javafx.animation.Timeline) timeline).stop();
                 }
             }
         }
-        
-        // Reset style
-        dashboardRoot.setStyle("-fx-background-color: #f5f0fa;");
+
+        dashboardRoot.setStyle("-fx-background-color: #F3F4F6;");
         dashboardRoot.setTranslateX(0);
         dashboardRoot.setTranslateY(0);
     }
 
-    /**
-     * Applies a pulsing animation to the warning banner to create a "bleeding" visual effect.
-     * The animation continuously pulses with increased glow, scaling, and color changes.
-     * Similar to the "HP low" warning effect in PUBG.
-     */
     private void applyOverdueAnimation() {
         javafx.animation.Timeline timeline = new javafx.animation.Timeline(
-            // Start: Normal state
-            new javafx.animation.KeyFrame(
-                javafx.util.Duration.millis(0),
-                new javafx.animation.KeyValue(overdueWarningBanner.scaleXProperty(), 1.0),
-                new javafx.animation.KeyValue(overdueWarningBanner.scaleYProperty(), 1.0),
-                new javafx.animation.KeyValue(overdueWarningBanner.opacityProperty(), 1.0),
-                new javafx.animation.KeyValue(overdueWarningBanner.translateXProperty(), 0)
-            ),
-            // 25%: Pulse - Scale up slightly with slight vibration
-            new javafx.animation.KeyFrame(
-                javafx.util.Duration.millis(600),
-                new javafx.animation.KeyValue(overdueWarningBanner.scaleXProperty(), 1.02),
-                new javafx.animation.KeyValue(overdueWarningBanner.scaleYProperty(), 1.05),
-                new javafx.animation.KeyValue(overdueWarningBanner.opacityProperty(), 0.93),
-                new javafx.animation.KeyValue(overdueWarningBanner.translateXProperty(), 3)
-            ),
-            // 50%: Peak glow - Maximum intensity
-            new javafx.animation.KeyFrame(
-                javafx.util.Duration.millis(1200),
-                new javafx.animation.KeyValue(overdueWarningBanner.scaleXProperty(), 1.0),
-                new javafx.animation.KeyValue(overdueWarningBanner.scaleYProperty(), 1.0),
-                new javafx.animation.KeyValue(overdueWarningBanner.opacityProperty(), 1.0),
-                new javafx.animation.KeyValue(overdueWarningBanner.translateXProperty(), -3)
-            ),
-            // 75%: Dim - Fade out slightly (like "pain" effect)
-            new javafx.animation.KeyFrame(
-                javafx.util.Duration.millis(1800),
-                new javafx.animation.KeyValue(overdueWarningBanner.scaleXProperty(), 0.98),
-                new javafx.animation.KeyValue(overdueWarningBanner.scaleYProperty(), 0.98),
-                new javafx.animation.KeyValue(overdueWarningBanner.opacityProperty(), 0.86),
-                new javafx.animation.KeyValue(overdueWarningBanner.translateXProperty(), 2)
-            ),
-            // Back to start for loop
-            new javafx.animation.KeyFrame(
-                javafx.util.Duration.millis(2400),
-                new javafx.animation.KeyValue(overdueWarningBanner.scaleXProperty(), 1.0),
-                new javafx.animation.KeyValue(overdueWarningBanner.scaleYProperty(), 1.0),
-                new javafx.animation.KeyValue(overdueWarningBanner.opacityProperty(), 1.0),
-                new javafx.animation.KeyValue(overdueWarningBanner.translateXProperty(), 0)
-            )
+                new javafx.animation.KeyFrame(javafx.util.Duration.millis(0), new javafx.animation.KeyValue(overdueWarningBanner.scaleXProperty(), 1.0), new javafx.animation.KeyValue(overdueWarningBanner.scaleYProperty(), 1.0), new javafx.animation.KeyValue(overdueWarningBanner.opacityProperty(), 1.0), new javafx.animation.KeyValue(overdueWarningBanner.translateXProperty(), 0)),
+                new javafx.animation.KeyFrame(javafx.util.Duration.millis(600), new javafx.animation.KeyValue(overdueWarningBanner.scaleXProperty(), 1.02), new javafx.animation.KeyValue(overdueWarningBanner.scaleYProperty(), 1.05), new javafx.animation.KeyValue(overdueWarningBanner.opacityProperty(), 0.93), new javafx.animation.KeyValue(overdueWarningBanner.translateXProperty(), 3)),
+                new javafx.animation.KeyFrame(javafx.util.Duration.millis(1200), new javafx.animation.KeyValue(overdueWarningBanner.scaleXProperty(), 1.0), new javafx.animation.KeyValue(overdueWarningBanner.scaleYProperty(), 1.0), new javafx.animation.KeyValue(overdueWarningBanner.opacityProperty(), 1.0), new javafx.animation.KeyValue(overdueWarningBanner.translateXProperty(), -3)),
+                new javafx.animation.KeyFrame(javafx.util.Duration.millis(1800), new javafx.animation.KeyValue(overdueWarningBanner.scaleXProperty(), 0.98), new javafx.animation.KeyValue(overdueWarningBanner.scaleYProperty(), 0.98), new javafx.animation.KeyValue(overdueWarningBanner.opacityProperty(), 0.86), new javafx.animation.KeyValue(overdueWarningBanner.translateXProperty(), 2)),
+                new javafx.animation.KeyFrame(javafx.util.Duration.millis(2400), new javafx.animation.KeyValue(overdueWarningBanner.scaleXProperty(), 1.0), new javafx.animation.KeyValue(overdueWarningBanner.scaleYProperty(), 1.0), new javafx.animation.KeyValue(overdueWarningBanner.opacityProperty(), 1.0), new javafx.animation.KeyValue(overdueWarningBanner.translateXProperty(), 0))
         );
         timeline.setCycleCount(javafx.animation.Animation.INDEFINITE);
         timeline.play();
-        
-        // Store timeline for cleanup if needed
-        overdueWarningBanner.setUserData(timeline);
     }
 
-    /**
-     * Sets up the vignette overlay with the red gradient effect.
-     */
     private void setupVignetteOverlay() {
         if (vignetteOverlay == null) return;
-        
         vignetteOverlay.getChildren().clear();
         vignetteOverlay.setMouseTransparent(true);
         vignetteOverlay.setPickOnBounds(false);
-        
-        // Create radial gradient for vignette effect (dark red on edges, transparent in center)
+
         javafx.scene.paint.RadialGradient gradient = new javafx.scene.paint.RadialGradient(
-            0.5, 0.5,  // centerX, centerY
-            0.5, 0.5,  // focusX, focusY
-            0.8,       // radius
-            false,     // proportional
-            javafx.scene.paint.CycleMethod.NO_CYCLE,
-            new javafx.scene.paint.Stop(0, javafx.scene.paint.Color.web("#00000000")),  // Transparent center
-            new javafx.scene.paint.Stop(0.6, javafx.scene.paint.Color.web("#c0392bff")), // Red edges
-            new javafx.scene.paint.Stop(1.0, javafx.scene.paint.Color.web("#990000ff"))  // Dark red corners
+                0.5, 0.5, 0.5, 0.5, 0.8, false, javafx.scene.paint.CycleMethod.NO_CYCLE,
+                new javafx.scene.paint.Stop(0, javafx.scene.paint.Color.web("#00000000")),
+                new javafx.scene.paint.Stop(0.6, javafx.scene.paint.Color.web("#EF444433")),
+                new javafx.scene.paint.Stop(1.0, javafx.scene.paint.Color.web("#B91C1C80"))
         );
-        
+
         javafx.scene.shape.Rectangle vignetteRect = new javafx.scene.shape.Rectangle();
         vignetteRect.widthProperty().bind(vignetteOverlay.widthProperty());
         vignetteRect.heightProperty().bind(vignetteOverlay.heightProperty());
         vignetteRect.setFill(gradient);
         vignetteRect.setMouseTransparent(true);
-        
+
         vignetteOverlay.getChildren().add(vignetteRect);
-        vignetteOverlay.setOpacity(0.25);  // Subtle but visible red vignette
-        vignetteOverlay.setVisible(true);  // Always visible on dashboard
-    }
-    
-    /**
-     * Creates the vignette overlay that will appear on top of content without blocking it.
-     */
-    private void createVignetteOverlay() {
-        // This is now handled by FXML and setupVignetteOverlay()
+        vignetteOverlay.setOpacity(0.25);
+        vignetteOverlay.setVisible(true);
     }
 
-    /**
-     * Applies an innovative "bleeding" effect to the entire dashboard.
-     * Creates a red vignette overlay that pulsates with corner glow effects.
-     * Multiple layers of animation create a sophisticated PUBG-like warning effect.
-     */
     private void applyDashboardBleedingEffect() {
-        // Show the vignette overlay if it exists
         if (vignetteOverlay != null) {
             vignetteOverlay.toFront();
-            
-            // === ANIMATION 1: Vignette Opacity Pulsing ===
             javafx.animation.Timeline vignetteTimeline = new javafx.animation.Timeline(
-                new javafx.animation.KeyFrame(javafx.util.Duration.millis(0),
-                    new javafx.animation.KeyValue(vignetteOverlay.opacityProperty(), 0.25)),
-                new javafx.animation.KeyFrame(javafx.util.Duration.millis(500),
-                    new javafx.animation.KeyValue(vignetteOverlay.opacityProperty(), 0.35)),
-                new javafx.animation.KeyFrame(javafx.util.Duration.millis(1000),
-                    new javafx.animation.KeyValue(vignetteOverlay.opacityProperty(), 0.55)),
-                new javafx.animation.KeyFrame(javafx.util.Duration.millis(1500),
-                    new javafx.animation.KeyValue(vignetteOverlay.opacityProperty(), 0.35)),
-                new javafx.animation.KeyFrame(javafx.util.Duration.millis(2000),
-                    new javafx.animation.KeyValue(vignetteOverlay.opacityProperty(), 0.25))
+                    new javafx.animation.KeyFrame(javafx.util.Duration.millis(0), new javafx.animation.KeyValue(vignetteOverlay.opacityProperty(), 0.25)),
+                    new javafx.animation.KeyFrame(javafx.util.Duration.millis(500), new javafx.animation.KeyValue(vignetteOverlay.opacityProperty(), 0.35)),
+                    new javafx.animation.KeyFrame(javafx.util.Duration.millis(1000), new javafx.animation.KeyValue(vignetteOverlay.opacityProperty(), 0.55)),
+                    new javafx.animation.KeyFrame(javafx.util.Duration.millis(1500), new javafx.animation.KeyValue(vignetteOverlay.opacityProperty(), 0.35)),
+                    new javafx.animation.KeyFrame(javafx.util.Duration.millis(2000), new javafx.animation.KeyValue(vignetteOverlay.opacityProperty(), 0.25))
             );
             vignetteTimeline.setCycleCount(javafx.animation.Animation.INDEFINITE);
             vignetteTimeline.play();
-            
-            // Store for later cleanup
             if (dashboardRoot.getUserData() == null) {
                 dashboardRoot.setUserData(new Object[]{vignetteTimeline, null});
             }
         }
-        
-        // === ANIMATION 2: Background color subtle shift ===
+
         javafx.animation.Timeline colorTimeline = new javafx.animation.Timeline(
-            new javafx.animation.KeyFrame(javafx.util.Duration.millis(0),
-                new javafx.animation.KeyValue(dashboardRoot.styleProperty(),
-                    "-fx-background-color: #f5f0fa;")),
-            new javafx.animation.KeyFrame(javafx.util.Duration.millis(600),
-                new javafx.animation.KeyValue(dashboardRoot.styleProperty(),
-                    "-fx-background-color: #f5eded;")),
-            new javafx.animation.KeyFrame(javafx.util.Duration.millis(1200),
-                new javafx.animation.KeyValue(dashboardRoot.styleProperty(),
-                    "-fx-background-color: #fae6e0;")),
-            new javafx.animation.KeyFrame(javafx.util.Duration.millis(1800),
-                new javafx.animation.KeyValue(dashboardRoot.styleProperty(),
-                    "-fx-background-color: #f5eded;")),
-            new javafx.animation.KeyFrame(javafx.util.Duration.millis(2400),
-                new javafx.animation.KeyValue(dashboardRoot.styleProperty(),
-                    "-fx-background-color: #f5f0fa;"))
+                new javafx.animation.KeyFrame(javafx.util.Duration.millis(0), new javafx.animation.KeyValue(dashboardRoot.styleProperty(), "-fx-background-color: #F3F4F6;")),
+                new javafx.animation.KeyFrame(javafx.util.Duration.millis(600), new javafx.animation.KeyValue(dashboardRoot.styleProperty(), "-fx-background-color: #FEE2E2;")),
+                new javafx.animation.KeyFrame(javafx.util.Duration.millis(1200), new javafx.animation.KeyValue(dashboardRoot.styleProperty(), "-fx-background-color: #FECACA;")),
+                new javafx.animation.KeyFrame(javafx.util.Duration.millis(1800), new javafx.animation.KeyValue(dashboardRoot.styleProperty(), "-fx-background-color: #FEE2E2;")),
+                new javafx.animation.KeyFrame(javafx.util.Duration.millis(2400), new javafx.animation.KeyValue(dashboardRoot.styleProperty(), "-fx-background-color: #F3F4F6;"))
         );
         colorTimeline.setCycleCount(javafx.animation.Animation.INDEFINITE);
         colorTimeline.play();
-        
-        // Store timelines for cleanup
-        Object[] timelines = (dashboardRoot.getUserData() instanceof Object[]) ? 
-            (Object[]) dashboardRoot.getUserData() : new Object[2];
-        timelines[0] = (timelines[0] == null) ? null : timelines[0];  // vignette timeline
+
+        Object[] timelines = (dashboardRoot.getUserData() instanceof Object[]) ? (Object[]) dashboardRoot.getUserData() : new Object[2];
+        timelines[0] = (timelines[0] == null) ? null : timelines[0];
         timelines[1] = colorTimeline;
         dashboardRoot.setUserData(timelines);
     }
-    
-    private javafx.scene.layout.Region region() {
-        return dashboardRoot;
-    }
 
-    /**
-     * Called when the dismiss button (✕) on the warning banner is clicked.
-     * Hides the warning banner but keeps it available for re-display if overdue books still exist.
-     */
     @FXML
     public void dismissOverdueWarning() {
         overdueWarningBanner.setVisible(false);
         overdueWarningBanner.setManaged(false);
     }
 
-    /**
-     * TEST METHOD - Simulates overdue books for testing the warning system.
-     * Press Ctrl+Shift+O in the "My Borrowed" table to trigger this.
-     * This adds temporary test books with overdue dates to demonstrate the warning.
-     */
     private void testOverdueWarning() {
-        // Create test books with overdue dates
-        Book testBook1 = new Book("TEST-ISBN-001", "Test Overdue Book 1", "Test Author", "Fiction", 
-                                  currentUserId, false, currentUserId, 
-                                  LocalDate.now().minusDays(10), LocalDate.now().minusDays(5), true);
-        
-        Book testBook2 = new Book("TEST-ISBN-002", "Test Overdue Book 2", "Another Author", "Mystery", 
-                                  currentUserId, false, currentUserId, 
-                                  LocalDate.now().minusDays(8), LocalDate.now().minusDays(2), true);
-        
-        // Add test books to the display list
+        Book testBook1 = new Book("TEST-ISBN-001", "Test Overdue Book 1", "Test Author", "Fiction", currentUserId, false, currentUserId, LocalDate.now().minusDays(10), LocalDate.now().minusDays(5), true, "Good", null, 0);
+        Book testBook2 = new Book("TEST-ISBN-002", "Test Overdue Book 2", "Another Author", "Mystery", currentUserId, false, currentUserId, LocalDate.now().minusDays(8), LocalDate.now().minusDays(2), true, "Good", null, 0);
         borrowedList.add(testBook1);
         borrowedList.add(testBook2);
-        
-        // Trigger the overdue check
         checkForOverdueBooks();
-        
-        // Show a tooltip
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Test Mode");
-        alert.setHeaderText("Overdue Warning Test Activated");
-        alert.setContentText("Two test overdue books have been added. You should see the red warning banner above.\n\n" +
-                           "Press Ctrl+Shift+R to remove test books.");
-        alert.showAndWait();
     }
 
-    /**
-     * TEST METHOD - Removes test overdue books and reloads the real data.
-     * Press Ctrl+Shift+R in the "My Borrowed" table to trigger this.
-     */
     private void removeTestOverdueBooks() {
-        // Reload the actual borrowed books from database
         loadMyBorrowedBooks();
-        
+    }
+
+    private void handleConfirmReceipt(BorrowRequest request) {
+        SupaBorrowRequestDAO dao = (SupaBorrowRequestDAO) borrowRequestDAO;
+        if (dao.markReceivedByCourier(request.getRequestId())) {
+            loadMyRequests();
+            loadMyBorrowedBooks();
+            showMyBooks();
+        }
+    }
+
+    private void showMeetupDetails(BorrowRequest request) {
+        String otp = request.getOtp();
+        String location = request.getHandover().getMeetupLocation();
+
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Test Mode");
-        alert.setHeaderText("Test Books Removed");
-        alert.setContentText("Test books have been removed and real data has been reloaded.");
+        alert.setTitle("Meetup Details");
+        alert.setHeaderText("Meetup at: " + location);
+
+        Label l = new Label(otp);
+        l.setStyle("-fx-font-size: 32px; -fx-font-weight: 900; -fx-text-fill: #4F46E5;");
+
+        VBox v = new VBox(10, new Label("Show this code to the lender:"), l);
+        v.setAlignment(javafx.geometry.Pos.CENTER);
+        alert.getDialogPane().setContent(v);
         alert.showAndWait();
     }
 }

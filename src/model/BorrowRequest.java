@@ -4,22 +4,25 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public class BorrowRequest {
-    private Integer requestId;
+    private int requestId;
     private String bookIsbn;
-    private Integer borrowerId;
-    private Integer lenderId;  // Owner of the book
-    private String status;     // PENDING, ACCEPTED, REJECTED, CANCELLED
+    private int borrowerId;
+    private int lenderId;
+    private String status;
     private LocalDate requestedDueDate;
     private LocalDateTime createdAt;
-    private LocalDateTime respondedAt;  // When lender accepted/rejected
-    private String rejectionReason;    // Optional: why lender rejected
+    private LocalDateTime respondedAt;
+    private String rejectionReason;
 
-    // Constructors
-    public BorrowRequest() {
-        this.status = "PENDING";
-    }
+    // Sprint 3 — US-1
+    private HandoverDetails handover = new HandoverDetails();
+    private LocalDateTime receivedAt;   // when borrower confirmed receipt — T-2
+    private LocalDateTime returnedAt;
 
-    public BorrowRequest(String bookIsbn, Integer borrowerId, Integer lenderId, LocalDate requestedDueDate) {
+    public BorrowRequest() {}
+
+    // Constructor for creating new borrow requests (UI creation)
+    public BorrowRequest(String bookIsbn, int borrowerId, int lenderId, LocalDate requestedDueDate) {
         this.bookIsbn = bookIsbn;
         this.borrowerId = borrowerId;
         this.lenderId = lenderId;
@@ -28,9 +31,10 @@ public class BorrowRequest {
         this.createdAt = LocalDateTime.now();
     }
 
-    public BorrowRequest(Integer requestId, String bookIsbn, Integer borrowerId, Integer lenderId,
-                        String status, LocalDate requestedDueDate, LocalDateTime createdAt,
-                        LocalDateTime respondedAt, String rejectionReason) {
+    // Constructor for loading from database (full object)
+    public BorrowRequest(int requestId, String bookIsbn, int borrowerId, int lenderId,
+                         String status, LocalDate requestedDueDate, LocalDateTime createdAt,
+                         LocalDateTime respondedAt, String rejectionReason) {
         this.requestId = requestId;
         this.bookIsbn = bookIsbn;
         this.borrowerId = borrowerId;
@@ -42,88 +46,34 @@ public class BorrowRequest {
         this.rejectionReason = rejectionReason;
     }
 
-    // Getters and Setters
-    public Integer getRequestId() {
-        return requestId;
-    }
+    public int getRequestId() { return requestId; }
+    public void setRequestId(int requestId) { this.requestId = requestId; }
+    public String getBookIsbn() { return bookIsbn; }
+    public void setBookIsbn(String bookIsbn) { this.bookIsbn = bookIsbn; }
+    public int getBorrowerId() { return borrowerId; }
+    public void setBorrowerId(int borrowerId) { this.borrowerId = borrowerId; }
+    public int getLenderId() { return lenderId; }
+    public void setLenderId(int lenderId) { this.lenderId = lenderId; }
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
+    public HandoverStatus getHandoverStatus() { return HandoverStatus.fromString(status); }
 
-    public void setRequestId(Integer requestId) {
-        this.requestId = requestId;
-    }
+    public LocalDate getRequestedDueDate() { return requestedDueDate; }
+    public void setRequestedDueDate(LocalDate requestedDueDate) { this.requestedDueDate = requestedDueDate; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public LocalDateTime getRespondedAt() { return respondedAt; }
+    public void setRespondedAt(LocalDateTime respondedAt) { this.respondedAt = respondedAt; }
+    public String getRejectionReason() { return rejectionReason; }
+    public void setRejectionReason(String rejectionReason) { this.rejectionReason = rejectionReason; }
 
-    public String getBookIsbn() {
-        return bookIsbn;
-    }
-
-    public void setBookIsbn(String bookIsbn) {
-        this.bookIsbn = bookIsbn;
-    }
-
-    public Integer getBorrowerId() {
-        return borrowerId;
-    }
-
-    public void setBorrowerId(Integer borrowerId) {
-        this.borrowerId = borrowerId;
-    }
-
-    public Integer getLenderId() {
-        return lenderId;
-    }
-
-    public void setLenderId(Integer lenderId) {
-        this.lenderId = lenderId;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public LocalDate getRequestedDueDate() {
-        return requestedDueDate;
-    }
-
-    public void setRequestedDueDate(LocalDate requestedDueDate) {
-        this.requestedDueDate = requestedDueDate;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDateTime getRespondedAt() {
-        return respondedAt;
-    }
-
-    public void setRespondedAt(LocalDateTime respondedAt) {
-        this.respondedAt = respondedAt;
-    }
-
-    public String getRejectionReason() {
-        return rejectionReason;
-    }
-
-    public void setRejectionReason(String rejectionReason) {
-        this.rejectionReason = rejectionReason;
-    }
-
-    @Override
-    public String toString() {
-        return "BorrowRequest{" +
-                "requestId=" + requestId +
-                ", bookIsbn='" + bookIsbn + '\'' +
-                ", borrowerId=" + borrowerId +
-                ", status='" + status + '\'' +
-                ", requestedDueDate=" + requestedDueDate +
-                ", createdAt=" + createdAt +
-                '}';
+    public HandoverDetails getHandover() { return handover; }
+    public void setHandover(HandoverDetails handover) { this.handover = handover; }
+    public LocalDateTime getReceivedAt() { return receivedAt; }
+    public void setReceivedAt(LocalDateTime receivedAt) { this.receivedAt = receivedAt; }
+    public LocalDateTime getReturnedAt() { return returnedAt; }
+    public void setReturnedAt(LocalDateTime returnedAt) { this.returnedAt = returnedAt; }
+    public String getOtp() {
+        return (this.handover != null) ? this.handover.getOtp() : null;
     }
 }

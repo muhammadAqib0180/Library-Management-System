@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.effect.DropShadow?>
+
+<VBox spacing="24" xmlns:fx="http://javafx.com/fxml" fx:controller="controller.ReportsController" style="-fx-background-color: transparent;">
+
+    <HBox alignment="CENTER_LEFT" spacing="16">
+        <VBox spacing="4">
+            <Label text="System Analytics" style="-fx-font-size: 20px; -fx-font-weight: 800; -fx-text-fill: #111827;"/>
+            <Label text="Real-time health metrics and lender performance." style="-fx-font-size: 13px; -fx-text-fill: #6B7280;"/>
+        </VBox>
+        <Region HBox.hgrow="ALWAYS" />
+        <Button text="↻ Refresh Data" onAction="#refreshStats"
+                style="-fx-background-color: #EFF6FF; -fx-text-fill: #1D4ED8; -fx-font-weight: 700; -fx-padding: 8 16; -fx-background-radius: 6; -fx-border-color: #DBEAFE; -fx-cursor: hand;"/>
+    </HBox>
+
+    <HBox spacing="20">
+        <VBox spacing="8" HBox.hgrow="ALWAYS" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 10; -fx-border-color: #E5E7EB;">
+            <Label text="TOTAL BOOKS" style="-fx-text-fill: #6B7280; -fx-font-size: 11px; -fx-font-weight: 800;"/>
+            <Label fx:id="lblTotalBooks" text="0" style="-fx-font-size: 24px; -fx-font-weight: 900; -fx-text-fill: #1E3A8A;"/>
+        </VBox>
+        <VBox spacing="8" HBox.hgrow="ALWAYS" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 10; -fx-border-color: #E5E7EB;">
+            <Label text="ACTIVE BORROWS" style="-fx-text-fill: #6B7280; -fx-font-size: 11px; -fx-font-weight: 800;"/>
+            <Label fx:id="lblActiveBorrows" text="0" style="-fx-font-size: 24px; -fx-font-weight: 900; -fx-text-fill: #10B981;"/>
+        </VBox>
+        <VBox spacing="8" HBox.hgrow="ALWAYS" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 10; -fx-border-color: #E5E7EB;">
+            <Label text="OVERDUE ASSETS" style="-fx-text-fill: #6B7280; -fx-font-size: 11px; -fx-font-weight: 800;"/>
+            <Label fx:id="lblOverdueCount" text="0" style="-fx-font-size: 24px; -fx-font-weight: 900; -fx-text-fill: #EF4444;"/>
+        </VBox>
+        <VBox spacing="8" HBox.hgrow="ALWAYS" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 10; -fx-border-color: #E5E7EB;">
+            <Label text="SYSTEM USERS" style="-fx-text-fill: #6B7280; -fx-font-size: 11px; -fx-font-weight: 800;"/>
+            <Label fx:id="lblTotalUsers" text="0" style="-fx-font-size: 24px; -fx-font-weight: 900; -fx-text-fill: #6366F1;"/>
+        </VBox>
+    </HBox>
+
+    <VBox spacing="12" VBox.vgrow="ALWAYS" style="-fx-background-color: white; -fx-padding: 24; -fx-background-radius: 12; -fx-border-color: #E5E7EB;">
+        <Label text="Lender Performance Leaderboard" style="-fx-font-weight: 800; -fx-font-size: 16px; -fx-text-fill: #111827;"/>
+        <TableView fx:id="lenderTable" VBox.vgrow="ALWAYS" style="-fx-background-radius: 8;">
+            <columns>
+                <TableColumn fx:id="colLenderName" text="Lender Name" prefWidth="250"/>
+                <TableColumn fx:id="colBooksOwned" text="Books Listed" prefWidth="150"/>
+                <TableColumn fx:id="colActiveLends" text="Currently Lent" prefWidth="150"/>
+            </columns>
+        </TableView>
+    </VBox>
+</VBox>

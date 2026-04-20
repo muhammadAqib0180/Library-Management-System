@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DialogPane?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Text?>
+
+<DialogPane fx:id="dialogPane" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.CourierFormDialogController">
+    <content>
+        <VBox spacing="12" style="-fx-padding: 20;">
+            <VBox spacing="5">
+                <Label text="Courier Service" style="-fx-font-weight: bold; -fx-font-size: 12;" />
+                <ComboBox fx:id="serviceCombo" prefWidth="250" />
+                <TextField fx:id="otherServiceField" promptText="Enter courier service name" visible="false" managed="false" />
+                <Text fx:id="serviceError" style="-fx-fill: #d32f2f; -fx-font-size: 10;" />
+            </VBox>
+
+            <VBox spacing="5">
+                <Label text="Delivery Person's Name" style="-fx-font-weight: bold; -fx-font-size: 12;" />
+                <TextField fx:id="personField" promptText="e.g., Ahmed, Maria" />
+                <Text fx:id="personError" style="-fx-fill: #d32f2f; -fx-font-size: 10;" />
+            </VBox>
+
+            <VBox spacing="5">
+                <Label text="Vehicle Number Plate" style="-fx-font-weight: bold; -fx-font-size: 12;" />
+                <TextField fx:id="plateField" promptText="e.g., ABC-1234" />
+                <Text fx:id="plateError" style="-fx-fill: #d32f2f; -fx-font-size: 10;" />
+            </VBox>
+
+            <VBox spacing="5">
+                <Label text="Vehicle Type" style="-fx-font-weight: bold; -fx-font-size: 12;" />
+                <ComboBox fx:id="vehicleCombo" prefWidth="250" />
+                <Text fx:id="vehicleError" style="-fx-fill: #d32f2f; -fx-font-size: 10;" />
+            </VBox>
+
+            <VBox spacing="5">
+                <Label text="Proof Screenshot (Optional)" style="-fx-font-weight: bold; -fx-font-size: 12;" />
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <TextField fx:id="filePathField" prefWidth="200" promptText="No file selected" editable="false" />
+                    <Button fx:id="uploadButton" text="Browse..." style="-fx-padding: 8 15;" />
+                </HBox>
+                <Text fx:id="fileError" style="-fx-fill: #d32f2f; -fx-font-size: 10;" />
+            </VBox>
+
+            <HBox spacing="10" style="-fx-alignment: center-right; -fx-padding: 10 0 0 0;">
+                <Button fx:id="cancelButton" text="Cancel" style="-fx-padding: 8 20;" />
+                <Button fx:id="submitButton" text="Submit Courier Details" style="-fx-padding: 8 20; -fx-font-weight: bold;" />
+            </HBox>
+        </VBox>
+    </content>
+</DialogPane>

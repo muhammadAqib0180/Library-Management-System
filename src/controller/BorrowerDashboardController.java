@@ -212,13 +212,23 @@ public class BorrowerDashboardController extends BaseDashboardController {
             });
         }
 
+        // --- NEW: Background Timer for Notifications and Bell Shake ---
+        javafx.animation.Timeline shakeTimer = new javafx.animation.Timeline(
+                new javafx.animation.KeyFrame(javafx.util.Duration.seconds(10), e -> {
+                    updateNotificationBadge();
+                    applyBellShake();
+                })
+        );
+        shakeTimer.setCycleCount(javafx.animation.Animation.INDEFINITE);
+        shakeTimer.play();
+
         updateNotificationBadge();
         showMyBooks();
         initializeSearchFilterPanel();
     }
 
     private void updateNotificationBadge() {
-        int unreadCount = notificationDAO.getUnreadCount(currentUserId);
+        int unreadCount = notificationDAO.getUnreadCount(currentUserId, "BORROWER");
         if (unreadCount > 0) {
             notificationBadge.setText(String.valueOf(unreadCount));
             notificationBadge.setVisible(true);
@@ -236,7 +246,7 @@ public class BorrowerDashboardController extends BaseDashboardController {
             notificationPanel.setVisible(true);
             notificationPanel.setManaged(true);
             new Thread(() -> {
-                java.util.List<Notification> notifications = notificationDAO.getUnreadNotifications(currentUserId);
+                java.util.List<Notification> notifications = notificationDAO.getUnreadNotifications(currentUserId, "BORROWER");
                 javafx.application.Platform.runLater(() -> {
                     notificationListContainer.getChildren().clear();
                     if (notifications.isEmpty()) {
@@ -339,26 +349,20 @@ public class BorrowerDashboardController extends BaseDashboardController {
 
     // --- SPRINT 3: GRID VIEW LOAD LOGIC ---
     private void loadBrowseBooks() {
-        // 1. Grab Main Search Bar Text
         String query = searchField != null && searchField.getText() != null ? searchField.getText().trim() : null;
-
-        // 2. Grab Advanced Filter Values (safely)
         String genre = searchFilterController != null ? searchFilterController.getGenre() : null;
         String condition = searchFilterController != null ? searchFilterController.getCondition() : null;
         boolean availableOnly = searchFilterController != null && searchFilterController.isAvailableOnly();
         String sortBy = searchFilterController != null ? searchFilterController.getSortBy() : "newest";
 
         new Thread(() -> {
-            // 3. Use the US-3 Database Method!
             SupaBookDAO supaBookDAO = (SupaBookDAO) bookDAO;
             java.util.List<Book> searchResults = supaBookDAO.findByFilters(query, genre, condition, availableOnly, sortBy, 50, 0);
 
-            // Filter out books the user owns themselves
             java.util.List<Book> finalBooks = searchResults.stream()
                     .filter(b -> b.getOwnerId() != currentUserId)
                     .toList();
 
-            // 4. Update the Grid
             javafx.application.Platform.runLater(() -> {
                 if (bookGrid != null) {
                     bookGrid.getChildren().clear();
@@ -441,7 +445,6 @@ public class BorrowerDashboardController extends BaseDashboardController {
             VBox searchPanel = loader.load();
             searchFilterController = loader.getController();
 
-            // WHEN "APPLY FILTERS" IS CLICKED -> REFRESH THE GRID!
             searchFilterController.setOnFilterAppliedListener(this::loadBrowseBooks);
 
             if (searchFilterContainer != null) {
@@ -464,51 +467,37 @@ public class BorrowerDashboardController extends BaseDashboardController {
         if (book == null) return;
 
         try {
-            // Load the FXML
             javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(
                     getClass().getResource("/view/AvailabilityPanel.fxml")
             );
             VBox availabilityPanel = loader.load();
             availabilityController = loader.getController();
 
-            // 1. Create the Dialog object FIRST
-            // 1. Create the Dialog object
-            // 1. Create the Dialog object
             Dialog<ButtonType> availabilityDialog = new Dialog<>();
-
-            // ---> KILL THE WINDOWS BORDER <---
             availabilityDialog.initStyle(javafx.stage.StageStyle.TRANSPARENT);
-
             availabilityDialog.setHeaderText(null);
             availabilityDialog.setGraphic(null);
-
-            // Force the background to be transparent so our rounded corners show!
             availabilityDialog.getDialogPane().setStyle("-fx-background-color: transparent; -fx-padding: 0;");
             availabilityDialog.getDialogPane().getScene().setFill(javafx.scene.paint.Color.TRANSPARENT);
 
-            // 2. Wire up the buttons
             availabilityController.setOnBorrowClickedListener((lenderId) -> {
                 availabilityDialog.setResult(ButtonType.CLOSE);
                 availabilityDialog.close();
                 this.onBorrowFromAvailability(isbn, lenderId, book.getTitle());
             });
 
-            // Make our custom "X" button close the dialog
             availabilityController.setOnCloseClickedListener(() -> {
                 availabilityDialog.setResult(ButtonType.CLOSE);
                 availabilityDialog.close();
             });
 
-            // 3. Load the data
             availabilityController.loadAvailability(isbn);
-
-            // 4. Show the popup (We don't need to add a default ButtonType.CLOSE anymore!)
             availabilityDialog.getDialogPane().setContent(availabilityPanel);
             availabilityDialog.showAndWait();
 
         } catch (java.io.IOException e) {
             System.err.println("[BorrowerDashboard] FXML Load Crash!");
-            e.printStackTrace(); // This will print the exact red error line if your file is missing!
+            e.printStackTrace();
         }
     }
 
@@ -542,7 +531,14 @@ public class BorrowerDashboardController extends BaseDashboardController {
                     alert.setContentText("Your request has been sent to the lender. Check 'My Requests' for status.");
                     alert.showAndWait();
 
-                    loadBrowseBooks(); // Refresh grid
+                    // --- NEW: NOTIFY THE LENDER ---
+                    Notification lenderNotif = new Notification(
+                            lenderId, "BORROW_REQUEST", "New Borrow Request!",
+                            currentUsername + " wants to borrow " + title, isbn, currentUserId, "requests", "LENDER"
+                    );
+                    notificationDAO.createNotification(lenderNotif);
+
+                    loadBrowseBooks();
                     loadMyRequests();
                     showMyRequests();
                 } else {
@@ -866,5 +862,16 @@ public class BorrowerDashboardController extends BaseDashboardController {
         v.setAlignment(javafx.geometry.Pos.CENTER);
         alert.getDialogPane().setContent(v);
         alert.showAndWait();
+    }
+
+    private void applyBellShake() {
+        if (notificationBadge != null && notificationBadge.isVisible()) {
+            javafx.animation.RotateTransition rt = new javafx.animation.RotateTransition(javafx.util.Duration.millis(100), notificationBell);
+            rt.setFromAngle(-15);
+            rt.setToAngle(15);
+            rt.setCycleCount(6);
+            rt.setAutoReverse(true);
+            rt.play();
+        }
     }
 }

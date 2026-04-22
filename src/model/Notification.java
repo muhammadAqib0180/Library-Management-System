@@ -4,46 +4,26 @@ import java.time.LocalDateTime;
 
 public class Notification {
     private Integer notificationId;
-    private Integer userId;  // For any user: lender, borrower, admin
-    private String type;     // BORROW_REQUEST, REQUEST_ACCEPTED, REQUEST_REJECTED, BOOK_RETURNED, BOOK_OVERDUE, ADMIN_ACTION, etc.
+    private Integer userId;
+    private String type;
     private String title;
     private String message;
-    private String relatedBookIsbn;  // Optional: link to related book
-    private Integer relatedUserId;   // Optional: link to related user (who triggered notification)
+    private String relatedBookIsbn;
+    private Integer relatedUserId;
     private Boolean isRead;
     private LocalDateTime createdAt;
-    private String actionUrl;  // Optional: URL or identifier for action (e.g., open pending requests)
+    private String actionUrl;
+    private String targetRole; // "LENDER" or "BORROWER"
 
-    // Constructors
     public Notification() {
         this.isRead = false;
-    }
-
-    public Notification(Integer userId, String type, String title, String message) {
-        this.userId = userId;
-        this.type = type;
-        this.title = title;
-        this.message = message;
-        this.isRead = false;
         this.createdAt = LocalDateTime.now();
     }
 
-    public Notification(Integer userId, String type, String title, String message, 
-                       String relatedBookIsbn, Integer relatedUserId, String actionUrl) {
-        this.userId = userId;
-        this.type = type;
-        this.title = title;
-        this.message = message;
-        this.relatedBookIsbn = relatedBookIsbn;
-        this.relatedUserId = relatedUserId;
-        this.actionUrl = actionUrl;
-        this.isRead = false;
-        this.createdAt = LocalDateTime.now();
-    }
-
-    public Notification(Integer notificationId, Integer userId, String type, String title, 
-                       String message, String relatedBookIsbn, Integer relatedUserId, 
-                       Boolean isRead, LocalDateTime createdAt, String actionUrl) {
+    // Full constructor for the DAO to use when reading from DB
+    public Notification(Integer notificationId, Integer userId, String type, String title,
+                        String message, String relatedBookIsbn, Integer relatedUserId,
+                        Boolean isRead, LocalDateTime createdAt, String actionUrl, String targetRole) {
         this.notificationId = notificationId;
         this.userId = userId;
         this.type = type;
@@ -54,7 +34,27 @@ public class Notification {
         this.isRead = isRead;
         this.createdAt = createdAt;
         this.actionUrl = actionUrl;
+        this.targetRole = targetRole;
     }
+
+    // Constructor for creating new notifications in controllers
+    public Notification(Integer userId, String type, String title, String message,
+                        String relatedBookIsbn, Integer relatedUserId, String actionUrl, String targetRole) {
+        this.userId = userId;
+        this.type = type;
+        this.title = title;
+        this.message = message;
+        this.relatedBookIsbn = relatedBookIsbn;
+        this.relatedUserId = relatedUserId;
+        this.actionUrl = actionUrl;
+        this.targetRole = targetRole;
+        this.isRead = false;
+        this.createdAt = LocalDateTime.now();
+    }
+
+    // --- Getters and Setters ---
+    public String getTargetRole() { return targetRole; }
+    public void setTargetRole(String targetRole) { this.targetRole = targetRole; }
 
     // Getters and Setters
     public Integer getNotificationId() {
@@ -136,6 +136,10 @@ public class Notification {
     public void setActionUrl(String actionUrl) {
         this.actionUrl = actionUrl;
     }
+
+
+
+// Update constructors to include targetRole
 
     @Override
     public String toString() {

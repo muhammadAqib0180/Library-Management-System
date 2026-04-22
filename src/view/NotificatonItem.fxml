@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.Circle?>
+
+<HBox xmlns:fx="http://javafx.com/fxml" fx:controller="controller.NotificationItemController"
+      spacing="12" alignment="CENTER_LEFT"
+      style="-fx-padding: 12 16; -fx-background-color: white; -fx-border-color: transparent transparent #F3F4F6 transparent; -fx-border-width: 1; -fx-cursor: hand;"
+      onMouseClicked="#handleItemClick">
+
+    <StackPane>
+        <Circle fx:id="iconBg" radius="18" fill="#F3E8FF"/>
+        <Label fx:id="iconLabel" text="🔔" style="-fx-font-size: 16px;"/>
+        <Circle fx:id="unreadDot" radius="4" fill="#EF4444" StackPane.alignment="TOP_RIGHT" visible="false"/>
+    </StackPane>
+
+    <VBox spacing="2" HBox.hgrow="ALWAYS">
+        <HBox alignment="CENTER_LEFT">
+            <Label fx:id="titleLabel" text="Notification Title" style="-fx-font-weight: 800; -fx-font-size: 13px; -fx-text-fill: #111827;"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label fx:id="timeLabel" text="2m ago" style="-fx-font-size: 11px; -fx-text-fill: #9CA3AF;"/>
+        </HBox>
+        <Label fx:id="messageLabel" text="This is the preview message of the notification..."
+               wrapText="true" style="-fx-font-size: 12px; -fx-text-fill: #6B7280; -fx-line-spacing: 1;"/>
+    </VBox>
+</HBox>

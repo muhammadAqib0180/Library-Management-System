@@ -102,10 +102,10 @@ public class LenderDashboardController extends BaseDashboardController {
         authorColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().getAuthor()));
         genreColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().getGenre()));
         statusColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().isAvailable() ? "Available" : "Unavailable"));
-        // Add this near the top of initialize()
+
         if (conditionCombo != null) {
             conditionCombo.getItems().addAll("Like New", "Very Good", "Good", "Acceptable");
-            conditionCombo.setValue("Good"); // Set a safe default
+            conditionCombo.setValue("Good");
         }
         if (bookImageBtn != null) {
             bookImageBtn.setOnAction(e -> openBookImageChooser());
@@ -191,8 +191,6 @@ public class LenderDashboardController extends BaseDashboardController {
         reqDueDateColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().getRequestedDueDate() != null ? data.getValue().getRequestedDueDate().toString() : "N/A"));
         reqDateColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().getCreatedAt() != null ? data.getValue().getCreatedAt().toLocalDate().toString() : "N/A"));
 
-        // US-1: DYNAMIC ACTION COLUMN SETUP
-        // This replaces your static accept/reject buttons with a "Smart Button"
         reqActionColumn.setCellFactory(col -> new TableCell<BorrowRequest, Void>() {
             private final Button actionBtn = new Button();
             private final Button rejectBtn = new Button("Decline");
@@ -206,7 +204,6 @@ public class LenderDashboardController extends BaseDashboardController {
                     BorrowRequest req = getTableView().getItems().get(getIndex());
                     String status = req.getStatus();
 
-                    // Style standard for both
                     actionBtn.setMinWidth(110);
                     actionBtn.setStyle("-fx-font-weight: bold; -fx-text-fill: white; -fx-background-radius: 6; -fx-cursor: hand;");
                     rejectBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #EF4444; -fx-font-weight: bold; -fx-cursor: hand;");
@@ -249,7 +246,7 @@ public class LenderDashboardController extends BaseDashboardController {
 
                         case "RETURN_IN_TRANSIT":
                             actionBtn.setText("Confirm Return");
-                            actionBtn.setStyle(actionBtn.getStyle() + "-fx-background-color: #EC4899;"); // Pink
+                            actionBtn.setStyle(actionBtn.getStyle() + "-fx-background-color: #EC4899;");
                             actionBtn.setDisable(false);
                             actionBtn.setOnAction(e -> handleConfirmReturn(req));
                             break;
@@ -280,12 +277,18 @@ public class LenderDashboardController extends BaseDashboardController {
             lentBooksTable.setItems(lentBooksList);
         }
 
+        javafx.animation.Timeline shakeTimer = new javafx.animation.Timeline(
+                new javafx.animation.KeyFrame(javafx.util.Duration.seconds(10), e -> applyBellShake())
+        );
+        shakeTimer.setCycleCount(javafx.animation.Animation.INDEFINITE);
+        shakeTimer.play();
+
         updateNotificationBadge();
         showAddBookPanel();
     }
 
     private void updateNotificationBadge() {
-        int unreadCount = notificationDAO.getUnreadCount(currentUserId);
+        int unreadCount = notificationDAO.getUnreadCount(currentUserId, "LENDER");
         if (unreadCount > 0) {
             notificationBadge.setText(String.valueOf(unreadCount));
             notificationBadge.setVisible(true);
@@ -303,7 +306,7 @@ public class LenderDashboardController extends BaseDashboardController {
             notificationPanel.setVisible(true);
             notificationPanel.setManaged(true);
             new Thread(() -> {
-                java.util.List<Notification> notifications = notificationDAO.getUnreadNotifications(currentUserId);
+                java.util.List<Notification> notifications = notificationDAO.getUnreadNotifications(currentUserId, "LENDER");
                 javafx.application.Platform.runLater(() -> {
                     notificationListContainer.getChildren().clear();
                     if (notifications.isEmpty()) {
@@ -381,7 +384,6 @@ public class LenderDashboardController extends BaseDashboardController {
         if (lentBooksPanel != null) { lentBooksPanel.setVisible(false); lentBooksPanel.setManaged(false); }
         setActiveButton(btnAddBook);
         setInactiveButton(btnInventory); setInactiveButton(btnPendingRequests); setInactiveButton(btnLentBooks);
-
     }
 
     @FXML
@@ -445,51 +447,37 @@ public class LenderDashboardController extends BaseDashboardController {
                 ? conditionCombo.getValue() : "Good";
 
         if (isbn.isEmpty() || title.isEmpty() || author.isEmpty() || genre.isEmpty()) {
-            statusLabel.setTextFill(Color.web("#EF4444")); // Red
+            statusLabel.setTextFill(Color.web("#EF4444"));
             statusLabel.setText("ISBN, Title, Author, and Genre are required.");
             return;
         }
 
-        // Change status to let user know it's working
-        statusLabel.setTextFill(Color.web("#F59E0B")); // Amber/Warning color
+        statusLabel.setTextFill(Color.web("#F59E0B"));
         statusLabel.setText("Publishing asset... please wait.");
-
-        // Disable button so they don't click it twice while uploading
         btnAddBook.setDisable(true);
 
-        // Run network/DB tasks in the background to prevent freezing the UI
         new Thread(() -> {
             String imageUrl = null;
-
-            // 1. Upload Image if they selected one
             if (selectedBookImage != null) {
                 imageUrl = util.ImageUploadService.upload(selectedBookImage);
             }
 
-            // 2. Create the Book Object
-            // NOTE: Make sure your Book.java model has a constructor that accepts condition and coverUrl!
             Book book = new Book(isbn, title, author, genre, currentUserId, true, null, null, null, true, condition, imageUrl, 0);
-
-            // 3. Save to Database
             boolean success = bookDAO.insert(book);
 
-            // 4. Update the UI back on the main thread
             javafx.application.Platform.runLater(() -> {
                 btnAddBook.setDisable(false);
-
                 if (success) {
                     bookList.add(book);
-
-                    // Clear fields
                     isbnField.clear(); titleField.clear(); authorField.clear(); genreField.clear();
                     if (conditionCombo != null) conditionCombo.setValue("Good");
                     bookImageField.clear();
                     selectedBookImage = null;
 
-                    statusLabel.setTextFill(Color.web("#10B981")); // Green
+                    statusLabel.setTextFill(Color.web("#10B981"));
                     statusLabel.setText("Asset published successfully!");
                 } else {
-                    statusLabel.setTextFill(Color.web("#EF4444")); // Red
+                    statusLabel.setTextFill(Color.web("#EF4444"));
                     statusLabel.setText("Database error: Could not publish asset.");
                 }
             });
@@ -521,11 +509,8 @@ public class LenderDashboardController extends BaseDashboardController {
 
     private void loadPendingRequests() {
         new Thread(() -> {
-            // --- THE FIX: USE getActiveRequestsFor ---
             SupaBorrowRequestDAO dao = (SupaBorrowRequestDAO) borrowRequestDAO;
             java.util.List<BorrowRequest> requests = dao.getActiveRequestsFor(currentUserId);
-
-            // Filter out requests where the current user is the borrower (we only want lender requests here)
             requests.removeIf(r -> r.getLenderId() != currentUserId);
 
             java.util.Map<String, Book> bookCache = new java.util.HashMap<>();
@@ -555,11 +540,10 @@ public class LenderDashboardController extends BaseDashboardController {
             boolean accepted = borrowRequestDAO.acceptBorrowRequest(request.getRequestId());
 
             if (accepted) {
-                // 1. Notify the Borrower
                 Notification borrowerNotif = new Notification(
                         request.getBorrowerId(), "REQUEST_ACCEPTED", "Request Approved: " + bookTitle,
                         "Your request to borrow \"" + bookTitle + "\" was approved! Return date: " + request.getRequestedDueDate(),
-                        request.getBookIsbn(), currentUserId, "my-requests"
+                        request.getBookIsbn(), currentUserId, "my-requests", "BORROWER"
                 );
                 notificationDAO.createNotification(borrowerNotif);
                 updateNotificationBadge();
@@ -569,10 +553,7 @@ public class LenderDashboardController extends BaseDashboardController {
                     pendingRequestsStatusLabel.setText("Approved. Member notified.");
                 }
 
-                // 2. STOP HERE and Refresh the Table
-                // The Action Column button will automatically change from "Approve" to "Set Handover".
                 loadPendingRequests();
-
             } else {
                 Alert errorAlert = new Alert(Alert.AlertType.ERROR);
                 errorAlert.setHeaderText("System Error");
@@ -604,7 +585,7 @@ public class LenderDashboardController extends BaseDashboardController {
                     Notification borrowerNotif = new Notification(
                             request.getBorrowerId(), "REQUEST_REJECTED", "Request Declined: " + bookTitle,
                             "Your request to borrow \"" + bookTitle + "\" was declined.\nReason: " + (rejectionReason.isEmpty() ? "N/A" : rejectionReason),
-                            request.getBookIsbn(), currentUserId, "my-requests"
+                            request.getBookIsbn(), currentUserId, "my-requests", "BORROWER"
                     );
                     notificationDAO.createNotification(borrowerNotif);
                     pendingRequestsStatusLabel.setTextFill(Color.web("#EF4444"));
@@ -697,10 +678,18 @@ public class LenderDashboardController extends BaseDashboardController {
                 if (meetupOpt.isPresent()) {
                     MeetupDetailsDialogController.MeetupDetails details = meetupOpt.get();
 
-                    // 1. Update the database with location/time. This generates the OTP in the backend.
                     if (dao.initiateMeetupHandover(request.getRequestId(), details.location, details.dateTime)) {
-                        // 2. Refresh the table.
-                        // DO NOT call the OTP dialog here! The button in the table will change to "Verify OTP"
+
+                        BorrowRequest freshRequest = dao.getRequestById(request.getRequestId());
+                        String actualOtp = (freshRequest.getHandover() != null) ? freshRequest.getHandover().getOtp() : "N/A";
+
+                        Notification borrowerNotif = new Notification(
+                                request.getBorrowerId(), "HANDOVER_UPDATE", "Meetup Scheduled!",
+                                "Lender set a meetup. Use OTP: " + actualOtp + " to receive the book.",
+                                request.getBookIsbn(), currentUserId, "my-requests", "BORROWER"
+                        );
+                        notificationDAO.createNotification(borrowerNotif);
+
                         loadPendingRequests();
                     }
                 }
@@ -729,7 +718,6 @@ public class LenderDashboardController extends BaseDashboardController {
         Optional<String> enteredOtp = OtpEntryDialogController.show(null);
         if (enteredOtp.isPresent()) {
             SupaBorrowRequestDAO supaBorrowDAO = (SupaBorrowRequestDAO) borrowRequestDAO;
-            // CORRECTED: Use the actual verification method in your DAO
             if (supaBorrowDAO.verifyOtpAndMarkBorrowed(request.getRequestId(), enteredOtp.get())) {
                 Alert successAlert = new Alert(Alert.AlertType.INFORMATION, "Handover complete! Asset marked as BORROWED.");
                 successAlert.show();
@@ -744,29 +732,24 @@ public class LenderDashboardController extends BaseDashboardController {
     private void handleConfirmReturn(BorrowRequest request) {
         SupaBorrowRequestDAO dao = (SupaBorrowRequestDAO) borrowRequestDAO;
 
-        // We can check if a return OTP exists to know if it was a meetup return
         String returnOtp = (request.getHandover() != null) ? request.getHandover().getReturnOtp() : null;
 
         if (returnOtp != null && !returnOtp.isEmpty()) {
-            // It's a MEETUP return. Ask Lender for the OTP the Borrower has.
             Optional<String> enteredOtp = OtpEntryDialogController.show(null);
             if (enteredOtp.isPresent()) {
                 if (dao.confirmReturn(request.getRequestId(), enteredOtp.get())) {
                     Alert success = new Alert(Alert.AlertType.INFORMATION, "Return Verified! Book is available again.");
                     success.show();
 
-                    // Trigger Rating (US-6)
                     triggerLenderRating(request);
-
                     loadPendingRequests();
-                    loadBooks(); // Refresh inventory
+                    loadBooks();
                 } else {
                     Alert error = new Alert(Alert.AlertType.ERROR, "Invalid Return OTP.");
                     error.show();
                 }
             }
         } else {
-            // It's a COURIER return. Just ask if they got the package.
             Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
             confirm.setHeaderText("Confirm Courier Delivery");
             confirm.setContentText("Did you safely receive the book from the courier?");
@@ -781,7 +764,6 @@ public class LenderDashboardController extends BaseDashboardController {
         }
     }
 
-    // Helper to trigger ratings after successful return
     private void triggerLenderRating(BorrowRequest request) {
         Book book = bookDAO.findByIsbn(request.getBookIsbn());
         new Thread(() -> javafx.application.Platform.runLater(() -> {
@@ -791,7 +773,6 @@ public class LenderDashboardController extends BaseDashboardController {
         })).start();
     }
 
-    // Helper to fix the "cannot resolve refreshRequestsTable" error
     private void refreshRequestsTable() {
         loadPendingRequests();
     }
@@ -803,7 +784,6 @@ public class LenderDashboardController extends BaseDashboardController {
                 new javafx.stage.FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg", "*.webp")
         );
 
-        // Open the dialog
         java.io.File file = chooser.showOpenDialog(bookImageBtn.getScene().getWindow());
 
         if (file != null) {
@@ -813,12 +793,21 @@ public class LenderDashboardController extends BaseDashboardController {
     }
 
     private void setActiveButton(Button btn) {
-        // Deep Teal Active State - Bright cyan text with a thick left border
         btn.setStyle("-fx-background-color: rgba(0,0,0,0.2); -fx-text-fill: #FFFFFF; -fx-font-weight: 700; -fx-padding: 10 16; -fx-cursor: hand; -fx-background-radius: 6; -fx-border-color: transparent transparent transparent #2DD4BF; -fx-border-width: 0 0 0 3;");
     }
 
     private void setInactiveButton(Button btn) {
-        // Muted Teal Inactive State
         btn.setStyle("-fx-background-color: transparent; -fx-text-fill: #99F6E4; -fx-font-weight: 600; -fx-padding: 10 16; -fx-cursor: hand; -fx-background-radius: 6; -fx-border-width: 0;");
+    }
+
+    private void applyBellShake() {
+        if (notificationBadge != null && notificationBadge.isVisible()) {
+            javafx.animation.RotateTransition rt = new javafx.animation.RotateTransition(javafx.util.Duration.millis(100), notificationBell);
+            rt.setFromAngle(-15);
+            rt.setToAngle(15);
+            rt.setCycleCount(6);
+            rt.setAutoReverse(true);
+            rt.play();
+        }
     }
 }
